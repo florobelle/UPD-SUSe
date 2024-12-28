@@ -6,7 +6,7 @@ export const actions = {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: 'https://upd-suse.vercel.app/home'
+                redirectTo: 'https://upd-suse.vercel.app/auth/callback'
             }
         })
 
