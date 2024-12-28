@@ -22,6 +22,7 @@
 		<form method="POST">
 			<button>Sign In Server</button>
 		</form>
+        <a href="/home">Home</a>
         <!-- <button on:click={getUser}>Get User</button> -->
 	</section>
 
