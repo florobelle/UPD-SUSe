@@ -13,44 +13,60 @@
 			data: { session },
 			error
 		} = await supabaseClient.auth.getSession();
+		let user = session?.user;
+		const accessToken: string = readCookie('accessToken');
+		const refreshToken: string = readCookie('refreshToken');
 
-		if (session) {
+		if (session && !accessToken && !refreshToken) {
+			// if there is currently a session with no cookies, save tokens in cookies
 			createCookie('accessToken', session.access_token, 1, $page.url.pathname);
 			createCookie('refreshToken', session.refresh_token, 1, $page.url.pathname);
 		} else if (error) {
-			console.log('Error with saving session: ' + error);
+			console.log('Error with getting session: ' + error);
+			return;
 		} else {
-			const accessToken: string = readCookie('accessToken');
-			const refreshToken: string = readCookie('refreshToken');
-
-			const { data, error } = await supabaseClient.auth.setSession({
+			// if there is no current session, start one with the save
+			const {
+				data: { session },
+				error
+			} = await supabaseClient.auth.setSession({
 				access_token: accessToken,
 				refresh_token: refreshToken
 			});
+			user = session?.user;
 
-			if (data.user) {
-				$UserStore = {
-                    authenticated: true,
-					fullName: data.user?.user_metadata.full_name ? data.user?.user_metadata.full_name : '',
-					email: data.user?.email ? data.user?.email : ''
-				};
-			} else {
+			if (error) {
 				console.log('Error with creating session: ' + error);
+				return;
 			}
-        }
+		}
+        
+		$UserStore = {
+			authenticated: true,
+			fullName: user?.user_metadata.full_name ? user?.user_metadata.full_name : '',
+			email: user?.email ? user?.email : ''
+		};
+
+		console.log(readCookie('accessToken'));
 	}
 
 	async function endSession() {
 		// Ends the user's current session if available.
 		const { error } = await supabaseClient.auth.signOut();
-        deleteCookie('accessToken', $page.url.pathname),
-        deleteCookie('refreshToken', $page.url.pathname)
+		deleteCookie('accessToken', $page.url.pathname),
+        deleteCookie('refreshToken', $page.url.pathname);
 
-        if (error) {
-            console.log("Error with logging out: " + error)
-        } else {
-            console.log("Successfull logout.")
-        }
+		$UserStore = {
+			authenticated: false,
+			fullName: '',
+			email: ''
+		};
+
+		if (error) {
+			console.log('Error with logging out: ' + error);
+		} else {
+			console.log('Successfull logout.');
+		}
 	}
 
 	onMount(startSession);
@@ -61,12 +77,17 @@
 	<Hero />
 
 	<!-- Select library and section to proceed to enable the website -->
-	<section class="flex flex-col grow items-center">
-        <!-- Login -->
+	<section class="flex grow flex-col items-center">
+		{#if $UserStore.fullName}
+			<h1>You are now logged in, {$UserStore.fullName}</h1>
+		{:else}
+			<h1>You are not logged in.</h1>
+		{/if}
+		<!-- Login -->
 		<form method="POST">
 			<button>Login</button>
 		</form>
-        <!-- Logout -->
+		<!-- Logout -->
 		<button on:click={endSession}>Log out</button>
 	</section>
 
