@@ -6,6 +6,7 @@
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Hero from '$lib/components/navigation/Hero.svelte';
 	import { onMount } from 'svelte';
+	import toast, { Toaster } from 'svelte-5-french-toast';
 
 	async function startSession() {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -22,7 +23,7 @@
 			createCookie('accessToken', session.access_token, 1, $page.url.pathname);
 			createCookie('refreshToken', session.refresh_token, 1, $page.url.pathname);
 		} else if (error) {
-			console.log('Error with getting session: ' + error);
+			toast.error(`Error with getting session: ${error}`);
 			return;
 		} else {
 			// if there is no current session, start one with the save
@@ -36,7 +37,7 @@
 			user = session?.user;
 
 			if (error) {
-				console.log('Error with creating session: ' + error);
+				toast.error(`Error with creating session: ${error}`);
 				return;
 			}
 		}
@@ -46,8 +47,7 @@
 			fullName: user?.user_metadata.full_name ? user?.user_metadata.full_name : '',
 			email: user?.email ? user?.email : ''
 		};
-
-		console.log(readCookie('accessToken'));
+        toast.success(`You're now logged in, ${$UserStore.fullName}!`)
 	}
 
 	async function endSession() {
@@ -63,14 +63,16 @@
 		};
 
 		if (error) {
-			console.log('Error with logging out: ' + error);
+			toast.error(`Error with logging out: ${error}`);
 		} else {
-			console.log('Successfull logout.');
+			toast.success('Successfull logout.');
 		}
 	}
 
 	onMount(startSession);
 </script>
+
+<Toaster />
 
 <div class="flex h-screen w-screen flex-col">
 	<!-- Hero -->
