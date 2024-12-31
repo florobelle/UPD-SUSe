@@ -1,29 +1,94 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
+	import { UserStore } from '$lib/client/Stores/User';
+	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Hero from '$lib/components/navigation/Hero.svelte';
-    // import { createClient } from "@supabase/supabase-js";
+	import { onMount } from 'svelte';
 
-    // export const supabase = createClient(
-    //     "https://uyqjlzjcrniklqwqzwek.supabase.co",
-    //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cWpsempjcm5pa2xxd3F6d2VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM5OTI0NDQsImV4cCI6MjA0OTU2ODQ0NH0.rd4i_sbarTEWz9eS93V0dP3mFHuH5CVLD8V_jR1DO70"
-    // )
+	async function startSession() {
+		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
+		const {
+			data: { session },
+			error
+		} = await supabaseClient.auth.getSession();
+		let user = session?.user;
+		const accessToken: string = readCookie('accessToken');
+		const refreshToken: string = readCookie('refreshToken');
 
-    // async function getUser() {
-    //     console.log(await supabase.auth.getUser())
-    // }
+		if (session && !accessToken && !refreshToken) {
+			// if there is currently a session with no cookies, save tokens in cookies
+			createCookie('accessToken', session.access_token, 1, $page.url.pathname);
+			createCookie('refreshToken', session.refresh_token, 1, $page.url.pathname);
+		} else if (error) {
+			console.log('Error with getting session: ' + error);
+			return;
+		} else {
+			// if there is no current session, start one with the save
+			const {
+				data: { session },
+				error
+			} = await supabaseClient.auth.setSession({
+				access_token: accessToken,
+				refresh_token: refreshToken
+			});
+			user = session?.user;
+
+			if (error) {
+				console.log('Error with creating session: ' + error);
+				return;
+			}
+		}
+        
+		$UserStore = {
+			authenticated: true,
+			fullName: user?.user_metadata.full_name ? user?.user_metadata.full_name : '',
+			email: user?.email ? user?.email : ''
+		};
+
+		console.log(readCookie('accessToken'));
+	}
+
+	async function endSession() {
+		// Ends the user's current session if available.
+		const { error } = await supabaseClient.auth.signOut();
+		deleteCookie('accessToken', $page.url.pathname),
+        deleteCookie('refreshToken', $page.url.pathname);
+
+		$UserStore = {
+			authenticated: false,
+			fullName: '',
+			email: ''
+		};
+
+		if (error) {
+			console.log('Error with logging out: ' + error);
+		} else {
+			console.log('Successfull logout.');
+		}
+	}
+
+	onMount(startSession);
 </script>
 
 <div class="flex h-screen w-screen flex-col">
 	<!-- Hero -->
 	<Hero />
 
-	<!-- Login -->
-	<section class="h-full grow">
+	<!-- Select library and section to proceed to enable the website -->
+	<section class="flex grow flex-col items-center">
+		{#if $UserStore.fullName}
+			<h1>You are now logged in, {$UserStore.fullName}</h1>
+		{:else}
+			<h1>You are not logged in.</h1>
+		{/if}
+		<!-- Login -->
 		<form method="POST">
-			<button>Sign In Server</button>
+			<button>Login</button>
 		</form>
-        <a href="/home">Home</a>
-        <!-- <button on:click={getUser}>Get User</button> -->
+		<!-- Logout -->
+		<button on:click={endSession}>Log out</button>
 	</section>
 
 	<!-- Footer -->
