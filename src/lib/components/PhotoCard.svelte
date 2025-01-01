@@ -1,4 +1,6 @@
 <script lang="ts">
+	import MapPin from 'lucide-svelte/icons/map-pin';
+
 	let imgSrc = 'photos/AECH.jpeg';
 	let libName = 'Engineering Library II';
 	let libBuilding = 'G/F UP Alumni Engineers Centennial Hall';
@@ -15,9 +17,12 @@
 		class="overlay-blur bg-[#D9D9D9]/.20 absolute inset-x-0 bottom-0 h-1/3 w-full rounded-t-[2000px] backdrop-blur-lg"
 	></div>
 	<!-- Blur -->
-	<div class="gap-[20px absolute inset-x-0 bottom-0 flex w-full flex-col gap-4 p-10 text-center">
-		<p class="text-3xl font-medium text-white">{libName}</p>
-		<p class="text-base font-normal text-white/[.80]">
+	<div class="gap-[20px absolute inset-x-0 bottom-0 flex w-full flex-col gap-8 p-10 text-center">
+		<div class="flex w-full items-center justify-center gap-4">
+			<MapPin size="36" strokeWidth="2" color="#ffffff" />
+			<p class="text-4xl font-medium text-white">{libName}</p>
+		</div>
+		<p class="text-lg font-normal text-white/[.80]">
 			{libBuilding}<br />
 			{libStreet}
 		</p>
