@@ -5,8 +5,11 @@
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Hero from '$lib/components/navigation/Hero.svelte';
+	import type { UserFilter } from '$lib/server/EntityFilters';
 	import { onMount } from 'svelte';
 	import toast, { Toaster } from 'svelte-5-french-toast';
+
+    let rfid: string = '';
 
 	async function startSession() {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -70,6 +73,60 @@
 	}
 
 	onMount(startSession);
+
+    // -----
+
+    async function readUsers() {
+        // Reads the User table using a filter.
+        const payload: UserFilter = {
+            id: 0,
+            is_enrolled: null,
+            is_active: null,
+            college: '',
+            unit: '',
+            program: '',
+            user_type: ''
+        }
+
+        const response = await fetch('/api/user', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+			headers: {
+				'content-type': 'application/json'
+			}
+        })
+
+        console.log((await response.json()))
+    }
+
+    async function loginRfid(rfid: string) {
+        // Logs in using user RFID and email from the database
+        const payload: {rfid: string} = {
+            rfid
+        }
+
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+			headers: {
+				'content-type': 'application/json'
+			}
+        })
+
+        const { username } = await response.json()
+
+        const { error } = await supabaseClient.auth.signInWithPassword({
+            email: `${username}@up.edu.ph`,
+            password: rfid
+        })
+
+        if (error) {
+            toast.error(`Error with logging in with RFID: ${error}`);
+        }
+
+        startSession();
+        return;
+    }
 </script>
 
 <Toaster />
@@ -82,13 +139,23 @@
 	<section class="flex grow flex-col items-center">
 		{#if $UserStore.fullName}
 			<h1>You are now logged in, {$UserStore.fullName}</h1>
+            <button on:click={readUsers}>Read User Table</button>
 		{:else}
 			<h1>You are not logged in.</h1>
 		{/if}
-		<!-- Login -->
-		<form method="POST">
-			<button>Login</button>
+
+        <!-- Login with Email and Password -->
+        <!-- <form method="POST" action="?/rfidauth" class="flex flex-col"> -->
+            <label for="rfid">RFID:</label>
+            <input type="text" id="rfid" name="rfid" class="border border-4" bind:value={rfid}>
+            <button on:click={() => {loginRfid(rfid)}}>Login with RFID</button>
+        <!-- </form> -->
+
+		<!-- Login with Google OAuth-->
+		<form method="POST" action="?/googleauth">
+			<button>Login with UP Mail</button>
 		</form>
+        
 		<!-- Logout -->
 		<button on:click={endSession}>Log out</button>
 	</section>
