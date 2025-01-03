@@ -6,12 +6,13 @@
 	// Backend Imports
 	import { page } from '$app/stores';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
-	import { UserStore } from '$lib/stores/User';
+	import { UserStore } from '$lib/stores/UserStore';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import { onMount } from 'svelte';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import type { Session } from '@supabase/supabase-js';
 	import { goto } from '$app/navigation';
+	import { linkRfid } from '../../supabase/LoginReg';
 
     let rfid: string = '';
 	let library: string = $page.url.pathname.split('/')[1];
@@ -52,7 +53,7 @@
 		}
 
 		$UserStore.authenticated = true;
-        $UserStore.username = user?.email ? user?.email.split('@')[0] : '';
+        $UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
 		toast.success(`You're now logged in!`);
 		return;
 	}
@@ -63,11 +64,8 @@
 		deleteCookie('accessToken', library);
 		deleteCookie('refreshToken', library);
 
-		$UserStore = {
-			authenticated: false,
-			username: '',
-            rfid: '',
-		};
+		$UserStore.authenticated = false;
+        $UserStore.formData.userName = '';
 
 		if (error) {
 			toast.error(`Error with logging out: ${error}`);
@@ -83,19 +81,12 @@
 
 	// -----
 
-    async function linkRfid(rfid: string) {
-        // Links the UP RFID of a student to their UP Mail account
-        const { data, error } = await supabaseClient.auth.updateUser({ password: rfid})
+    
 
-        console.log(data)
-
-        if (error) {
-			toast.error(`Error with linking RFID: ${error}`);
-		} else {
-            toast.success('Successfull RFID linking!');
+    async function checkRfidEnter(event: KeyboardEvent) {
+        if (event.key == 'Enter') {
+            linkRfid(rfid);
         }
-
-        return;
     }
 </script>
 
@@ -112,7 +103,7 @@
 		<Input
 			type="text"
 			bind:value={rfid}
-			on:keyup={() => {linkRfid(rfid)}}
+			on:keyup={checkRfidEnter}
 			placeholder="••••••••••"
 			class="max-w-full text-center text-base"
 		/>

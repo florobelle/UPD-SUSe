@@ -4,84 +4,56 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 
 	// Backend Imports
-	import { UserStore } from '$lib/stores/User';
-	import { supabaseClient } from '$lib/client/SupabaseClient';
+	import { UserStore } from '$lib/stores/UserStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
+    import { loginRfid, sendOtp } from '../../supabase/LoginReg'
+	import { readUsername } from '../../supabase/User';
 
 	let loginWithRfid: boolean = true;
-	let rfid: string = '';
-	let username: string = '';
+	let rfidGlobal: string = '';
+	let usernameGlobal: string = '';
 
 	// -----
 
-	async function loginRfid(rfid: string) {
-		// Logs in using user RFID and email from the database
-		const payload: { rfid: string } = { rfid };
-
-		const response = await fetch('/api/login', {
-			method: 'POST',
-			body: JSON.stringify(payload),
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-
-		const { username, error } = await response.json();
-
-		if (error) {
-			toast.error(`Error with looking for a username: ${error}`);
-		} 
-        
-        $UserStore.username = username;
-        $UserStore.rfid = rfid;
-
-        if (username) {
-			const { data, error } = await supabaseClient.auth.signInWithPassword({
-				email: `${username}@up.edu.ph`,
-				password: rfid
-			});
-            console.log(data)
-
-			if (error) {
-				toast.error(`Error with logging in with RFID: ${error}`);
-				return;
-			}
-
-            goto('./student-dashboard')
-		} else {
-            goto('./register')
-        }
-
-        return;
-	}
-
-	function checkRfidEnter(event: KeyboardEvent) {
+	async function checkRfidEnter(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key == 'Enter') {
-			loginRfid(rfid);
-		}
+            // Check if user is already registered
+            const { username, error } = await readUsername(rfidGlobal, '');
 
-		return;
+            if (error) {
+                toast.error(`Error with looking for a username: ${error}`);
+            }
+            $UserStore.formData.rfid = rfidGlobal;
+            if (username) {
+                if (await loginRfid(rfidGlobal, username)) {
+                    $UserStore.formData.userName = username;
+                    goto('./student-dashboard');
+                } 
+            } else {
+                goto('./register');
+            }
+		}
 	}
 
-	async function sendOtp(username: string) {
-		// Logs in using user email with OTP
-		const { data, error } = await supabaseClient.auth.signInWithOtp({
-			email: `${username}@up.edu.ph`
-		});
-
-		if (error) {
-			toast.error(`Error with sending OTP: ${error}`);
-		}
-        $UserStore.username = username;
-		goto('./verify-otp'); // go to the verify-otp page in the same directory
-	}
-
-	function checkUsernameEnter(event: KeyboardEvent) {
+	async function checkUsernameEnter(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key == 'Enter') {
-			sendOtp(username);
+            // Check if user is already registered
+            const { username, error } = await readUsername('', usernameGlobal);
+
+            if (error) {
+                toast.error(`Error with looking for a username: ${error}`);
+            }
+            $UserStore.formData.userName = usernameGlobal;
+            if (username) {
+                if (await sendOtp(username)) {
+                    goto('/verify-otp');
+                }
+            } else {
+                goto('./register');
+            }
 		}
 
 		return;
@@ -105,7 +77,7 @@
 				<Input
 					type="text"
 					placeholder="••••••••••"
-					bind:value={rfid}
+					bind:value={rfidGlobal}
 					on:keyup={checkRfidEnter}
 					class="max-w-full text-center text-base"
 				/>
@@ -144,7 +116,7 @@
 				<Input
 					type="text"
 					placeholder="jddelacruz"
-					bind:value={username}
+					bind:value={usernameGlobal}
 					on:keyup={checkUsernameEnter}
 					class="max-w-full text-center text-base"
 				/>
