@@ -108,7 +108,7 @@
 
 	const { form: formData, enhance } = form;
 
-	$: console.log($formData);
+	// $: console.log($formData);
 </script>
 
 <!-- Register -->
