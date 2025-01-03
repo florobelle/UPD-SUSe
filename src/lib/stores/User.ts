@@ -2,10 +2,12 @@ import { writable, type Writable } from "svelte/store";
 
 type UserInformation =  {
     authenticated: boolean,
-    username: string
+    username: string,
+    rfid: string,
 }
 
 export const UserStore: Writable<UserInformation> = writable({
     authenticated: false,
-    username: ''
+    username: '',
+    rfid: '',
 })

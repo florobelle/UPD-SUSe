@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 
 	// Backend Imports
-	import { UserStore } from '$lib/client/Stores/User';
+	import { UserStore } from '$lib/stores/User';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';

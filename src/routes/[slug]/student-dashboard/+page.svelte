@@ -6,7 +6,7 @@
 	// Backend Imports
 	import { page } from '$app/stores';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
-	import { UserStore } from '$lib/client/Stores/User';
+	import { UserStore } from '$lib/stores/User';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import { onMount } from 'svelte';
 	import toast, { Toaster } from 'svelte-5-french-toast';
@@ -51,10 +51,8 @@
 			}
 		}
 
-		$UserStore = {
-			authenticated: true,
-			username: user?.email ? user?.email.split('@')[0] : ''
-		};
+		$UserStore.authenticated = true;
+        $UserStore.username = user?.email ? user?.email.split('@')[0] : '';
 		toast.success(`You're now logged in!`);
 		return;
 	}
@@ -67,7 +65,8 @@
 
 		$UserStore = {
 			authenticated: false,
-			username: ''
+			username: '',
+            rfid: '',
 		};
 
 		if (error) {

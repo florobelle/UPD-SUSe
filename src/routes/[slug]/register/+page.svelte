@@ -1,7 +1,6 @@
 <script lang="ts">
 	// UI Component Imports
 	import Input from '$lib/components/ui/input/input.svelte';
-	import PhotoCard from '$lib/components/PhotoCard.svelte';
 	import * as Form from '$lib/components/ui/form';
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
@@ -13,7 +12,6 @@
 
 	// Combobox Imports (User Type, College and Program Comboboxes)
 	import { cn } from '$lib/utils.js';
-	import { get } from 'svelte/store';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import PopoverContent from '$lib/components/ui/popover/popover-content.svelte';
@@ -25,6 +23,7 @@
 		collegeProgramsList,
 		type College
 	} from '$lib/stores/collegePrograms';
+	import { UserStore } from '$lib/stores/User';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -109,6 +108,13 @@
 	const { form: formData, enhance } = form;
 
 	// $: console.log($formData);
+
+    // ----------------------------------------------------------------------------
+    $formData.userName = $UserStore.username ? $UserStore.username : '';
+
+    $: {
+        $UserStore.username = $formData.userName;
+        console.log($UserStore.username)}
 </script>
 
 <!-- Register -->
@@ -123,7 +129,7 @@
 		<!-- <Separator /> -->
 
 		<!-- Register Form Inputs-->
-		<form method="POST" class="grid w-full gap-12" use:enhance>
+		<form method="POST" on:submit={(event) => {event.preventDefault()}} class="grid w-full gap-12" use:enhance>
 			<div class="grid-rows grid gap-0">
 				<!-- Row 1: Name -->
 				<div class="grid grid-cols-6 gap-4">
@@ -372,10 +378,10 @@
 
 			<!-- Button Actions -->
 			<div class="grid w-full gap-2">
-				<Form.Button class="flex gap-2">
+				<Form.Button on:click={() => {console.log("Register!")}} class="flex gap-2">
 					<p class="text-base">Register</p>
 				</Form.Button>
-				<Form.Button href="/" variant="outline" class="flex gap-2">
+				<Form.Button href="./login" variant="outline" class="flex gap-2">
 					<p class="text-base">Cancel</p>
 				</Form.Button>
 			</div>

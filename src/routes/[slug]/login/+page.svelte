@@ -4,7 +4,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 
 	// Backend Imports
-	import { UserStore } from '$lib/client/Stores/User';
+	import { UserStore } from '$lib/stores/User';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
@@ -31,8 +31,12 @@
 
 		if (error) {
 			toast.error(`Error with looking for a username: ${error}`);
-			return;
-		} else {
+		} 
+        
+        $UserStore.username = username;
+        $UserStore.rfid = rfid;
+
+        if (username) {
 			const { data, error } = await supabaseClient.auth.signInWithPassword({
 				email: `${username}@up.edu.ph`,
 				password: rfid
@@ -43,10 +47,13 @@
 				toast.error(`Error with logging in with RFID: ${error}`);
 				return;
 			}
-		}
 
-        $UserStore.username = username;
-        goto('./student-dashboard')
+            goto('./student-dashboard')
+		} else {
+            goto('./register')
+        }
+
+        return;
 	}
 
 	function checkRfidEnter(event: KeyboardEvent) {
