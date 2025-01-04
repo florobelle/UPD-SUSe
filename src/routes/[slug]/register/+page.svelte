@@ -139,7 +139,7 @@
             program: $formData.program,
             IDNum: $formData.IDNum
         };
-        console.log($UserStore.formData)
+        
         if (await sendOtp($formData.userName)) {
             goto('./verify-otp');
         } else {

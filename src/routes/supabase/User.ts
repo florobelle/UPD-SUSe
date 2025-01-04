@@ -88,12 +88,9 @@ export async function createUser(userInfo:formData): Promise<UserResponse> {
         phone_number: userInfo.phoneNum,
         is_enrolled: false,
         is_active: false,
-        // user_type_id: parseInt(userInfo.userType),
-        // program_id: parseInt(userInfo.program),
-        // college_unit_id: parseInt(userInfo.college),
-        user_type_id: 1,
-        program_id: 1,
-        college_unit_id: 1,
+        user_type_id: parseInt(userInfo.userType),
+        program_id: parseInt(userInfo.program),
+        college_id: parseInt(userInfo.college),
     })
 
     if (error) {
@@ -110,7 +107,6 @@ export async function createUser(userInfo:formData): Promise<UserResponse> {
 }
 
 export async function updateUser(userInfo: object, username: string): Promise<UserResponse> {
-    console.log(userInfo, username)
     // Updates user information in the lib_user table
     // let toUpdate: Object = {};
 

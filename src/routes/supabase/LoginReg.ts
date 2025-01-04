@@ -25,7 +25,7 @@ export async function sendOtp(username: string): Promise<boolean> {
 
     if (username) {
         const { error } = await supabaseClient.auth.signInWithOtp({
-            email: `${username}@up.edu.ph`
+            email: `${username}@up.edu.ph`,
         });
     
         if (error) {
@@ -49,7 +49,6 @@ export async function loginOtp(otp: string, username: string, toRegister: boolea
         toast.error(`Error with verifying OTP: ${error}`);
         return false;
     }
-    console.log(formData)
 
     if (toRegister) {
         const { error } = await createUser(formData);
