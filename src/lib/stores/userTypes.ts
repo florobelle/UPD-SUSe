@@ -1,5 +1,5 @@
 export const userTypes = [
-	{ value: 'U', label: 'Undergraduate Student' },
-	{ value: 'G', label: 'Graduate Student' },
-	{ value: 'F', label: 'Faculty' }
+	{ value: '1', label: 'Undergraduate Student' },
+	{ value: '2', label: 'Graduate Student' },
+	{ value: '3', label: 'Faculty' }
 ];

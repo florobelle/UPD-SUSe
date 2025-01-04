@@ -8,7 +8,7 @@
 		libSrc: string;
 	};
 
-	console.log(data);
+	// console.log(data);
 </script>
 
 <section class="grid h-screen max-h-dvh grid-cols-2">
