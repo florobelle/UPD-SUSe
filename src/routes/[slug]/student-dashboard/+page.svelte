@@ -13,6 +13,7 @@
 	import type { Session } from '@supabase/supabase-js';
 	import { goto } from '$app/navigation';
 	import { linkRfid } from '../../supabase/LoginReg';
+	import { updateUser } from '../../supabase/User';
 
     let rfid: string = '';
 	let library: string = $page.url.pathname.split('/')[1];
@@ -48,7 +49,7 @@
 
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
-				return;
+				goto('./login')
 			}
 		}
 
@@ -79,13 +80,12 @@
 
 	onMount(startSession);
 
-	// -----
+    // ----------------------------------------------------------------------------
 
-    
 
     async function checkRfidEnter(event: KeyboardEvent) {
         if (event.key == 'Enter') {
-            linkRfid(rfid);
+            linkRfid(rfid, $UserStore.formData.userName);
         }
     }
 </script>

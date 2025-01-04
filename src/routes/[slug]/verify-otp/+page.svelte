@@ -10,7 +10,7 @@
 
 	let otp: string = '';
 
-	// -----
+    // ----------------------------------------------------------------------------
 
 	async function checkOtpEnter(event: KeyboardEvent) {
 		// Listens to input in the OTP field

@@ -1,6 +1,6 @@
 import toast from "svelte-5-french-toast";
 import { supabaseClient } from "$lib/client/SupabaseClient";
-import { createUser } from "./User";
+import { createUser, updateUser } from "./User";
 import type { formData } from "$lib/stores/UserStore";
 
 export async function loginRfid(rfid: string, username: string): Promise<boolean> {
@@ -44,12 +44,12 @@ export async function loginOtp(otp: string, username: string, toRegister: boolea
         token: otp,
         type: 'email'
     });
-    console.log(data);
 
     if (error) {
         toast.error(`Error with verifying OTP: ${error}`);
         return false;
     }
+    console.log(formData)
 
     if (toRegister) {
         const { error } = await createUser(formData);
@@ -58,15 +58,18 @@ export async function loginOtp(otp: string, username: string, toRegister: boolea
             toast.error(`Error with creating a new user: ${error}`)
             return false;
         }
+        if (formData.rfid) {
+            linkRfid(formData.rfid, username);
+        }
     }
 
     return true;
 }
 
-export async function linkRfid(rfid: string) {
+export async function linkRfid(rfid: string, username: string) {
     // Links the UP RFID of a student to their UP Mail account
     const { error } = await supabaseClient.auth.updateUser({ password: rfid})
-    // Update user entry in database!
+    updateUser({ rfid }, username);
 
     if (error) {
         toast.error(`Error with linking RFID: ${error}`);

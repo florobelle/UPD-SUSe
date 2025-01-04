@@ -13,8 +13,25 @@
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
 	let usernameGlobal: string = '';
+    
+    $UserStore = {
+        authenticated: false,
+        toRegister: false,
+        formData: {
+            userName: '',
+            firstName: '',
+            rfid: '',
+            middleName: '',
+            lastName: '',
+            phoneNum: '',
+            userType: '',
+            college: '',
+            program: '',
+            IDNum: ''
+        },
+    }
 
-	// -----
+    // ----------------------------------------------------------------------------
 
 	async function checkRfidEnter(event: KeyboardEvent) {
 		// Listens to input in the RFID field
@@ -24,6 +41,7 @@
 
             if (error) {
                 toast.error(`Error with looking for a username: ${error}`);
+                return;
             }
             $UserStore.formData.rfid = rfidGlobal;
             if (username) {
@@ -49,7 +67,7 @@
             $UserStore.formData.userName = usernameGlobal;
             if (username) {
                 if (await sendOtp(username)) {
-                    goto('/verify-otp');
+                    goto('./verify-otp');
                 }
             } else {
                 goto('./register');

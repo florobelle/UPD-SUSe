@@ -9,7 +9,7 @@ type Username = {
     error: string | null 
 }
 
-export async function readUsername(rfid: string='', username: string=''): Promise<Username> {
+export async function readUsername(rfid:string='', username:string=''): Promise<Username> {
     // Reads the public_user_info view in the database and returns the username of the user
     let query = supabaseClient.from('public_user_info').select("username");
 
@@ -34,7 +34,7 @@ export async function readUsername(rfid: string='', username: string=''): Promis
     }
 }
 
-export async function readUser(filter: UserFilter): Promise<UserResponse> {
+export async function readUser(filter:UserFilter): Promise<UserResponse> {
     // Reads and filters the user_info view in the database and returns all corresponding entries
     let query = supabaseClient.from('user_info').select("*");
 
@@ -75,7 +75,7 @@ export async function readUser(filter: UserFilter): Promise<UserResponse> {
     }
 }
 
-export async function createUser(userInfo: formData): Promise<UserResponse> {
+export async function createUser(userInfo:formData): Promise<UserResponse> {
     // Creates user information in the lib_user table.
 
     const { error } = await supabaseClient.from('lib_user').insert({
@@ -99,7 +99,63 @@ export async function createUser(userInfo: formData): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: error.toString()
+            error: `Error with creating user ${userInfo.userName}: ${error}`
+        }
+    }
+
+    return {
+        users: null,
+        error: null,
+    };
+}
+
+export async function updateUser(userInfo: object, username: string): Promise<UserResponse> {
+    console.log(userInfo, username)
+    // Updates user information in the lib_user table
+    // let toUpdate: Object = {};
+
+    // if (userInfo.userName) {
+    //     toUpdate = {...toUpdate, username: userInfo.userName}
+    // }
+    
+    // if (userInfo.firstName) {
+    //     toUpdate = {...toUpdate, first_name: userInfo.firstName}
+    // }
+
+    // if (userInfo.rfid) {
+    //     toUpdate = {...toUpdate, rfid: userInfo.rfid}
+    // }
+
+    // if (userInfo.middleName) {
+    //     toUpdate = {...toUpdate, middle_name: userInfo.middleName}
+    // }
+
+    // if (userInfo.lastName) {
+    //     toUpdate = {...toUpdate, last_name: userInfo.lastName}
+    // }
+
+    // if (userInfo.phoneNum) {
+    //     toUpdate = {...toUpdate, phone_number: userInfo.phoneNum}
+    // }
+
+    // if (userInfo.userType) {
+    //     toUpdate = {...toUpdate, user_type_id: parseInt(userInfo.userType)}
+    // }
+
+    // if (userInfo.college_unit) {
+    //     toUpdate = {...toUpdate, college_unit_id: userInfo.college_unit}
+    // }
+
+    // if (userInfo.program) {
+    //     toUpdate = {...toUpdate, program_id: parseInt(userInfo.program)}
+    // }
+    
+    const { error } = await supabaseClient.from('lib_user').update(userInfo).eq('username', username)
+
+    if (error) {
+        return {
+            users: null,
+            error: `Error with updating user ${username}: ${error}`
         }
     }
 
