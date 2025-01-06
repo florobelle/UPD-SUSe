@@ -1,7 +1,7 @@
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import type { UserFilter } from "$lib/dataTypes/EntityFilters";
 import type { UserResponse } from "$lib/dataTypes/EntityResponses";
-import type { formData } from "$lib/stores/UserStore";
+import type { UserFormData } from "$lib/stores/UserStore";
 
 type Username = { 
     username: string, 
@@ -74,7 +74,7 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     }
 }
 
-export async function createUser(userInfo:formData): Promise<UserResponse> {
+export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     // Creates user information in the lib_user table.
 
     const { error } = await supabaseClient.from('lib_user').insert({

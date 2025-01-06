@@ -1,7 +1,7 @@
 import toast from "svelte-5-french-toast";
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import { createUser, updateUser } from "./User";
-import type { formData } from "$lib/stores/UserStore";
+import type { UserFormData } from "$lib/stores/UserStore";
 import type { Admin } from "$lib/dataTypes/EntityTypes";
 import { createAdmin } from "./Admin";
 
@@ -34,7 +34,7 @@ export async function sendOtp(username:string): Promise<boolean> {
     return true;
 }
 
-export async function loginOtp(otp:string, username:string, toRegister:boolean, formData:formData): Promise<boolean> {
+export async function loginOtp(otp:string, username:string, toRegister:boolean, formData:UserFormData): Promise<boolean> {
     // Logs in using user email with OTP
     const { error } = await supabaseClient.auth.verifyOtp({
         email: `${username}@up.edu.ph`,

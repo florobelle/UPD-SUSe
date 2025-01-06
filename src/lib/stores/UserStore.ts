@@ -1,6 +1,6 @@
 import { writable, type Writable } from "svelte/store";
 
-export type formData = {
+export type UserFormData = {
     userName: string,
     rfid: string,
     firstName: string,
@@ -16,7 +16,7 @@ export type formData = {
 type UserInformation =  {
     authenticated: boolean,
     toRegister: boolean,
-    formData: formData
+    formData: UserFormData
 }
 
 export const UserStore: Writable<UserInformation> = writable({
