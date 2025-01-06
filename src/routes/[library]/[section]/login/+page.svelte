@@ -7,71 +7,71 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
-    import { loginRfid, sendOtp } from '../../supabase/LoginReg'
-	import { readUsername } from '../../supabase/User';
+	import { loginRfid, sendOtp } from '../../../supabase/LoginReg';
+	import { readUsername } from '../../../supabase/User';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
 	let usernameGlobal: string = '';
-    
-    $UserStore = {
-        authenticated: false,
-        toRegister: false,
-        formData: {
-            userName: '',
-            firstName: '',
-            rfid: '',
-            middleName: '',
-            lastName: '',
-            phoneNum: '',
-            userType: '',
-            college: '',
-            program: '',
-            IDNum: ''
-        },
-    }
 
-    // ----------------------------------------------------------------------------
+	$UserStore = {
+		authenticated: false,
+		toRegister: false,
+		formData: {
+			userName: '',
+			firstName: '',
+			rfid: '',
+			middleName: '',
+			lastName: '',
+			phoneNum: '',
+			userType: '',
+			college: '',
+			program: '',
+			IDNum: ''
+		}
+	};
+
+	// ----------------------------------------------------------------------------
 
 	async function checkRfidEnter(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key == 'Enter') {
-            // Check if user is already registered
-            const { username, error } = await readUsername(rfidGlobal, '');
+			// Check if user is already registered
+			const { username, error } = await readUsername(rfidGlobal, '');
 
-            if (error) {
-                toast.error(`Error with looking for a username: ${error}`);
-                return;
-            }
-            $UserStore.formData.rfid = rfidGlobal;
-            if (username) {
-                if (await loginRfid(rfidGlobal, username)) {
-                    $UserStore.formData.userName = username;
-                    goto('./student-dashboard');
-                } 
-            } else {
-                goto('./register');
-            }
+			if (error) {
+				toast.error(`Error with looking for a username: ${error}`);
+				return;
+			}
+			$UserStore.formData.rfid = rfidGlobal;
+			if (username) {
+				if (await loginRfid(rfidGlobal, username)) {
+					$UserStore.formData.userName = username;
+					goto('./student-dashboard');
+				}
+			} else {
+				goto('./register');
+			}
 		}
 	}
 
 	async function checkUsernameEnter(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key == 'Enter') {
-            // Check if user is already registered
-            const { username, error } = await readUsername('', usernameGlobal);
+			// Check if user is already registered
+			const { username, error } = await readUsername('', usernameGlobal);
 
-            if (error) {
-                toast.error(`Error with looking for a username: ${error}`);
-            }
-            $UserStore.formData.userName = usernameGlobal;
-            if (username) {
-                if (await sendOtp(username)) {
-                    goto('./verify-otp');
-                }
-            } else {
-                goto('./register');
-            }
+			if (error) {
+				toast.error(`Error with looking for a username: ${error}`);
+			}
+			$UserStore.formData.userName = usernameGlobal;
+			if (username) {
+				if (await sendOtp(username)) {
+					goto('./verify-otp');
+				}
+			} else {
+				goto('./register');
+			}
 		}
 
 		return;

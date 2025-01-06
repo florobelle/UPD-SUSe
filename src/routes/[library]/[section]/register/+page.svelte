@@ -24,11 +24,11 @@
 		type College
 	} from '$lib/stores/collegePrograms';
 
-    // Login Imports
+	// Login Imports
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { sendOtp } from '../../supabase/LoginReg';
+	import { sendOtp } from '../../../supabase/LoginReg';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -114,39 +114,39 @@
 
 	// $: console.log($formData);
 
-    // ----------------------------------------------------------------------------
-    // BACKEND
-    // ----------------------------------------------------------------------------
-    $formData.userName = $UserStore.formData.userName ? $UserStore.formData.userName : ''; // Auto-inputs the username if user picked Login with UP Mail
-    
-    // Returns to Login if both username and rfid are lost after page refresh
-    if (browser && !$UserStore.formData.rfid && !$UserStore.formData.userName) { 
-        goto('./login');
-    }
+	// ----------------------------------------------------------------------------
+	// BACKEND
+	// ----------------------------------------------------------------------------
+	$formData.userName = $UserStore.formData.userName ? $UserStore.formData.userName : ''; // Auto-inputs the username if user picked Login with UP Mail
 
-    async function saveFormData() {
-        // Saves user data in the User Store for inserting in the database once user has been authenticated
-        $UserStore.toRegister = true;
-        $UserStore.formData = {
-            rfid: $UserStore.formData.rfid,
-            userName: $formData.userName,
-            firstName: $formData.firstName,
-            middleName: $formData.middleName,
-            lastName: $formData.lastName,
-            phoneNum: $formData.phoneNum,
-            userType: $formData.userType,
-            college: $formData.college,
-            program: $formData.program,
-            IDNum: $formData.IDNum
-        };
-        
-        if (await sendOtp($formData.userName)) {
-            goto('./verify-otp');
-        } else {
-            goto('./login');
-        }
-        return;
-    }
+	// Returns to Login if both username and rfid are lost after page refresh
+	if (browser && !$UserStore.formData.rfid && !$UserStore.formData.userName) {
+		goto('./login');
+	}
+
+	async function saveFormData() {
+		// Saves user data in the User Store for inserting in the database once user has been authenticated
+		$UserStore.toRegister = true;
+		$UserStore.formData = {
+			rfid: $UserStore.formData.rfid,
+			userName: $formData.userName,
+			firstName: $formData.firstName,
+			middleName: $formData.middleName,
+			lastName: $formData.lastName,
+			phoneNum: $formData.phoneNum,
+			userType: $formData.userType,
+			college: $formData.college,
+			program: $formData.program,
+			IDNum: $formData.IDNum
+		};
+
+		if (await sendOtp($formData.userName)) {
+			goto('./verify-otp');
+		} else {
+			goto('./login');
+		}
+		return;
+	}
 </script>
 
 <!-- Register -->
@@ -161,7 +161,14 @@
 		<!-- <Separator /> -->
 
 		<!-- Register Form Inputs-->
-		<form method="POST" on:submit={(event) => {event.preventDefault()}} class="grid w-full gap-12" use:enhance>
+		<form
+			method="POST"
+			on:submit={(event) => {
+				event.preventDefault();
+			}}
+			class="grid w-full gap-12"
+			use:enhance
+		>
 			<div class="grid-rows grid gap-0">
 				<!-- Row 1: Name -->
 				<div class="grid grid-cols-6 gap-4">
