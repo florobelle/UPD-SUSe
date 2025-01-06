@@ -7,10 +7,16 @@
 	import { loginOtp } from '../../supabase/LoginReg';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 
 	let otp: string = '';
 
     // ----------------------------------------------------------------------------
+
+    // Returns to Login if both username and rfid are lost after page refresh
+    if (browser && !$UserStore.formData.userName) { 
+        goto('./login');
+    }
 
 	async function checkOtpEnter(event: KeyboardEvent) {
 		// Listens to input in the OTP field
