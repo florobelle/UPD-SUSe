@@ -16,7 +16,7 @@
 
 	let rfid: string = '';
 	let library: string = $page.url.pathname.split('/')[1];
-    
+
 	let isLoggedOut: boolean = false;
 	let maxSessionDuration: number = 5; // seconds
 	let logOutReminder = setTimeout(remindLogOut, maxSessionDuration * 1000 - 5000); // user will be reminded of auto logout 5 seconds before
@@ -66,7 +66,7 @@
 			}
 
 			$UserStore.authenticated = true;
-			$UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
+			$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
 			toast.success(`You're now logged in!`);
 		}
 
@@ -80,7 +80,7 @@
 		deleteCookie('refreshToken', library);
 
 		$UserStore.authenticated = false;
-		$UserStore.formData.userName = '';
+		$UserStore.formData.username = '';
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
@@ -99,9 +99,9 @@
 
 	async function checkRfidEnter(event: KeyboardEvent) {
 		if (event.key == 'Enter') {
-			linkRfid(rfid, $UserStore.formData.userName);
+			linkRfid(rfid, $UserStore.formData.username);
 		}
-        return;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------

@@ -14,7 +14,7 @@
 	// ----------------------------------------------------------------------------
 
 	// Returns to Login if both username and rfid are lost after page refresh
-	if (browser && !$UserStore.formData.userName) {
+	if (browser && !$UserStore.formData.username) {
 		goto('./login');
 	}
 
@@ -24,7 +24,7 @@
 			if (
 				await loginOtp(
 					otp,
-					$UserStore.formData.userName,
+					$UserStore.formData.username,
 					$UserStore.toRegister,
 					$UserStore.formData
 				)

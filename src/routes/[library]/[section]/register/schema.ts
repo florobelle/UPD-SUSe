@@ -1,19 +1,19 @@
 import { z } from 'zod';
-import { allPrograms, allColleges } from '$lib/stores/collegePrograms';
+import { allColleges, allPrograms } from '$lib/stores/collegePrograms';
 import { userTypes } from '$lib/stores/userTypes';
 
 export const formSchema = z.object({
-	firstName: z.string().min(2).max(50),
-	middleName: z.string().min(1).max(5),
-	lastName: z.string().min(2).max(50),
-	userName: z.string().min(2).max(50),
-	IDNum: z.string().regex(/^\d{9}$/, {
+	first_name: z.string().min(2).max(50),
+	middle_name: z.string().min(1).max(5),
+	last_name: z.string().min(2).max(50),
+	username: z.string().min(2).max(50),
+	id: z.string().regex(/^\d{9}$/, {
 		message: 'ID number must have exactly 9 digits'
 	}),
-	phoneNum: z.string().regex(/^\d{11}$/, {
+	phone_number: z.string().regex(/^\d{11}$/, {
 		message: 'Phone number must have exactly 11 digits'
 	}),
-	userType: z.enum(userTypes.map((f) => f.value) as [string, ...string[]], {
+	user_type: z.enum(userTypes.map((f) => f.value) as [string, ...string[]], {
 		message: 'Please select a user type'
 	}),
 	college: z.enum(allColleges.map((g) => g.value) as [string, ...string[]], {

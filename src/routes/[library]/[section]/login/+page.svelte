@@ -18,16 +18,16 @@
 		authenticated: false,
 		toRegister: false,
 		formData: {
-			userName: '',
-			firstName: '',
+			username: '',
+			first_name: '',
 			rfid: '',
-			middleName: '',
-			lastName: '',
-			phoneNum: '',
-			userType: '',
+			middle_name: '',
+			last_name: '',
+			phone_number: '',
+			user_type: '',
 			college: '',
 			program: '',
-			IDNum: ''
+			id: ''
 		}
 	};
 
@@ -46,7 +46,7 @@
 			$UserStore.formData.rfid = rfidGlobal;
 			if (username) {
 				if (await loginRfid(rfidGlobal, username)) {
-					$UserStore.formData.userName = username;
+					$UserStore.formData.username = username;
 					goto('./student-dashboard');
 				}
 			} else {
@@ -64,7 +64,7 @@
 			if (error) {
 				toast.error(`Error with looking for a username: ${error}`);
 			}
-			$UserStore.formData.userName = usernameGlobal;
+			$UserStore.formData.username = usernameGlobal;
 			if (username) {
 				if (await sendOtp(username)) {
 					goto('./verify-otp');
@@ -117,7 +117,7 @@
 				}}
 				class="flex w-full gap-2"
 			>
-				<img src="../logos/google.png" class="h-[70%]" alt="Google logo" />
+				<img src="../../logos/google.png" class="h-[70%]" alt="Google logo" />
 				<p class="text-base">Login with UP Mail</p>
 			</Button>
 		</div>
