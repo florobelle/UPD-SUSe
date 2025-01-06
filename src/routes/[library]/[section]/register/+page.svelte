@@ -201,7 +201,12 @@
 					<Form.Field {form} class="col-span-1" name="phone_number">
 						<Form.Control let:attrs>
 							<Form.Label>Phone Number</Form.Label>
-							<Input {...attrs} bind:value={$formData.phone_number} />
+							<div class="flex items-center rounded-l-md bg-zinc-100">
+								<div class="px-2">
+									<p class="text-sm">+63</p>
+								</div>
+								<Input {...attrs} class="rounded-l-none" bind:value={$formData.phone_number} />
+							</div>
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>

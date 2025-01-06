@@ -12,7 +12,7 @@
 	import { onMount } from 'svelte';
 	import type { Session } from '@supabase/supabase-js';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { linkRfid } from '../../supabase/LoginReg';
+	import { linkRfid } from '../../../supabase/LoginReg';
 
 	let rfid: string = '';
 	let library: string = $page.url.pathname.split('/')[1];
