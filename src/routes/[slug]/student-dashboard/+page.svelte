@@ -14,13 +14,17 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { linkRfid } from '../../supabase/LoginReg';
 
-    let rfid: string = '';
+	let rfid: string = '';
 	let library: string = $page.url.pathname.split('/')[1];
-    let isLoggedOut: boolean = false;
+    
+	let isLoggedOut: boolean = false;
+	let maxSessionDuration: number = 5; // seconds
+	let logOutReminder = setTimeout(remindLogOut, maxSessionDuration * 1000 - 5000); // user will be reminded of auto logout 5 seconds before
+	let logOutTimer = setTimeout(logOutUser, maxSessionDuration * 1000);
 
-    // ----------------------------------------------------------------------------
-    // SESSION FUNCTIONS
-    // ----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------
+	// SESSION FUNCTIONS
+	// ----------------------------------------------------------------------------
 
 	async function startSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -41,11 +45,11 @@
 			createCookie('accessToken', session.access_token, 1, library);
 			createCookie('refreshToken', session.refresh_token, 1, library);
 		} else if (!session && !accessToken && !refreshToken) {
-            // if there is no session or tokens saved, go back to login
-            toast.error("Please login first.");
-            isLoggedOut = true;
-            goto('./login');
-        } else if (accessToken && refreshToken) {
+			// if there is no session or tokens saved, go back to login
+			toast.error('Please login first.');
+			isLoggedOut = true;
+			goto('./login');
+		} else if (accessToken && refreshToken) {
 			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
@@ -58,12 +62,12 @@
 
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
-				goto('./login')
+				goto('./login');
 			}
 
-            $UserStore.authenticated = true;
-            $UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
-            toast.success(`You're now logged in!`);
+			$UserStore.authenticated = true;
+			$UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
+			toast.success(`You're now logged in!`);
 		}
 
 		return;
@@ -76,7 +80,7 @@
 		deleteCookie('refreshToken', library);
 
 		$UserStore.authenticated = false;
-        $UserStore.formData.userName = '';
+		$UserStore.formData.userName = '';
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
@@ -89,38 +93,56 @@
 
 	onMount(startSession);
 
-    // ----------------------------------------------------------------------------
-    // RFID LINKING
-    // ----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------
+	// RFID LINKING
+	// ----------------------------------------------------------------------------
 
-    async function checkRfidEnter(event: KeyboardEvent) {
-        if (event.key == 'Enter') {
-            linkRfid(rfid, $UserStore.formData.userName);
-        }
-    }
+	async function checkRfidEnter(event: KeyboardEvent) {
+		if (event.key == 'Enter') {
+			linkRfid(rfid, $UserStore.formData.userName);
+		}
+        return;
+	}
 
-    
-    // ----------------------------------------------------------------------------
-    // LOGOUT
-    // ----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------
+	// LOGOUT
+	// ----------------------------------------------------------------------------
 
-    function logOutUser() {
-        // Logs out the user without confirmation and goes to login page
-        endSession()
-        isLoggedOut = true;
-        goto('./login');
-    }
+	function logOutUser() {
+		// Logs out the user without confirmation and goes to login page
+		endSession();
+		isLoggedOut = true;
+		goto('./login');
+	}
 
-    beforeNavigate(({cancel}) => {
-        // Confirms user will be logged out if they navigate to other pages
-        if (!isLoggedOut) {
-            if(!confirm('Leaving will logout your current session. Continue?')) {
-                cancel();
-            } else{
-                logOutUser();
-            }
-        }
-    })
+	beforeNavigate(({ cancel }) => {
+		// Confirms user will be logged out if they navigate to other pages
+		if (!isLoggedOut) {
+			if (!confirm('Leaving will logout your current session. Continue?')) {
+				cancel();
+			} else {
+				logOutUser();
+			}
+		}
+		return;
+	});
+
+	function resetReminderTimer() {
+		//  Resets the timer before a user is reminded to be logged out
+		clearTimeout(logOutTimer);
+		logOutTimer = setTimeout(logOutUser, maxSessionDuration * 1000);
+
+		clearTimeout(logOutReminder);
+		logOutReminder = setTimeout(remindLogOut, maxSessionDuration * 1000 - 5000);
+		return;
+	}
+
+	function remindLogOut() {
+		toast(`You will be logged out in ${maxSessionDuration} seconds unless you select a service.`, {
+			icon: '⏳'
+		});
+		return;
+	}
 </script>
 
 <Toaster />
@@ -130,7 +152,7 @@
 	<!-- Dashboard -->
 	<div class="flex w-full flex-col gap-8">
 		<div class="flex w-full flex-col gap-4 text-center">
-			<h1 class="text-5xl font-medium">You are now logged in</h1>
+			<h1 class="text-5xl font-medium" on:mouseover={resetReminderTimer}>You are now logged in</h1>
 			<h2 class="text-lg font-normal">Tap your RFID to connect it to your account!</h2>
 		</div>
 		<Input
