@@ -185,7 +185,7 @@
 						id="rfid"
 						type="password"
 						placeholder="••••••••••"
-						pattern="^{'\\'}d{'{'}3{'}'}$"
+						pattern="^{'\\'}d{'{'}10{'}'}$"
 						bind:value={rfidGlobal}
 						on:keyup={handleKeydownRfid}
 						class="max-w-full text-center text-base"
