@@ -1,7 +1,6 @@
 <script lang="ts">
 	// UI Component Imports
 	import Input from '$lib/components/ui/input/input.svelte';
-	import PhotoCard from '$lib/components/PhotoCard.svelte';
 	import * as Form from '$lib/components/ui/form';
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
@@ -13,7 +12,6 @@
 
 	// Combobox Imports (User Type, College and Program Comboboxes)
 	import { cn } from '$lib/utils.js';
-	import { get } from 'svelte/store';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import PopoverContent from '$lib/components/ui/popover/popover-content.svelte';
@@ -25,6 +23,12 @@
 		collegeProgramsList,
 		type College
 	} from '$lib/stores/collegePrograms';
+
+    // Login Imports
+	import { UserStore } from '$lib/stores/UserStore';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import { sendOtp } from '../../supabase/LoginReg';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -108,7 +112,41 @@
 
 	const { form: formData, enhance } = form;
 
-	$: console.log($formData);
+	// $: console.log($formData);
+
+    // ----------------------------------------------------------------------------
+    // BACKEND
+    // ----------------------------------------------------------------------------
+    $formData.userName = $UserStore.formData.userName ? $UserStore.formData.userName : ''; // Auto-inputs the username if user picked Login with UP Mail
+    
+    // Returns to Login if both username and rfid are lost after page refresh
+    if (browser && !$UserStore.formData.rfid && !$UserStore.formData.userName) { 
+        goto('./login');
+    }
+
+    async function saveFormData() {
+        // Saves user data in the User Store for inserting in the database once user has been authenticated
+        $UserStore.toRegister = true;
+        $UserStore.formData = {
+            rfid: $UserStore.formData.rfid,
+            userName: $formData.userName,
+            firstName: $formData.firstName,
+            middleName: $formData.middleName,
+            lastName: $formData.lastName,
+            phoneNum: $formData.phoneNum,
+            userType: $formData.userType,
+            college: $formData.college,
+            program: $formData.program,
+            IDNum: $formData.IDNum
+        };
+        
+        if (await sendOtp($formData.userName)) {
+            goto('./verify-otp');
+        } else {
+            goto('./login');
+        }
+        return;
+    }
 </script>
 
 <!-- Register -->
@@ -123,7 +161,7 @@
 		<!-- <Separator /> -->
 
 		<!-- Register Form Inputs-->
-		<form method="POST" class="grid w-full gap-12" use:enhance>
+		<form method="POST" on:submit={(event) => {event.preventDefault()}} class="grid w-full gap-12" use:enhance>
 			<div class="grid-rows grid gap-0">
 				<!-- Row 1: Name -->
 				<div class="grid grid-cols-6 gap-4">
@@ -372,10 +410,10 @@
 
 			<!-- Button Actions -->
 			<div class="grid w-full gap-2">
-				<Form.Button class="flex gap-2">
+				<Form.Button on:click={saveFormData} class="flex gap-2">
 					<p class="text-base">Register</p>
 				</Form.Button>
-				<Form.Button href="/" variant="outline" class="flex gap-2">
+				<Form.Button href="./login" variant="outline" class="flex gap-2">
 					<p class="text-base">Cancel</p>
 				</Form.Button>
 			</div>
