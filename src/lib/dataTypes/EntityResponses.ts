@@ -1,6 +1,11 @@
-import type { User } from "./EntityTypes"
+import type { Admin, User } from "./EntityTypes"
 
 export type UserResponse = {
     users: Array<User> | null
+    error: string | null
+}
+
+export type AdminResponse = {
+    admins: Array<Admin> | null
     error: string | null
 }

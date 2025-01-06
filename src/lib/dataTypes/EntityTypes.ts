@@ -13,3 +13,13 @@ export type User = {
     program: string | null,
     user_type: string
 }
+
+export type Admin = {
+    id: number,
+    rfid: string,
+    nickname: string,
+    email: string,
+    is_active: boolean,
+    library: string,
+    section: string,
+}

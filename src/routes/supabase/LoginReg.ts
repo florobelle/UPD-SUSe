@@ -2,44 +2,41 @@ import toast from "svelte-5-french-toast";
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import { createUser, updateUser } from "./User";
 import type { formData } from "$lib/stores/UserStore";
+import type { Admin } from "$lib/dataTypes/EntityTypes";
+import { createAdmin } from "./Admin";
 
-export async function loginRfid(rfid: string, username: string): Promise<boolean> {
+export async function loginRfid(rfid:string, username:string): Promise<boolean> {
     // Logs in using user RFID and email from the database	
-    if (username) {
-        const { error } = await supabaseClient.auth.signInWithPassword({
-            email: `${username}@up.edu.ph`,
-            password: rfid
-        });
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email: `${username}@up.edu.ph`,
+        password: rfid
+    });
 
-        if (error) {
-            toast.error(`Error with logging in with RFID: ${error}`);
-            return false;
-        }
+    if (error) {
+        toast.error(`Error with logging in with RFID: ${error}`);
+        return false;
     }
 
     return true;
 }
 
-export async function sendOtp(username: string): Promise<boolean> {
-    // Logs in using user email with OTP
+export async function sendOtp(username:string): Promise<boolean> {
+    // Sends OTP to user UP Mail
+    const { error } = await supabaseClient.auth.signInWithOtp({
+        email: `${username}@up.edu.ph`,
+    });
 
-    if (username) {
-        const { error } = await supabaseClient.auth.signInWithOtp({
-            email: `${username}@up.edu.ph`,
-        });
-    
-        if (error) {
-            toast.error(`Error with sending OTP: ${error}`);
-            return false;
-        }
-    }     
+    if (error) {
+        toast.error(`Error with sending OTP: ${error}`);
+        return false;
+    }   
     
     return true;
 }
 
-export async function loginOtp(otp: string, username: string, toRegister: boolean, formData: formData): Promise<boolean> {
+export async function loginOtp(otp:string, username:string, toRegister:boolean, formData:formData): Promise<boolean> {
     // Logs in using user email with OTP
-    const { data, error } = await supabaseClient.auth.verifyOtp({
+    const { error } = await supabaseClient.auth.verifyOtp({
         email: `${username}@up.edu.ph`,
         token: otp,
         type: 'email'
@@ -65,7 +62,7 @@ export async function loginOtp(otp: string, username: string, toRegister: boolea
     return true;
 }
 
-export async function linkRfid(rfid: string, username: string) {
+export async function linkRfid(rfid:string, username:string): Promise<boolean> {
     // Links the UP RFID of a student to their UP Mail account
     const { error } = await supabaseClient.auth.updateUser({ password: rfid})
     updateUser({ rfid }, username);
@@ -75,5 +72,67 @@ export async function linkRfid(rfid: string, username: string) {
         return false;
     }
     toast.success('Successfull RFID linking!');
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+
+export async function signUpAdmin(email:string): Promise<boolean> {
+    // Sends OTP to admin email
+    const { error } = await supabaseClient.auth.signInWithOtp({
+        email: email,
+    });
+
+    if (error) {
+        toast.error(`Error with sending OTP: ${error}`);
+        return false;
+    }   
+    
+    return true;
+}
+
+export async function verifyAdmin(otp:string, email:string, adminData:Admin): Promise<boolean> {
+    // Logs in using admin email with OTP
+    const { error } = await supabaseClient.auth.verifyOtp({
+        email: email,
+        token: otp,
+        type: 'email'
+    });
+
+    if (error) {
+        toast.error(`Error with verifying OTP: ${error}`);
+        return false;
+    } else {
+        const { error } = await createAdmin(adminData);
+
+        if (error) {
+            toast.error(`Error with creating a new admin: ${error}`)
+            return false;
+        } else {
+            const { error } = await supabaseClient.auth.updateUser({ password: adminData.rfid})
+
+            if (error) {
+                toast.error(`Error with linking RFID: ${error}`);
+                return false;
+            }
+            toast.success('Successfull admin creation!');
+        }      
+    }
+
+    return true;
+}
+
+export async function loginAdmin(rfid:string, email:string): Promise<boolean> {
+    // Lgs in using admin RFID and email from the database
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: rfid
+    });
+
+    if (error) {
+        toast.error(`Error with logging in with RFID: ${error}`);
+        return false;
+    }
+
     return true;
 }

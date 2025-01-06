@@ -2,7 +2,6 @@ import { supabaseClient } from "$lib/client/SupabaseClient";
 import type { UserFilter } from "$lib/dataTypes/EntityFilters";
 import type { UserResponse } from "$lib/dataTypes/EntityResponses";
 import type { formData } from "$lib/stores/UserStore";
-import toast from "svelte-5-french-toast";
 
 type Username = { 
     username: string, 
@@ -108,43 +107,6 @@ export async function createUser(userInfo:formData): Promise<UserResponse> {
 
 export async function updateUser(userInfo: object, username: string): Promise<UserResponse> {
     // Updates user information in the lib_user table
-    // let toUpdate: Object = {};
-
-    // if (userInfo.userName) {
-    //     toUpdate = {...toUpdate, username: userInfo.userName}
-    // }
-    
-    // if (userInfo.firstName) {
-    //     toUpdate = {...toUpdate, first_name: userInfo.firstName}
-    // }
-
-    // if (userInfo.rfid) {
-    //     toUpdate = {...toUpdate, rfid: userInfo.rfid}
-    // }
-
-    // if (userInfo.middleName) {
-    //     toUpdate = {...toUpdate, middle_name: userInfo.middleName}
-    // }
-
-    // if (userInfo.lastName) {
-    //     toUpdate = {...toUpdate, last_name: userInfo.lastName}
-    // }
-
-    // if (userInfo.phoneNum) {
-    //     toUpdate = {...toUpdate, phone_number: userInfo.phoneNum}
-    // }
-
-    // if (userInfo.userType) {
-    //     toUpdate = {...toUpdate, user_type_id: parseInt(userInfo.userType)}
-    // }
-
-    // if (userInfo.college_unit) {
-    //     toUpdate = {...toUpdate, college_unit_id: userInfo.college_unit}
-    // }
-
-    // if (userInfo.program) {
-    //     toUpdate = {...toUpdate, program_id: parseInt(userInfo.program)}
-    // }
     
     const { error } = await supabaseClient.from('lib_user').update(userInfo).eq('username', username)
 
