@@ -2,6 +2,7 @@
 	// UI Imports
 	import { Input } from '$lib/components/ui/input';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import toast, { Toaster } from 'svelte-5-french-toast';
 
 	// Backend Imports
 	import { page } from '$app/stores';
@@ -9,14 +10,17 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import { onMount } from 'svelte';
-	import toast, { Toaster } from 'svelte-5-french-toast';
 	import type { Session } from '@supabase/supabase-js';
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { linkRfid } from '../../supabase/LoginReg';
-	import { updateUser } from '../../supabase/User';
 
     let rfid: string = '';
 	let library: string = $page.url.pathname.split('/')[1];
+    let isLoggedOut: boolean = false;
+
+    // ----------------------------------------------------------------------------
+    // SESSION FUNCTIONS
+    // ----------------------------------------------------------------------------
 
 	async function startSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -36,8 +40,13 @@
 			// if there is currently a session with no cookies, save tokens in cookies
 			createCookie('accessToken', session.access_token, 1, library);
 			createCookie('refreshToken', session.refresh_token, 1, library);
-		} else {
-			// if there is no current session, start one with the save
+		} else if (!session && !accessToken && !refreshToken) {
+            // if there is no session or tokens saved, go back to login
+            toast.error("Please login first.");
+            isLoggedOut = true;
+            goto('./login');
+        } else if (accessToken && refreshToken) {
+			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
 				error
@@ -51,11 +60,12 @@
 				toast.error(`Error with creating session: ${error}`);
 				goto('./login')
 			}
+
+            $UserStore.authenticated = true;
+            $UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
+            toast.success(`You're now logged in!`);
 		}
 
-		$UserStore.authenticated = true;
-        $UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
-		toast.success(`You're now logged in!`);
 		return;
 	}
 
@@ -69,10 +79,9 @@
         $UserStore.formData.userName = '';
 
 		if (error) {
-			toast.error(`Error with logging out: ${error}`);
+			toast.error(`Error with ending session: ${error}`);
 		} else {
-			toast.success('Successfull logout.');
-			goto('./login');
+			toast.success('Successfull end of session.');
 		}
 
 		return;
@@ -81,13 +90,37 @@
 	onMount(startSession);
 
     // ----------------------------------------------------------------------------
-
+    // RFID LINKING
+    // ----------------------------------------------------------------------------
 
     async function checkRfidEnter(event: KeyboardEvent) {
         if (event.key == 'Enter') {
             linkRfid(rfid, $UserStore.formData.userName);
         }
     }
+
+    
+    // ----------------------------------------------------------------------------
+    // LOGOUT
+    // ----------------------------------------------------------------------------
+
+    function logOutUser() {
+        // Logs out the user without confirmation and goes to login page
+        endSession()
+        isLoggedOut = true;
+        goto('./login');
+    }
+
+    beforeNavigate(({cancel}) => {
+        // Confirms user will be logged out if they navigate to other pages
+        if (!isLoggedOut) {
+            if(!confirm('Leaving will logout your current session. Continue?')) {
+                cancel();
+            } else{
+                logOutUser();
+            }
+        }
+    })
 </script>
 
 <Toaster />
@@ -107,7 +140,7 @@
 			placeholder="••••••••••"
 			class="max-w-full text-center text-base"
 		/>
-		<Button on:click={endSession} class="flex w-full gap-2">
+		<Button on:click={logOutUser} class="flex w-full gap-2">
 			<p class="text-base">Logout</p>
 		</Button>
 	</div>
