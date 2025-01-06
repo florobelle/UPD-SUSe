@@ -33,12 +33,38 @@ export async function readEmail(rfid:string): Promise<Email> {
 export async function createAdmin(adminData:AdminFormData): Promise<AdminResponse> {
     // Creates admin information in the admin_engglib table.
 
-    const { error } = await supabaseClient.from('admin_engglib').insert(adminData)
+    const { error } = await supabaseClient.from('admin_engglib').insert({
+        id: adminData.id,
+        rfid: adminData.rfid,
+        nickname: adminData.nickname,
+        email: adminData.email,
+        is_active: false,
+        library_id: parseInt(adminData.library),
+        section_id: parseInt(adminData.section),
+    })
 
     if (error) {
         return {
             admins: null,
             error: `Error with creating user ${adminData.nickname}: ${error}`
+        }
+    }
+
+    return {
+        admins: null,
+        error: null,
+    };
+}
+
+export async function updateAdmin(adminInfo: object, email: string): Promise<AdminResponse> {
+    // Updates user information in the lib_user table
+    
+    const { error } = await supabaseClient.from('lib_user').update(adminInfo).eq('email', email)
+
+    if (error) {
+        return {
+            admins: null,
+            error: `Error with updating admin ${email}: ${error}`
         }
     }
 

@@ -2,8 +2,12 @@ import toast from "svelte-5-french-toast";
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import { createUser, updateUser } from "./User";
 import type { UserFormData } from "$lib/stores/UserStore";
-import type { Admin } from "$lib/dataTypes/EntityTypes";
 import { createAdmin } from "./Admin";
+import type { AdminFormData } from "$lib/stores/AdminStore";
+
+// ----------------------------------------------------------------------------
+// USER LOGIN
+// ----------------------------------------------------------------------------
 
 export async function loginRfid(rfid:string, username:string): Promise<boolean> {
     // Logs in using user RFID and email from the database	
@@ -76,6 +80,8 @@ export async function linkRfid(rfid:string, username:string): Promise<boolean> {
 }
 
 // ----------------------------------------------------------------------------
+// ADMIN LOGIN
+// ----------------------------------------------------------------------------
 
 export async function signUpAdmin(email:string): Promise<boolean> {
     // Sends OTP to admin email
@@ -91,7 +97,7 @@ export async function signUpAdmin(email:string): Promise<boolean> {
     return true;
 }
 
-export async function verifyAdmin(otp:string, email:string, adminData:Admin): Promise<boolean> {
+export async function verifyAdmin(otp:string, email:string, adminData:AdminFormData): Promise<boolean> {
     // Logs in using admin email with OTP
     const { error } = await supabaseClient.auth.verifyOtp({
         email: email,
