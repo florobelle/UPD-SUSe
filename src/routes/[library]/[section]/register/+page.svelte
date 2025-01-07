@@ -22,7 +22,7 @@
 		allColleges,
 		collegeProgramsList,
 		type College
-	} from '$lib/stores/CollegePrograms';
+	} from '$lib/stores/collegePrograms';
 
 	// Login Imports
 	import { UserStore } from '$lib/stores/UserStore';
