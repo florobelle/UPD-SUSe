@@ -13,6 +13,10 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import type { Session } from '@supabase/supabase-js';
 	import { linkRfid } from '../../supabase/LoginReg';
+	import { ServiceStore } from '$lib/stores/ServiceStore';
+	import { readService } from '../../supabase/Service';
+	import type { ServiceFilter } from '$lib/dataTypes/EntityFilters';
+	import { readServiceType } from '../../supabase/ServiceType';
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
@@ -86,8 +90,6 @@
 		return;
 	}
 
-	onMount(startSession);
-
 	// ----------------------------------------------------------------------------
 	// RFID LINKING
 	// ----------------------------------------------------------------------------
@@ -104,9 +106,10 @@
 	// ----------------------------------------------------------------------------
 
 	let isLoggedOut: boolean = false;
-	let maxSessionDuration: number = 30; // seconds
-	let logOutReminder = setTimeout(remindLogOut, maxSessionDuration * 1000 - 5000); // user will be reminded of auto logout 5 seconds before
-	let logOutTimer = setTimeout(logOutUser, maxSessionDuration * 1000);
+	const maxSessionDuration: number = 30 * 1000; // seconds * ticks
+    const reminderTime: number = maxSessionDuration - 5000 // reminds 5 seconds before automatic logout
+	let logOutReminder = setTimeout(remindLogOut, reminderTime); // user will be reminded of auto logout 5 seconds before
+	let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
 
 	function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
@@ -128,17 +131,18 @@
 	});
 
 	function resetReminderTimer() {
-		//  Resets the timer before a user is reminded to be logged out
-		clearTimeout(logOutTimer);
-		logOutTimer = setTimeout(logOutUser, maxSessionDuration * 1000);
-
+		// Resets the timer before a user is reminded to be logged out
 		clearTimeout(logOutReminder);
-		logOutReminder = setTimeout(remindLogOut, maxSessionDuration * 1000 - 5000);
+		logOutReminder = setTimeout(remindLogOut, reminderTime);
+
+		clearTimeout(logOutTimer);
+		logOutTimer = setTimeout(logOutUser, maxSessionDuration);
 		return;
 	}
 
 	function remindLogOut() {
-		toast(`You will be logged out in ${maxSessionDuration} seconds unless you select a service.`, {
+        // Reminds user of automatic logout
+		toast(`You will be logged out in 5 seconds unless you select a service.`, {
 			icon: '⏳'
 		});
 		return;
@@ -148,7 +152,41 @@
 	// READ SERVICES
 	// ----------------------------------------------------------------------------
 
+    const serviceFilter: ServiceFilter = {
+        type: '',
+        in_use: false,
+        library: library,
+        section: '',
+    }
 
+    async function getServices() {
+        // Reads the service types and available services in the current library and section
+        const { serviceTypes, error } = await readServiceType();
+
+        if (error) {
+            toast.error(`Error with getting service types: ${error}`);
+            return;
+        } else if (serviceTypes != null) {
+            $ServiceStore.serviceTypes = serviceTypes
+            const { services, error } = await readService(serviceFilter);
+
+            if (error) {
+                toast.error(`Error with getting services: ${error}`);
+                return;
+            } else if (services != null) {
+                $ServiceStore.services = services;
+            }
+        }
+        console.log($ServiceStore)
+        return;
+    }
+
+	// ----------------------------------------------------------------------------
+
+    onMount(() => {
+        startSession();
+        getServices();
+    });
 </script>
 
 <Toaster />
