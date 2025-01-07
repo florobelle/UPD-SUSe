@@ -10,7 +10,7 @@ export type UserFormData = {
 	user_type: string;
 	college: string;
 	program: string;
-	id: string;
+	lib_user_id: string;
 };
 
 type UserInformation = {
@@ -32,6 +32,6 @@ export const UserStore: Writable<UserInformation> = writable({
 		user_type: '',
 		college: '',
 		program: '',
-		id: ''
+		lib_user_id: ''
 	}
 });

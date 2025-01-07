@@ -1,4 +1,4 @@
-import type { Admin, User } from "./EntityTypes"
+import type { Admin, Service, ServiceType, UsageLog, User } from "./EntityTypes"
 
 export type UserResponse = {
     users: Array<User> | null
@@ -7,5 +7,20 @@ export type UserResponse = {
 
 export type AdminResponse = {
     admins: Array<Admin> | null
+    error: string | null
+}
+
+export type ServiceResponse = {
+    services: Array<Service> | null
+    error: string | null
+}
+
+export type ServiceTypeResponse = {
+    serviceTypes: Array<ServiceType> | null
+    error: string | null
+}
+
+export type UsageLogResponse = {
+    usagelogs: Array<UsageLog> | null
     error: string | null
 }

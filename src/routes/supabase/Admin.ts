@@ -34,7 +34,7 @@ export async function createAdmin(adminData:AdminFormData): Promise<AdminRespons
     // Creates admin information in the admin_engglib table.
 
     const { error } = await supabaseClient.from('admin_engglib').insert({
-        id: adminData.id,
+        admin_id: adminData.id,
         rfid: adminData.rfid,
         nickname: adminData.nickname,
         email: adminData.email,
