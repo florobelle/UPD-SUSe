@@ -4,19 +4,19 @@
 
 	// Backend Imports
 	import { Toaster } from 'svelte-5-french-toast';
-	import { loginOtp } from '../../supabase/LoginReg';
+	import { loginOtp } from '../../../supabase/LoginReg';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 
 	let otp: string = '';
 
-    // ----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------
 
-    // Returns to Login if both username and rfid are lost after page refresh
-    if (browser && !$UserStore.formData.userName) { 
-        goto('./login');
-    }
+	// Returns to Login if both username and rfid are lost after page refresh
+	if (browser && !$UserStore.formData.username) {
+		goto('./login');
+	}
 
 	async function checkOtpEnter(event: KeyboardEvent) {
 		// Listens to input in the OTP field
@@ -24,7 +24,7 @@
 			if (
 				await loginOtp(
 					otp,
-					$UserStore.formData.userName,
+					$UserStore.formData.username,
 					$UserStore.toRegister,
 					$UserStore.formData
 				)
