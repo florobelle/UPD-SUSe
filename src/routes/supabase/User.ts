@@ -78,16 +78,16 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     // Creates user information in the lib_user table.
 
     const { error } = await supabaseClient.from('lib_user').insert({
-        lib_user_id: userInfo.IDNum,
-        username: userInfo.userName,
+        lib_user_id: userInfo.id,
+        username: userInfo.username,
         rfid: userInfo.rfid,
-        first_name: userInfo.firstName,
-        middle_initial: userInfo.middleName,
-        last_name: userInfo.lastName,
-        phone_number: userInfo.phoneNum,
+        first_name: userInfo.first_name,
+        middle_initial: userInfo.middle_name,
+        last_name: userInfo.last_name,
+        phone_number: userInfo.phone_number,
         is_enrolled: false,
         is_active: false,
-        user_type_id: parseInt(userInfo.userType),
+        user_type_id: parseInt(userInfo.user_type),
         program_id: parseInt(userInfo.program),
         college_id: parseInt(userInfo.college),
     })
@@ -95,7 +95,7 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: `Error with creating user ${userInfo.userName}: ${error}`
+            error: `Error with creating user ${userInfo.username}: ${error}`
         }
     }
 

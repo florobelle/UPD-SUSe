@@ -1,24 +1,17 @@
 <script lang="ts">
 	// UI Component Imports
 	import PhotoCard from '$lib/components/PhotoCard.svelte';
-	export let data: {
-		libName: string;
-		libBuilding: string;
-		libStreet: string;
-		libSrc: string;
-	};
-
-	// console.log(data);
+	export let data;
 </script>
 
 <section class="grid h-screen max-h-dvh grid-cols-2">
 	<!-- Photocard -->
 	<div class="h-full p-4">
 		<PhotoCard
-			libSrc={data.libSrc}
-			libName={data.libName}
-			libStreet={data.libStreet}
-			libBuilding={data.libBuilding}
+			libSrc={data.librarySrc}
+			libName={data.libraryName}
+			libStreet={data.libraryStreet}
+			libBuilding={data.libraryBuilding}
 		></PhotoCard>
 	</div>
 
@@ -27,16 +20,20 @@
 		<!-- Logo header -->
 		<div class="items-right flex h-[50px] w-full justify-end gap-4">
 			<img
-				src="../logos/up-logo.png"
+				src="../../logos/up-logo.png"
 				class="h-full w-auto"
 				alt="University of the Philippines logo"
 			/>
 			<img
-				src="../logos/dcs-logo.png"
+				src="../../logos/dcs-logo.png"
 				class="h-full w-auto"
 				alt="Department of Computer Science logo"
 			/>
-			<img src="../logos/engglib-logo.png" class="h-full w-auto" alt="Engineering Library logo" />
+			<img
+				src="../../logos/engglib-logo.png"
+				class="h-full w-auto"
+				alt="Engineering Library logo"
+			/>
 		</div>
 
 		<!-- Register/Login -->

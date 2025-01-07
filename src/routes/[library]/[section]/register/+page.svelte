@@ -24,11 +24,11 @@
 		type College
 	} from '$lib/stores/collegePrograms';
 
-    // Login Imports
+	// Login Imports
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { sendOtp } from '../../supabase/LoginReg';
+	import { sendOtp } from '../../../supabase/LoginReg';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -114,39 +114,39 @@
 
 	// $: console.log($formData);
 
-    // ----------------------------------------------------------------------------
-    // BACKEND
-    // ----------------------------------------------------------------------------
-    $formData.userName = $UserStore.formData.userName ? $UserStore.formData.userName : ''; // Auto-inputs the username if user picked Login with UP Mail
-    
-    // Returns to Login if both username and rfid are lost after page refresh
-    if (browser && !$UserStore.formData.rfid && !$UserStore.formData.userName) { 
-        goto('./login');
-    }
+	// ----------------------------------------------------------------------------
+	// BACKEND
+	// ----------------------------------------------------------------------------
+	$formData.username = $UserStore.formData.username ? $UserStore.formData.username : ''; // Auto-inputs the username if user picked Login with UP Mail
 
-    async function saveFormData() {
-        // Saves user data in the User Store for inserting in the database once user has been authenticated
-        $UserStore.toRegister = true;
-        $UserStore.formData = {
-            rfid: $UserStore.formData.rfid,
-            userName: $formData.userName,
-            firstName: $formData.firstName,
-            middleName: $formData.middleName,
-            lastName: $formData.lastName,
-            phoneNum: $formData.phoneNum,
-            userType: $formData.userType,
-            college: $formData.college,
-            program: $formData.program,
-            IDNum: $formData.IDNum
-        };
-        
-        if (await sendOtp($formData.userName)) {
-            goto('./verify-otp');
-        } else {
-            goto('./login');
-        }
-        return;
-    }
+	// Returns to Login if both username and rfid are lost after page refresh
+	if (browser && !$UserStore.formData.rfid && !$UserStore.formData.username) {
+		goto('./login');
+	}
+
+	async function saveFormData() {
+		// Saves user data in the User Store for inserting in the database once user has been authenticated
+		$UserStore.toRegister = true;
+		$UserStore.formData = {
+			rfid: $UserStore.formData.rfid,
+			username: $formData.username,
+			first_name: $formData.first_name,
+			middle_name: $formData.middle_name,
+			last_name: $formData.last_name,
+			phone_number: $formData.phone_number,
+			user_type: $formData.user_type,
+			college: $formData.college,
+			program: $formData.program,
+			id: $formData.id
+		};
+
+		if (await sendOtp($formData.username)) {
+			goto('./verify-otp');
+		} else {
+			goto('./login');
+		}
+		return;
+	}
 </script>
 
 <!-- Register -->
@@ -161,28 +161,35 @@
 		<!-- <Separator /> -->
 
 		<!-- Register Form Inputs-->
-		<form method="POST" on:submit={(event) => {event.preventDefault()}} class="grid w-full gap-12" use:enhance>
+		<form
+			method="POST"
+			on:submit={(event) => {
+				event.preventDefault();
+			}}
+			class="grid w-full gap-12"
+			use:enhance
+		>
 			<div class="grid-rows grid gap-0">
 				<!-- Row 1: Name -->
 				<div class="grid grid-cols-6 gap-4">
-					<Form.Field {form} class="col-span-3" name="firstName">
+					<Form.Field {form} class="col-span-3" name="first_name">
 						<Form.Control let:attrs>
 							<Form.Label>First Name</Form.Label>
-							<Input {...attrs} bind:value={$formData.firstName} />
+							<Input {...attrs} bind:value={$formData.first_name} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
-					<Form.Field {form} class="col-span-1" name="middleName">
+					<Form.Field {form} class="col-span-1" name="middle_name">
 						<Form.Control let:attrs>
 							<Form.Label>M.I.</Form.Label>
-							<Input {...attrs} bind:value={$formData.middleName} />
+							<Input {...attrs} bind:value={$formData.middle_name} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
-					<Form.Field {form} class="col-span-2" name="lastName">
+					<Form.Field {form} class="col-span-2" name="last_name">
 						<Form.Control let:attrs>
 							<Form.Label>Last Name</Form.Label>
-							<Input {...attrs} bind:value={$formData.lastName} />
+							<Input {...attrs} bind:value={$formData.last_name} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
@@ -191,16 +198,21 @@
 				<!-- Row 2: ID Number and Phone Number -->
 				<div class="grid grid-cols-2 gap-4">
 					<!-- Phone Number -->
-					<Form.Field {form} class="col-span-1" name="phoneNum">
+					<Form.Field {form} class="col-span-1" name="phone_number">
 						<Form.Control let:attrs>
 							<Form.Label>Phone Number</Form.Label>
-							<Input {...attrs} bind:value={$formData.phoneNum} />
+							<div class="flex items-center rounded-l-md bg-zinc-100">
+								<div class="px-2">
+									<p class="text-sm">+63</p>
+								</div>
+								<Input {...attrs} class="rounded-l-none" bind:value={$formData.phone_number} />
+							</div>
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
 
 					<!-- User Type -->
-					<Form.Field {form} name="userType" class="col-span-1 mt-2 flex flex-col">
+					<Form.Field {form} name="user_type" class="col-span-1 mt-2 flex flex-col">
 						<Popover.Root bind:open={userTypeOpen}>
 							<Form.Control let:attrs>
 								<Form.Label>User Type</Form.Label>
@@ -208,18 +220,18 @@
 									class={cn(
 										buttonVariants({ variant: 'outline' }),
 										'w-full justify-between',
-										!$formData.userType && 'text-muted-foreground'
+										!$formData.user_type && 'text-muted-foreground'
 									)}
 									role="combobox"
 									{...attrs}
 								>
 									<p class="truncate">
-										{userTypes.find((f) => f.value === $formData.userType)?.label ??
+										{userTypes.find((f) => f.value === $formData.user_type)?.label ??
 											'Select user type'}
 									</p>
 									<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 								</Popover.Trigger>
-								<input hidden value={$formData.userType} name={attrs.name} />
+								<input hidden value={$formData.user_type} name={attrs.name} />
 							</Form.Control>
 
 							<PopoverContent>
@@ -231,7 +243,7 @@
 												<Command.Item
 													value={userType.label}
 													onSelect={() => {
-														$formData.userType = userType.value;
+														$formData.user_type = userType.value;
 														userTypeOpen = false;
 													}}
 												>
@@ -239,7 +251,7 @@
 													<Check
 														class={cn(
 															'ml-auto h-4 w-4',
-															userType.value !== $formData.userType && 'text-transparent'
+															userType.value !== $formData.user_type && 'text-transparent'
 														)}
 													/>
 												</Command.Item>
@@ -383,20 +395,20 @@
 
 				<div class="grid grid-cols-2 gap-4">
 					<!-- ID Number -->
-					<Form.Field {form} class="col-span-1" name="IDNum">
+					<Form.Field {form} class="col-span-1" name="id">
 						<Form.Control let:attrs>
 							<Form.Label>ID Number</Form.Label>
-							<Input {...attrs} bind:value={$formData.IDNum} />
+							<Input {...attrs} bind:value={$formData.id} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
 
 					<!-- Email -->
-					<Form.Field {form} class="col-span-1" name="userName">
+					<Form.Field {form} class="col-span-1" name="username">
 						<Form.Control let:attrs>
 							<Form.Label>Email</Form.Label>
 							<div class="flex items-center rounded-r-md bg-zinc-100">
-								<Input {...attrs} class="rounded-r-none" bind:value={$formData.userName} />
+								<Input {...attrs} class="rounded-r-none" bind:value={$formData.username} />
 								<div class="px-2">
 									<p class="text-sm">@up.edu.ph</p>
 								</div>

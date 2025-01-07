@@ -15,11 +15,11 @@
 	import { ServiceStore } from '$lib/stores/ServiceStore';
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import type { ServiceFilter, UsageLogFilter } from '$lib/dataTypes/EntityFilters';
-	import { linkRfid } from '../../supabase/LoginReg';
-	import { readService } from '../../supabase/Service';
-	import { readServiceType } from '../../supabase/ServiceType';
-	import { readUsageLog } from '../../supabase/UsageLog';
-	import { readUser } from '../../supabase/User';
+	import { linkRfid } from '../../../supabase/LoginReg';
+	import { readServiceType } from '../../../supabase/ServiceType';
+	import { readService } from '../../../supabase/Service';
+	import { readUsageLog } from '../../../supabase/UsageLog';
+	import { readUser } from '../../../supabase/User';
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
@@ -68,7 +68,7 @@
 				goto('./login');
 			} else {
                 $UserStore.authenticated = true;
-                $UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
+                $UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
                 toast.success(`You're now logged in!`);
             }			
 		}
@@ -85,7 +85,7 @@
 		deleteCookie('refreshToken', library);
 
 		$UserStore.authenticated = false;
-		$UserStore.formData.userName = '';
+		$UserStore.formData.username = '';
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
@@ -103,9 +103,9 @@
 	async function checkRfidEnter(event: KeyboardEvent) {
         // checks once RFID has been entered
 		if (event.key == 'Enter') {
-			linkRfid(rfid, $UserStore.formData.userName);
+			linkRfid(rfid, $UserStore.formData.username);
 		}
-        return;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -195,7 +195,7 @@
         usagelog_id: 0,
         start: null,
         end: null,
-        lib_user_id: parseInt($UserStore.formData.IDNum),
+        lib_user_id: parseInt($UserStore.formData.id),
         service_type: '',
         library: library,
         section: '',
@@ -219,7 +219,7 @@
         // gets user information from database
         const { users, error } = await readUser({
             lib_user_id: 0,
-            username: $UserStore.formData.userName,
+            username: $UserStore.formData.username,
             is_enrolled: null,
             is_active: null,
             college: '',
@@ -231,12 +231,12 @@
             toast.error(`Error with reading user information: ${error}`)
             return false;
         } else if (users != null) {
-            $UserStore.formData.IDNum = users[0].lib_user_id.toString();
+            $UserStore.formData.id = users[0].lib_user_id.toString();
             $UserStore.formData.college = users[0].college;
-            $UserStore.formData.firstName = users[0].first_name;
-            $UserStore.formData.middleName = users[0].middle_initial ? users[0].middle_initial : '';
-            $UserStore.formData.lastName = users[0].last_name;
-            $UserStore.formData.userType = users[0].user_type;
+            $UserStore.formData.first_name = users[0].first_name;
+            $UserStore.formData.middle_name = users[0].middle_initial ? users[0].middle_initial : '';
+            $UserStore.formData.last_name = users[0].last_name;
+            $UserStore.formData.user_type = users[0].user_type;
             $UserStore.formData.college = users[0].college;
             $UserStore.formData.program = users[0].program ? users[0].program : '';
         }
