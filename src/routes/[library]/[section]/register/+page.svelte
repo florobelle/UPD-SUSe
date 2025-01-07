@@ -16,7 +16,7 @@
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import PopoverContent from '$lib/components/ui/popover/popover-content.svelte';
 	import Check from 'lucide-svelte/icons/check';
-	import { userTypes } from '$lib/stores/UserTypes';
+	import { userTypes } from '$lib/stores/userTypes';
 	import {
 		allPrograms,
 		allColleges,

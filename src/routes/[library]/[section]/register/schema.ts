@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { allColleges, allPrograms } from '$lib/stores/CollegePrograms';
-import { userTypes } from '$lib/stores/UserTypes';
+import { allColleges, allPrograms } from '$lib/stores/collegePrograms';
+import { userTypes } from '$lib/stores/userTypes';
 
 export const formSchema = z.object({
 	first_name: z.string().min(2).max(50),
