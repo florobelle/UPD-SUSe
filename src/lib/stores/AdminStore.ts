@@ -1,7 +1,7 @@
 import { writable, type Writable } from "svelte/store";
 
 export type AdminFormData = {
-    id: number,
+    admin_id: number,
     rfid: string,
     nickname: string,
     email: string,
@@ -19,7 +19,7 @@ export const AdminStore: Writable<AdminInformation> = writable({
     authenticated: false,
     toRegister: false,
     formData: {
-        id: 0,
+        admin_id: 0,
         rfid: '',
         nickname: '',
         email: '',
