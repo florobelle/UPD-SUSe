@@ -40,6 +40,9 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     if (filter.lib_user_id) {
         query = query.eq('lib_user_id', filter.lib_user_id)
     }
+    if (filter.username) {
+        query = query.eq('username', filter.username)
+    }
     if (filter.is_enrolled != null) {
         query = query.eq('is_enrolled', filter.is_enrolled)
     }
@@ -48,9 +51,6 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     }
     if (filter.college) {
         query = query.eq('college', filter.college)
-    }
-    if (filter.unit) {
-        query = query.eq('unit', filter.unit)
     }
     if (filter.program) {
         query = query.eq('program', filter.program)

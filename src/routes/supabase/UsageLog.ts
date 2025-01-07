@@ -4,7 +4,11 @@ import type { UsageLogResponse } from "$lib/dataTypes/EntityResponses";
 
 export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogResponse> {
     // Reads and filters the service_engglib table in the database and returns all corresponding entries
-    let query = supabaseClient.from(`public_service_${filter.library}`).select("*");
+    let query = supabaseClient.from(`public_usagelog_${filter.library}`).select("*");
+
+    if (filter.usagelog_id) {
+        query = query.eq('usagelog_id', filter.usagelog_id);
+    }
 
     if (filter.start != null) {
         query = query.gte('start', filter.start);
@@ -12,6 +16,8 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
 
     if (filter.end != null) {
         query = query.lte('end', filter.end);
+    } else {
+        query = query.is('end', null)
     }
 
     if (filter.lib_user_id) {
@@ -20,10 +26,6 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
 
     if (filter.service_type) {
         query = query.eq('service_type', filter.service_type);
-    }
-
-    if (filter.library) {
-        query = query.eq('library', filter.library);
     }
 
     if (filter.section) {

@@ -10,13 +10,16 @@
 	import { onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import { UserStore } from '$lib/stores/UserStore';
 	import type { Session } from '@supabase/supabase-js';
-	import { linkRfid } from '../../supabase/LoginReg';
+	import { UserStore } from '$lib/stores/UserStore';
 	import { ServiceStore } from '$lib/stores/ServiceStore';
+	import type { ServiceFilter, UsageLogFilter } from '$lib/dataTypes/EntityFilters';
+	import { linkRfid } from '../../supabase/LoginReg';
 	import { readService } from '../../supabase/Service';
-	import type { ServiceFilter } from '$lib/dataTypes/EntityFilters';
 	import { readServiceType } from '../../supabase/ServiceType';
+	import { readUsageLog } from '../../supabase/UsageLog';
+	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
+	import { readUser } from '../../supabase/User';
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
@@ -35,6 +38,7 @@
 				toast.error(`Error with getting session: ${sessionResponse.error}`);
 			}
 		}
+
 		let user = session?.user;
 		const accessToken: string = readCookie('accessToken');
 		const refreshToken: string = readCookie('refreshToken');
@@ -62,12 +66,36 @@
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
 				goto('./login');
-			}
-
-			$UserStore.authenticated = true;
-			$UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
-			toast.success(`You're now logged in!`);
+			} else {
+                $UserStore.authenticated = true;
+                $UserStore.formData.userName = user?.email ? user?.email.split('@')[0] : '';
+                toast.success(`You're now logged in!`);
+            }			
 		}
+
+        const { users, error } = await readUser({
+            lib_user_id: 0,
+            username: $UserStore.formData.userName,
+            is_enrolled: null,
+            is_active: null,
+            college: '',
+            program: '',
+            user_type: ''
+        })
+        
+        if (error) {
+            toast.error(`Error with reading user information: ${error}`)
+            return;
+        } else if (users != null) {
+            $UserStore.formData.IDNum = users[0].lib_user_id.toString();
+            $UserStore.formData.college = users[0].college;
+            $UserStore.formData.firstName = users[0].first_name;
+            $UserStore.formData.middleName = users[0].middle_initial ? users[0].middle_initial : '';
+            $UserStore.formData.lastName = users[0].last_name;
+            $UserStore.formData.userType = users[0].user_type;
+            $UserStore.formData.college = users[0].college;
+            $UserStore.formData.program = users[0].program ? users[0].program : '';
+        }
 
 		return;
 	}
@@ -95,6 +123,7 @@
 	// ----------------------------------------------------------------------------
 
 	async function checkRfidEnter(event: KeyboardEvent) {
+        // checks once RFID has been entered
 		if (event.key == 'Enter') {
 			linkRfid(rfid, $UserStore.formData.userName);
 		}
@@ -115,6 +144,8 @@
 		// Logs out the user without confirmation and goes to login page
 		endSession();
 		isLoggedOut = true;
+        clearTimeout(logOutReminder);
+        clearTimeout(logOutTimer);
 		goto('./login');
 	}
 
@@ -149,7 +180,7 @@
 	}
 
 	// ----------------------------------------------------------------------------
-	// READ SERVICES
+	// READ SERVICES ANG USAGE LOGS
 	// ----------------------------------------------------------------------------
 
     const serviceFilter: ServiceFilter = {
@@ -161,6 +192,7 @@
 
     async function getServices() {
         // Reads the service types and available services in the current library and section
+        // and puts the returned values in $ServiceStore
         const { serviceTypes, error } = await readServiceType();
 
         if (error) {
@@ -177,7 +209,31 @@
                 $ServiceStore.services = services;
             }
         }
-        console.log($ServiceStore)
+
+        return;
+    }
+
+    const activeUsageLogFilter: UsageLogFilter = {
+        usagelog_id: 0,
+        start: null,
+        end: null,
+        lib_user_id: parseInt($UserStore.formData.IDNum),
+        service_type: '',
+        library: library,
+        section: '',
+    }
+
+    async function getActiveUsageLogs() {
+        // Reads the active usage logs of the user in the current library and section
+        const { usagelogs, error } = await readUsageLog(activeUsageLogFilter);
+
+        if (error) {
+            toast.error(`Error with getting usagelogs: ${error}`);
+            return;
+        } else if (usagelogs != null) {
+            $ActiveUsageLogStore.activeUsageLogs = usagelogs
+        }
+
         return;
     }
 
@@ -186,6 +242,7 @@
     onMount(() => {
         startSession();
         getServices();
+        getActiveUsageLogs();
     });
 </script>
 

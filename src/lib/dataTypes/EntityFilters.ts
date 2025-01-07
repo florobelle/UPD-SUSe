@@ -1,9 +1,9 @@
 export type UserFilter = {
     lib_user_id: number,
+    username: string,
     is_enrolled: boolean | null,
     is_active: boolean | null,
     college: string,
-    unit: string,
     program: string,
     user_type: string
 }
@@ -16,6 +16,7 @@ export type ServiceFilter = {
 }
 
 export type UsageLogFilter = {
+    usagelog_id: number,
     start: Date | null,
     end: Date | null,
     lib_user_id: number,
