@@ -1,6 +1,7 @@
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import type { UsageLogFilter } from "$lib/dataTypes/EntityFilters";
 import type { UsageLogResponse } from "$lib/dataTypes/EntityResponses";
+import type { UsageLog } from "$lib/dataTypes/EntityTypes";
 
 export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogResponse> {
     // Reads and filters the service_engglib table in the database and returns all corresponding entries
@@ -45,4 +46,8 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
         usagelogs: data,
         error: null
     }
+}
+
+export async function createUsageLog(usagelog:UsageLog) {
+    
 }

@@ -13,12 +13,12 @@
 	import type { Session } from '@supabase/supabase-js';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { ServiceStore } from '$lib/stores/ServiceStore';
+	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import type { ServiceFilter, UsageLogFilter } from '$lib/dataTypes/EntityFilters';
 	import { linkRfid } from '../../supabase/LoginReg';
 	import { readService } from '../../supabase/Service';
 	import { readServiceType } from '../../supabase/ServiceType';
 	import { readUsageLog } from '../../supabase/UsageLog';
-	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import { readUser } from '../../supabase/User';
 
 	// ----------------------------------------------------------------------------
@@ -95,35 +95,6 @@
 
 		return;
 	}
-
-    async function getUser(): Promise<boolean> {
-        // gets user information from database
-        const { users, error } = await readUser({
-            lib_user_id: 0,
-            username: $UserStore.formData.userName,
-            is_enrolled: null,
-            is_active: null,
-            college: '',
-            program: '',
-            user_type: ''
-        })
-        
-        if (error) {
-            toast.error(`Error with reading user information: ${error}`)
-            return false;
-        } else if (users != null) {
-            $UserStore.formData.IDNum = users[0].lib_user_id.toString();
-            $UserStore.formData.college = users[0].college;
-            $UserStore.formData.firstName = users[0].first_name;
-            $UserStore.formData.middleName = users[0].middle_initial ? users[0].middle_initial : '';
-            $UserStore.formData.lastName = users[0].last_name;
-            $UserStore.formData.userType = users[0].user_type;
-            $UserStore.formData.college = users[0].college;
-            $UserStore.formData.program = users[0].program ? users[0].program : '';
-        }
-
-        return true;
-    }
 
 	// ----------------------------------------------------------------------------
 	// RFID LINKING
@@ -242,6 +213,35 @@
         }
 
         return;
+    }
+
+    async function getUser(): Promise<boolean> {
+        // gets user information from database
+        const { users, error } = await readUser({
+            lib_user_id: 0,
+            username: $UserStore.formData.userName,
+            is_enrolled: null,
+            is_active: null,
+            college: '',
+            program: '',
+            user_type: ''
+        })
+        
+        if (error) {
+            toast.error(`Error with reading user information: ${error}`)
+            return false;
+        } else if (users != null) {
+            $UserStore.formData.IDNum = users[0].lib_user_id.toString();
+            $UserStore.formData.college = users[0].college;
+            $UserStore.formData.firstName = users[0].first_name;
+            $UserStore.formData.middleName = users[0].middle_initial ? users[0].middle_initial : '';
+            $UserStore.formData.lastName = users[0].last_name;
+            $UserStore.formData.userType = users[0].user_type;
+            $UserStore.formData.college = users[0].college;
+            $UserStore.formData.program = users[0].program ? users[0].program : '';
+        }
+
+        return true;
     }
 
 	// ----------------------------------------------------------------------------
