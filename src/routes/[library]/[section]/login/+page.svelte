@@ -31,7 +31,7 @@
 			user_type: '',
 			college: '',
 			program: '',
-			id: ''
+			lib_user_id: ''
 		}
 	};
 

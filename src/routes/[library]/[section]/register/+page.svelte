@@ -16,19 +16,14 @@
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import PopoverContent from '$lib/components/ui/popover/popover-content.svelte';
 	import Check from 'lucide-svelte/icons/check';
-	import { userTypes } from '$lib/stores/userTypes';
-	import {
-		allPrograms,
-		allColleges,
-		collegeProgramsList,
-		type College
-	} from '$lib/stores/collegePrograms';
+	import { userTypes } from '$lib/stores/UserTypeStore';
 
 	// Login Imports
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { sendOtp } from '../../../supabase/LoginReg';
+	import { allColleges, allPrograms, collegeProgramsList, type College } from '$lib/stores/CollegeProgramStore';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -137,7 +132,7 @@
 			user_type: $formData.user_type,
 			college: $formData.college,
 			program: $formData.program,
-			id: $formData.id
+			lib_user_id: $formData.id
 		};
 
 		if (await sendOtp($formData.username)) {

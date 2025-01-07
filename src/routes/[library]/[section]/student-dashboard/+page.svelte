@@ -195,7 +195,7 @@
         usagelog_id: 0,
         start: null,
         end: null,
-        lib_user_id: parseInt($UserStore.formData.id),
+        lib_user_id: parseInt($UserStore.formData.lib_user_id),
         service_type: '',
         library: library,
         section: '',
@@ -231,7 +231,7 @@
             toast.error(`Error with reading user information: ${error}`)
             return false;
         } else if (users != null) {
-            $UserStore.formData.id = users[0].lib_user_id.toString();
+            $UserStore.formData.lib_user_id = users[0].lib_user_id.toString();
             $UserStore.formData.college = users[0].college;
             $UserStore.formData.first_name = users[0].first_name;
             $UserStore.formData.middle_name = users[0].middle_initial ? users[0].middle_initial : '';
