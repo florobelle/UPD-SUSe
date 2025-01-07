@@ -6,25 +6,20 @@
 
 	// Backend Imports
 	import { page } from '$app/stores';
-	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
-	import { UserStore } from '$lib/stores/UserStore';
-	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import { onMount } from 'svelte';
-	import type { Session } from '@supabase/supabase-js';
 	import { beforeNavigate, goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
+	import { supabaseClient } from '$lib/client/SupabaseClient';
+	import { UserStore } from '$lib/stores/UserStore';
+	import type { Session } from '@supabase/supabase-js';
 	import { linkRfid } from '../../supabase/LoginReg';
-
-	let rfid: string = '';
-	let library: string = $page.url.pathname.split('/')[1];
-    
-	let isLoggedOut: boolean = false;
-	let maxSessionDuration: number = 5; // seconds
-	let logOutReminder = setTimeout(remindLogOut, maxSessionDuration * 1000 - 5000); // user will be reminded of auto logout 5 seconds before
-	let logOutTimer = setTimeout(logOutUser, maxSessionDuration * 1000);
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
 	// ----------------------------------------------------------------------------
+
+	let rfid: string = ''; // rfid linking
+	let library: string = $page.url.pathname.split('/')[1]; // session 
 
 	async function startSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -108,6 +103,11 @@
 	// LOGOUT
 	// ----------------------------------------------------------------------------
 
+	let isLoggedOut: boolean = false;
+	let maxSessionDuration: number = 30; // seconds
+	let logOutReminder = setTimeout(remindLogOut, maxSessionDuration * 1000 - 5000); // user will be reminded of auto logout 5 seconds before
+	let logOutTimer = setTimeout(logOutUser, maxSessionDuration * 1000);
+
 	function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
 		endSession();
@@ -143,6 +143,12 @@
 		});
 		return;
 	}
+
+	// ----------------------------------------------------------------------------
+	// READ SERVICES
+	// ----------------------------------------------------------------------------
+
+
 </script>
 
 <Toaster />

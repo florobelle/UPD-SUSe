@@ -23,3 +23,16 @@ export type Admin = {
     library: string,
     section: string,
 }
+export type Service = {
+    id: number,
+    type: string,
+    name: string,
+    in_use: boolean,
+    library: string,
+    section: string, 
+}
+
+export type ServiceType = {
+    id: number,
+    type: string
+}

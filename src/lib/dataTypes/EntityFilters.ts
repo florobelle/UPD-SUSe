@@ -7,3 +7,10 @@ export type UserFilter = {
     program: string,
     user_type: string
 }
+
+export type ServiceFilter = {
+    type: string,
+    in_use: boolean | null,
+    library: string,
+    section: string, 
+}
