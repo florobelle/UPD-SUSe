@@ -37,8 +37,8 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     // Reads and filters the user_info view in the database and returns all corresponding entries
     let query = supabaseClient.from('user_info').select("*");
 
-    if (filter.id) {
-        query = query.eq('id', filter.id)
+    if (filter.lib_user_id) {
+        query = query.eq('lib_user_id', filter.lib_user_id)
     }
     if (filter.is_enrolled != null) {
         query = query.eq('is_enrolled', filter.is_enrolled)
@@ -78,7 +78,7 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     // Creates user information in the lib_user table.
 
     const { error } = await supabaseClient.from('lib_user').insert({
-        id: userInfo.IDNum,
+        lib_user_id: userInfo.IDNum,
         username: userInfo.userName,
         rfid: userInfo.rfid,
         first_name: userInfo.firstName,

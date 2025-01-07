@@ -14,8 +14,8 @@ export async function readService(filter:ServiceFilter): Promise<ServiceResponse
         query = query.eq('section', filter.section);
     }
 
-    if (filter.type) {
-        query = query.eq('type', filter.type);
+    if (filter.service_type) {
+        query = query.eq('service_type', filter.service_type);
     }
 
     const { data, error } = await query;

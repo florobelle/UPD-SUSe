@@ -153,7 +153,7 @@
 	// ----------------------------------------------------------------------------
 
     const serviceFilter: ServiceFilter = {
-        type: '',
+        service_type: '',
         in_use: false,
         library: library,
         section: '',
