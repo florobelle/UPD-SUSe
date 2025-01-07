@@ -32,7 +32,6 @@ export async function sendOtp(username:string): Promise<boolean> {
 
     if (error) {
         toast.error(`Error with sending OTP: ${error}`);
-        console.log(error)
         return false;
     }   
     

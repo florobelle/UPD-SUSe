@@ -72,31 +72,9 @@
                 toast.success(`You're now logged in!`);
             }			
 		}
-
-        const { users, error } = await readUser({
-            lib_user_id: 0,
-            username: $UserStore.formData.userName,
-            is_enrolled: null,
-            is_active: null,
-            college: '',
-            program: '',
-            user_type: ''
-        })
-        
-        if (error) {
-            toast.error(`Error with reading user information: ${error}`)
-            return;
-        } else if (users != null) {
-            $UserStore.formData.IDNum = users[0].lib_user_id.toString();
-            $UserStore.formData.college = users[0].college;
-            $UserStore.formData.firstName = users[0].first_name;
-            $UserStore.formData.middleName = users[0].middle_initial ? users[0].middle_initial : '';
-            $UserStore.formData.lastName = users[0].last_name;
-            $UserStore.formData.userType = users[0].user_type;
-            $UserStore.formData.college = users[0].college;
-            $UserStore.formData.program = users[0].program ? users[0].program : '';
-        }
-
+        getUser();
+        getActiveUsageLogs();
+        getServices();
 		return;
 	}
 
@@ -118,6 +96,35 @@
 		return;
 	}
 
+    async function getUser(): Promise<boolean> {
+        // gets user information from database
+        const { users, error } = await readUser({
+            lib_user_id: 0,
+            username: $UserStore.formData.userName,
+            is_enrolled: null,
+            is_active: null,
+            college: '',
+            program: '',
+            user_type: ''
+        })
+        
+        if (error) {
+            toast.error(`Error with reading user information: ${error}`)
+            return false;
+        } else if (users != null) {
+            $UserStore.formData.IDNum = users[0].lib_user_id.toString();
+            $UserStore.formData.college = users[0].college;
+            $UserStore.formData.firstName = users[0].first_name;
+            $UserStore.formData.middleName = users[0].middle_initial ? users[0].middle_initial : '';
+            $UserStore.formData.lastName = users[0].last_name;
+            $UserStore.formData.userType = users[0].user_type;
+            $UserStore.formData.college = users[0].college;
+            $UserStore.formData.program = users[0].program ? users[0].program : '';
+        }
+
+        return true;
+    }
+
 	// ----------------------------------------------------------------------------
 	// RFID LINKING
 	// ----------------------------------------------------------------------------
@@ -135,49 +142,49 @@
 	// ----------------------------------------------------------------------------
 
 	let isLoggedOut: boolean = false;
-	const maxSessionDuration: number = 30 * 1000; // seconds * ticks
-    const reminderTime: number = maxSessionDuration - 5000 // reminds 5 seconds before automatic logout
-	let logOutReminder = setTimeout(remindLogOut, reminderTime); // user will be reminded of auto logout 5 seconds before
-	let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
+	// const maxSessionDuration: number = 30 * 1000; // seconds * ticks
+    // const reminderTime: number = maxSessionDuration - 5000 // reminds 5 seconds before automatic logout
+	// let logOutReminder = setTimeout(remindLogOut, reminderTime); // user will be reminded of auto logout 5 seconds before
+	// let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
 
-	function logOutUser() {
+	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
-		endSession();
+		await endSession();
 		isLoggedOut = true;
-        clearTimeout(logOutReminder);
-        clearTimeout(logOutTimer);
+        // clearTimeout(logOutReminder);
+        // clearTimeout(logOutTimer);
 		goto('./login');
 	}
 
-	beforeNavigate(({ cancel }) => {
-		// Confirms user will be logged out if they navigate to other pages
-		if (!isLoggedOut) {
-			if (!confirm('Leaving will logout your current session. Continue?')) {
-				cancel();
-			} else {
-				logOutUser();
-			}
-		}
-		return;
-	});
+	// beforeNavigate(({ cancel }) => {
+	// 	// Confirms user will be logged out if they navigate to other pages
+	// 	if (!isLoggedOut) {
+	// 		if (!confirm('Leaving will logout your current session. Continue?')) {
+	// 			cancel();
+	// 		} else {
+	// 			logOutUser();
+	// 		}
+	// 	}
+	// 	return;
+	// });
 
-	function resetReminderTimer() {
-		// Resets the timer before a user is reminded to be logged out
-		clearTimeout(logOutReminder);
-		logOutReminder = setTimeout(remindLogOut, reminderTime);
+	// function resetReminderTimer() {
+	// 	// Resets the timer before a user is reminded to be logged out
+	// 	clearTimeout(logOutReminder);
+	// 	logOutReminder = setTimeout(remindLogOut, reminderTime);
 
-		clearTimeout(logOutTimer);
-		logOutTimer = setTimeout(logOutUser, maxSessionDuration);
-		return;
-	}
+	// 	clearTimeout(logOutTimer);
+	// 	logOutTimer = setTimeout(logOutUser, maxSessionDuration);
+	// 	return;
+	// }
 
-	function remindLogOut() {
-        // Reminds user of automatic logout
-		toast(`You will be logged out in 5 seconds unless you select a service.`, {
-			icon: '⏳'
-		});
-		return;
-	}
+	// function remindLogOut() {
+    //     // Reminds user of automatic logout
+	// 	toast(`You will be logged out in 5 seconds unless you select a service.`, {
+	// 		icon: '⏳'
+	// 	});
+	// 	return;
+	// }
 
 	// ----------------------------------------------------------------------------
 	// READ SERVICES ANG USAGE LOGS
@@ -239,11 +246,7 @@
 
 	// ----------------------------------------------------------------------------
 
-    onMount(() => {
-        startSession();
-        getServices();
-        getActiveUsageLogs();
-    });
+    onMount(startSession);
 </script>
 
 <Toaster />
@@ -253,7 +256,7 @@
 	<!-- Dashboard -->
 	<div class="flex w-full flex-col gap-8">
 		<div class="flex w-full flex-col gap-4 text-center">
-			<h1 class="text-5xl font-medium" on:mouseover={resetReminderTimer}>You are now logged in</h1>
+			<h1 class="text-5xl font-medium">You are now logged in</h1>
 			<h2 class="text-lg font-normal">Tap your RFID to connect it to your account!</h2>
 		</div>
 		<Input
