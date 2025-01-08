@@ -48,7 +48,10 @@
 		<div class="flex w-full flex-col gap-8">
 			<div class="flex w-full flex-col gap-4 text-center">
 				<h1 class="text-5xl font-medium">Enter the OTP sent to your UP Mail</h1>
-				<h2 class="text-lg font-normal">The One-Time Password has been sent to you UP Mail!</h2>
+				<h2 class="text-lg font-normal">
+					The One-Time Password has been sent to your UP Mail! Please check the spam folder if it
+					doesn't appear in your inbox.
+				</h2>
 			</div>
 			<Input
 				type="text"
