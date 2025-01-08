@@ -9,8 +9,8 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
-	import { loginRfid, sendOtp } from '../../../supabase/LoginReg';
-	import { readUsername } from '../../../supabase/User';
+	import { loginRfid, sendOtp } from '../supabase/LoginReg';
+	import { readUsername } from '../supabase/User';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
@@ -50,7 +50,7 @@
 			if (username) {
 				if (await loginRfid(rfidGlobal, username)) {
 					$UserStore.formData.username = username;
-					goto('./student-dashboard');
+					goto('../student-dashboard');
 				}
 			} else {
 				goto('./register');
@@ -207,7 +207,7 @@
 
 			<!-- Login with UP Mail -->
 			<Button on:click={selectLoginWithUPMail} class="flex w-full gap-2">
-				<img src="../../logos/google.png" class="h-[70%]" alt="Google logo" />
+				<img src="../../../logos/google.png" class="h-[70%]" alt="Google logo" />
 				<p class="text-base">Login with UP Mail</p>
 			</Button>
 		</div>

@@ -22,8 +22,13 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { sendOtp } from '../../../supabase/LoginReg';
-	import { allColleges, allPrograms, collegeProgramsList, type College } from '$lib/stores/CollegeProgramStore';
+	import { sendOtp } from '../supabase/LoginReg';
+	import {
+		allColleges,
+		allPrograms,
+		collegeProgramsList,
+		type College
+	} from '$lib/stores/CollegeProgramStore';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)

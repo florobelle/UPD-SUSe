@@ -4,7 +4,7 @@
 
 	// Backend Imports
 	import { Toaster } from 'svelte-5-french-toast';
-	import { loginOtp } from '../../../supabase/LoginReg';
+	import { loginOtp } from '../supabase/LoginReg';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
