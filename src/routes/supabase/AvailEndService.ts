@@ -10,8 +10,7 @@ export async function availService(serviceID:number, libUserID:number): Promise<
     if (error) {
         return { usagelog: null, error: error.toString() };
     }
-    console.log(data)
-    console.log(new Date(data[0].start).toLocaleString())
+
     return { usagelog: data[0], error: null }
 }
 

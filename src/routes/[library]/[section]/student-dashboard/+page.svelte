@@ -119,49 +119,38 @@
 	// ----------------------------------------------------------------------------
 
 	let isLoggedOut: boolean = false;
-	// const maxSessionDuration: number = 30 * 1000; // seconds * ticks
-    // const reminderTime: number = maxSessionDuration - 5000 // reminds 5 seconds before automatic logout
-	// let logOutReminder = setTimeout(remindLogOut, reminderTime); // user will be reminded of auto logout 5 seconds before
-	// let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
+	const maxSessionDuration: number = 30 * 1000; // seconds * ticks
+	let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
+    toast(`You will be logged out after 30 seconds of inactivity.`, {
+			icon: '⏳'
+		});
 
 	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
 		await endSession();
 		isLoggedOut = true;
-        // clearTimeout(logOutReminder);
-        // clearTimeout(logOutTimer);
 		goto('./login');
 	}
 
-	// beforeNavigate(({ cancel }) => {
-	// 	// Confirms user will be logged out if they navigate to other pages
-	// 	if (!isLoggedOut) {
-	// 		if (!confirm('Leaving will logout your current session. Continue?')) {
-	// 			cancel();
-	// 		} else {
-	// 			logOutUser();
-	// 		}
-	// 	}
-	// 	return;
-	// });
+	beforeNavigate(({ to, cancel }) => {
+		// Confirms user will be logged out if they navigate to other pages
+		if (to?.url == $page.url) {
+            return;
+        } else if (!isLoggedOut) {
+			if (!confirm('Leaving will logout your current session. Continue?')) {
+				cancel();
+			} else {
+				logOutUser();
+			}
+		}
+		return;
+	});
 
-	// function resetReminderTimer() {
-	// 	// Resets the timer before a user is reminded to be logged out
-	// 	clearTimeout(logOutReminder);
-	// 	logOutReminder = setTimeout(remindLogOut, reminderTime);
-
-	// 	clearTimeout(logOutTimer);
-	// 	logOutTimer = setTimeout(logOutUser, maxSessionDuration);
-	// 	return;
-	// }
-
-	// function remindLogOut() {
-    //     // Reminds user of automatic logout
-	// 	toast(`You will be logged out in 5 seconds unless you select a service.`, {
-	// 		icon: '⏳'
-	// 	});
-	// 	return;
-	// }
+    function resetTimer() {
+        // resets timer before user is automatically logged out
+        clearTimeout(logOutTimer); 
+        logOutTimer = setTimeout(logOutUser, maxSessionDuration)
+    }
 
 	// ----------------------------------------------------------------------------
 	// READ SERVICES ANG USAGE LOGS
@@ -262,7 +251,7 @@
 	<!-- Dashboard -->
 	<div class="flex w-full flex-col gap-8">
 		<div class="flex w-full flex-col gap-4 text-center">
-			<h1 class="text-5xl font-medium">You are now logged in</h1>
+			<h1 class="text-5xl font-medium" on:mouseenter={resetTimer}>You are now logged in</h1>
 			<h2 class="text-lg font-normal">Tap your RFID to connect it to your account!</h2>
 		</div>
 		<Input
@@ -275,10 +264,10 @@
 		<Button on:click={logOutUser} class="flex w-full gap-2">
 			<p class="text-base">Logout</p>
 		</Button>
-        <Button on:click={() => {availService(1, parseInt($UserStore.formData.lib_user_id))}} class="flex w-full gap-2">
+        <Button on:click={() => {availService(2, parseInt($UserStore.formData.lib_user_id))}} class="flex w-full gap-2">
 			<p class="text-base">Avail an Umbrella #55</p>
 		</Button>
-        <Button on:click={() => {endService(11, 1, $UserStore.formData.username, false)}} class="flex w-full gap-2">
+        <Button on:click={() => {endService(24, 2, $UserStore.formData.username, false)}} class="flex w-full gap-2">
 			<p class="text-base">End Umbrella #55 Service</p>
 		</Button>
 	</div>
