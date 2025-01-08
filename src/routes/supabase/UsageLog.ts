@@ -1,7 +1,7 @@
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import type { UsageLogFilter } from "$lib/dataTypes/EntityFilters";
 import type { UsageLogResponse } from "$lib/dataTypes/EntityResponses";
-import type { UsageLog } from "$lib/dataTypes/EntityTypes";
+import type { UsageLogDB } from "$lib/dataTypes/EntityTypes";
 
 export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogResponse> {
     // Reads and filters the service_engglib table in the database and returns all corresponding entries
@@ -38,7 +38,7 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
     if (error) {
         return {
             usagelogs: null,
-            error: `Error reading user_info table: ${error}`
+            error: error.toString()
         }
     }
 
@@ -48,6 +48,36 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
     }
 }
 
-export async function createUsageLog(usagelog:UsageLog) {
-    
+export async function createUsageLog(usagelog:UsageLogDB): Promise<UsageLogResponse> {
+    // Creates usage log in the usagelog_engglib table
+    const { error } = await supabaseClient.from('usagelog_engglib').insert(usagelog)
+
+    if (error) {
+        return {
+            usagelogs: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        usagelogs: null,
+        error: null,
+    };
+}
+
+export async function updateUsageLog(usagelog:object, usageLogID: number): Promise<UsageLogResponse> {
+    // Creates usage log in the usagelog_engglib table
+    const { error } = await supabaseClient.from('usagelog_engglib').update(usagelog).eq('usagelog_id', usageLogID)
+
+    if (error) {
+        return {
+            usagelogs: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        usagelogs: null,
+        error: null,
+    };
 }

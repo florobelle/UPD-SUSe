@@ -24,3 +24,5 @@ export type UsageLogResponse = {
     usagelogs: Array<UsageLog> | null
     error: string | null
 }
+
+export type Error = { error: string | null}

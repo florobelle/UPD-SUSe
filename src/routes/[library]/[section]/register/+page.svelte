@@ -24,6 +24,7 @@
 	import { browser } from '$app/environment';
 	import { sendOtp } from '../../../supabase/LoginReg';
 	import { allColleges, allPrograms, collegeProgramsList, type College } from '$lib/stores/CollegeProgramStore';
+	import toast, { Toaster } from 'svelte-5-french-toast';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -135,14 +136,17 @@
 			lib_user_id: $formData.id
 		};
 
-		if (await sendOtp($formData.username)) {
-			goto('./verify-otp');
+        const { error } = await sendOtp($formData.username);
+		if (error) {
+            toast.error(`Error with sending OTP: ${error}`);
 		} else {
-			goto('./login');
+			goto('./verify-otp');
 		}
 		return;
 	}
 </script>
+
+<Toaster/>
 
 <!-- Register -->
 <div class="flex h-[90%] w-[80%] items-center">

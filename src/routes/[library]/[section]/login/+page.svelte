@@ -48,10 +48,14 @@
 			}
 			$UserStore.formData.rfid = rfidGlobal;
 			if (username) {
-				if (await loginRfid(rfidGlobal, username)) {
+                const { error } = await loginRfid(rfidGlobal, username)
+				if (error) {
+                    toast.error(`Error with logging in with RFID: ${error}`);
+                    goto('./login');
+				} else {
 					$UserStore.formData.username = username;
 					goto('./student-dashboard');
-				}
+                }
 			} else {
 				goto('./register');
 			}
@@ -72,9 +76,13 @@
 			}
 			$UserStore.formData.username = usernameGlobal;
 			if (username) {
-				if (await sendOtp(username)) {
+                const { error } = await sendOtp(username);
+				if (error) {
+                    toast.error(`Error with sending OTP: ${error}`);
+                    goto('./login');
+				} else {
 					goto('./verify-otp');
-				}
+                }
 			} else {
 				goto('./register');
 			}

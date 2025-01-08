@@ -49,3 +49,11 @@ export type UsageLog = {
     service_type: string,
     section: string,
 }
+
+export type UsageLogDB = {
+    start: string | null,
+    end: string | null,
+    usagelog_id: number
+    service_id: number,
+    lib_user_id: number,
+}

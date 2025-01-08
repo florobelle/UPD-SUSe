@@ -23,7 +23,7 @@ export async function readService(filter:ServiceFilter): Promise<ServiceResponse
     if (error) {
         return {
             services: null,
-            error: `Error reading user_info table: ${error}`
+            error: error.toString()
         }
     }
 
@@ -31,4 +31,21 @@ export async function readService(filter:ServiceFilter): Promise<ServiceResponse
         services: data,
         error: null
     }
+}
+
+export async function updateService(service:object, serviceID: number): Promise<ServiceResponse> {
+    // Creates usage log in the usagelog_engglib table
+    const { error } = await supabaseClient.from('service_engglib').update(service).eq('service_id', serviceID)
+
+    if (error) {
+        return {
+            services: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        services: null,
+        error: null,
+    };
 }

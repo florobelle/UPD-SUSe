@@ -20,6 +20,7 @@
 	import { readService } from '../../../supabase/Service';
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { readUser } from '../../../supabase/User';
+	import { availService, endService } from '../../../supabase/AvailEndService';
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
@@ -103,7 +104,12 @@
 	async function checkRfidEnter(event: KeyboardEvent) {
         // checks once RFID has been entered
 		if (event.key == 'Enter') {
-			linkRfid(rfid, $UserStore.formData.username);
+			const { error } = await linkRfid(rfid, $UserStore.formData.username);
+            if (error) {
+                toast.error(`Error with linking RFID: ${error}`);
+            } else {
+                toast.success('Successful RFID linking!');
+            }
 		}
 		return;
 	}
@@ -268,6 +274,12 @@
 		/>
 		<Button on:click={logOutUser} class="flex w-full gap-2">
 			<p class="text-base">Logout</p>
+		</Button>
+        <Button on:click={() => {availService(1, parseInt($UserStore.formData.lib_user_id))}} class="flex w-full gap-2">
+			<p class="text-base">Avail an Umbrella #55</p>
+		</Button>
+        <Button on:click={() => {endService(11, 1, $UserStore.formData.username, false)}} class="flex w-full gap-2">
+			<p class="text-base">End Umbrella #55 Service</p>
 		</Button>
 	</div>
 </div>

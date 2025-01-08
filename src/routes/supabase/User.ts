@@ -23,7 +23,7 @@ export async function readUsername(rfid:string='', username:string=''): Promise<
     if (error) {
         return {
             username: '',
-            error: `Error reading public_user_info table: ${error}`
+            error: error.toString()
         }
     }
 
@@ -64,7 +64,7 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: `Error reading user_info table: ${error}`
+            error: error.toString()
         }
     }
 
@@ -95,7 +95,7 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: `Error with creating user ${userInfo.username}: ${error}`
+            error: error.toString()
         }
     }
 
@@ -113,7 +113,7 @@ export async function updateUser(userInfo: object, username: string): Promise<Us
     if (error) {
         return {
             users: null,
-            error: `Error with updating user ${username}: ${error}`
+            error: error.toString()
         }
     }
 
