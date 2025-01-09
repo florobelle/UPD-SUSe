@@ -120,6 +120,7 @@
 
 	async function saveFormData() {
 		// Saves user data in the User Store for inserting in the database once user has been authenticated
+        const loadID: string = toast.loading('Registering...');
 		$UserStore.toRegister = true;
 		$UserStore.formData = {
 			rfid: $UserStore.formData.rfid,
@@ -136,8 +137,10 @@
 
         const { error } = await sendOtp($formData.username);
 		if (error) {
+            toast.dismiss(loadID);
             toast.error(`Error with sending OTP: ${error}`);
 		} else {
+            toast.dismiss(loadID);
 			goto('./verify-otp');
 		}
 		return;

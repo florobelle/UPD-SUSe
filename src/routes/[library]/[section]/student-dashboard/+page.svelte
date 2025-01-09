@@ -51,6 +51,7 @@
 			// if there is currently a session with no cookies, save tokens in cookies
 			createCookie('accessToken', session.access_token, 1, `${library}/${section}`);
 			createCookie('refreshToken', session.refresh_token, 1, `${library}/${section}`);
+			toast.success(`You're now logged in!`);
 		} else if (!session && !accessToken && !refreshToken) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
@@ -129,12 +130,14 @@
 	toast(`You will be logged out after 1 minute of inactivity.`, {
 		icon: '⏳'
 	});
-
+    
 	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
-		await endUserSession();
-		isLoggedOut = true;
-		goto('./login');
+		if ($page.url.pathname == '/engglib1/circulation/student-dashboard') {
+            await endUserSession();
+            isLoggedOut = true;
+            goto('./login');
+        }
 	}
 
 	beforeNavigate(({ to, cancel }) => {
@@ -185,7 +188,6 @@
 				$ServiceStore.services = services;
 			}
 		}
-        console.log($ServiceStore)
 		return;
 	}
 
@@ -207,7 +209,6 @@
 		} else if (usagelogs != null) {
 			$ActiveUsageLogStore.activeUsageLogs = usagelogs;
 		}
-		console.log($ActiveUsageLogStore);
 		return;
 	}
 
@@ -236,7 +237,6 @@
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
 		}
-		console.log($UserStore);
 		return true;
 	}
 
@@ -255,8 +255,44 @@
 			$AdminStore.active_admin1 = admins[0];
 			$AdminStore.active_admin2 = admins[1];
 		}
-		console.log($AdminStore);
 		return true;
+	}
+
+	async function availAndUpdateUsage() {
+		// avails a given service and updates the active usage log store
+		const loadID: string = toast.loading('Availing service...');
+		const { error } = await availService(
+			$ServiceStore.services[0].service_id,
+			parseInt($UserStore.formData.lib_user_id),
+			$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
+			$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
+		);
+
+		if (error) {
+			toast.dismiss(loadID);
+			return;
+		}
+		toast.dismiss(loadID);
+		getActiveUsageLogs();
+        toast.success('Service availed!');
+	}
+
+	async function endAndUpdateUsage() {
+		// ends a given usage log and service then updates the active usage log store
+		const loadID: string = toast.loading('Ending service...');
+		const { error } = await endService(
+			$ActiveUsageLogStore.activeUsageLogs[0].usagelog_id,
+			$ActiveUsageLogStore.activeUsageLogs[0].service_id,
+			$UserStore.formData.username,
+			false
+		);
+        if (error) {
+			toast.dismiss(loadID);
+			return;
+		}
+		toast.dismiss(loadID);
+		getActiveUsageLogs();
+        toast.success('Service ended!');
 	}
 
 	// ----------------------------------------------------------------------------
@@ -284,26 +320,10 @@
 		<Button on:click={logOutUser} class="flex w-full gap-2">
 			<p class="text-base">Logout</p>
 		</Button>
-		<Button
-			on:click={() => {
-				availService(
-					$ServiceStore.services[0].service_id,
-					parseInt($UserStore.formData.lib_user_id),
-					$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
-					$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
-				);
-                getActiveUsageLogs();
-			}}
-			class="flex w-full gap-2"
-		>
+		<Button on:click={availAndUpdateUsage} class="flex w-full gap-2">
 			<p class="text-base">Avail Service</p>
 		</Button>
-		<Button
-			on:click={() => {
-				endService($ActiveUsageLogStore.activeUsageLogs[0].usagelog_id, $ActiveUsageLogStore.activeUsageLogs[0].service_id, $UserStore.formData.username, false);
-			}}
-			class="flex w-full gap-2"
-		>
+		<Button on:click={endAndUpdateUsage} class="flex w-full gap-2">
 			<p class="text-base">End Service</p>
 		</Button>
 	</div>
