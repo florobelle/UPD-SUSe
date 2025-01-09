@@ -1,3 +1,4 @@
+import type { AdminTable } from "$lib/dataTypes/EntityTypes";
 import { writable, type Writable } from "svelte/store";
 
 export type AdminFormData = {
@@ -12,12 +13,16 @@ export type AdminFormData = {
 type AdminInformation = {
     authenticated: boolean,
     toRegister: boolean,
+    active_admin1: AdminTable | null,
+    active_admin2: AdminTable | null,
     formData: AdminFormData
 }
 
 export const AdminStore: Writable<AdminInformation> = writable({
     authenticated: false,
     toRegister: false,
+    active_admin1: null,
+    active_admin2: null,
     formData: {
         admin_id: 0,
         rfid: '',

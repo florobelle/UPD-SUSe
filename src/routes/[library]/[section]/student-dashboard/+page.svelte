@@ -21,13 +21,17 @@
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { readUser } from '../../../supabase/User';
 	import { availService, endService } from '../../../supabase/AvailEndService';
+	import { readAdmin } from '../../../supabase/Admin';
+	import { AdminStore } from '$lib/stores/AdminStore';
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
 	// ----------------------------------------------------------------------------
 
 	let rfid: string = ''; // rfid linking
-	let library: string = $page.url.pathname.split('/')[1]; // session 
+    const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1]; // session 
+    const section: string = routes[2]; // session
 
 	async function startSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -46,8 +50,8 @@
 
 		if (session && !accessToken && !refreshToken) {
 			// if there is currently a session with no cookies, save tokens in cookies
-			createCookie('accessToken', session.access_token, 1, library);
-			createCookie('refreshToken', session.refresh_token, 1, library);
+			createCookie('accessToken', session.access_token, 1, `${library}/${section}`);
+			createCookie('refreshToken', session.refresh_token, 1, `${library}/${section}`);
 		} else if (!session && !accessToken && !refreshToken) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
@@ -68,22 +72,24 @@
 				toast.error(`Error with creating session: ${error}`);
 				goto('./login');
 			} else {
-                $UserStore.authenticated = true;
-                $UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
                 toast.success(`You're now logged in!`);
             }			
 		}
+        $UserStore.authenticated = true;
+        $UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
+
         getUser();
         getActiveUsageLogs();
         getServices();
+        getActiveAdmins();
 		return;
 	}
 
 	async function endSession() {
 		// Ends the user's current session if available.
 		const { error } = await supabaseClient.auth.signOut();
-		deleteCookie('accessToken', library);
-		deleteCookie('refreshToken', library);
+		deleteCookie('accessToken', `${library}/${section}`);
+		deleteCookie('refreshToken', `${library}/${section}`);
 
 		$UserStore.authenticated = false;
 		$UserStore.formData.username = '';
@@ -159,8 +165,8 @@
     const serviceFilter: ServiceFilter = {
         service_type: '',
         in_use: false,
-        library: library,
-        section: '',
+        library,
+        section,
     }
 
     async function getServices() {
@@ -182,7 +188,6 @@
                 $ServiceStore.services = services;
             }
         }
-
         return;
     }
 
@@ -192,8 +197,8 @@
         end: null,
         lib_user_id: parseInt($UserStore.formData.lib_user_id),
         service_type: '',
-        library: library,
-        section: '',
+        library,
+        section,
     }
 
     async function getActiveUsageLogs() {
@@ -206,7 +211,7 @@
         } else if (usagelogs != null) {
             $ActiveUsageLogStore.activeUsageLogs = usagelogs
         }
-
+        console.log($ActiveUsageLogStore)
         return;
     }
 
@@ -235,7 +240,26 @@
             $UserStore.formData.college = users[0].college;
             $UserStore.formData.program = users[0].program ? users[0].program : '';
         }
+        console.log($UserStore)
+        return true;
+    }
 
+    async function getActiveAdmins() {
+        // gets two active admins from database
+        const { admins, error } = await readAdmin({
+            is_active: true,
+            library,
+            section,
+        })
+        
+        if (error) {
+            toast.error(`Error with reading user information: ${error}`)
+            return false;
+        } else if (admins != null) {
+            $AdminStore.active_admin1 = admins[0];
+            $AdminStore.active_admin2 = admins[1];
+        }
+        console.log($AdminStore)
         return true;
     }
 
