@@ -95,7 +95,7 @@
 
 	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' || rfidGlobal.length == 10) {
 			checkRfid();
 		}
 	}
