@@ -14,7 +14,7 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import { ServiceStore } from '$lib/stores/ServiceStore';
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
-	import type { ServiceFilter, UsageLogFilter } from '$lib/dataTypes/EntityFilters';
+	import { AdminStore } from '$lib/stores/AdminStore';
 	import { linkRfid } from '../../../supabase/LoginReg';
 	import { readServiceType } from '../../../supabase/ServiceType';
 	import { readService } from '../../../supabase/Service';
@@ -22,18 +22,17 @@
 	import { readUser } from '../../../supabase/User';
 	import { availService, endService } from '../../../supabase/AvailEndService';
 	import { readAdmin } from '../../../supabase/Admin';
-	import { AdminStore } from '$lib/stores/AdminStore';
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
 	// ----------------------------------------------------------------------------
 
 	let rfid: string = ''; // rfid linking
-    const routes: Array<string> = $page.url.pathname.split('/');
-	const library: string = routes[1]; // session 
-    const section: string = routes[2]; // session
+	const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1]; // session
+	const section: string = routes[2]; // session
 
-	async function startSession(session: Session | null = null) {
+	async function startUserSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
 		if (!session) {
 			const sessionResponse = await supabaseClient.auth.getSession();
@@ -72,20 +71,20 @@
 				toast.error(`Error with creating session: ${error}`);
 				goto('./login');
 			} else {
-                toast.success(`You're now logged in!`);
-            }			
+				toast.success(`You're now logged in!`);
+			}
 		}
-        $UserStore.authenticated = true;
-        $UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
+		$UserStore.authenticated = true;
+		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
 
-        getUser();
-        getActiveUsageLogs();
-        getServices();
-        getActiveAdmins();
+		getUser();
+		getActiveUsageLogs();
+		getServices();
+		getActiveAdmins();
 		return;
 	}
 
-	async function endSession() {
+	async function endUserSession() {
 		// Ends the user's current session if available.
 		const { error } = await supabaseClient.auth.signOut();
 		deleteCookie('accessToken', `${library}/${section}`);
@@ -108,14 +107,14 @@
 	// ----------------------------------------------------------------------------
 
 	async function checkRfidEnter(event: KeyboardEvent) {
-        // checks once RFID has been entered
+		// checks once RFID has been entered
 		if (event.key == 'Enter') {
 			const { error } = await linkRfid(rfid, $UserStore.formData.username);
-            if (error) {
-                toast.error(`Error with linking RFID: ${error}`);
-            } else {
-                toast.success('Successful RFID linking!');
-            }
+			if (error) {
+				toast.error(`Error with linking RFID: ${error}`);
+			} else {
+				toast.success('Successful RFID linking!');
+			}
 		}
 		return;
 	}
@@ -125,15 +124,15 @@
 	// ----------------------------------------------------------------------------
 
 	let isLoggedOut: boolean = false;
-	const maxSessionDuration: number = 30 * 1000; // seconds * ticks
+	const maxSessionDuration: number = 60 * 1000; // seconds * ticks
 	let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
-    toast(`You will be logged out after 30 seconds of inactivity.`, {
-			icon: '⏳'
-		});
+	toast(`You will be logged out after 1 minute of inactivity.`, {
+		icon: '⏳'
+	});
 
 	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
-		await endSession();
+		await endUserSession();
 		isLoggedOut = true;
 		goto('./login');
 	}
@@ -141,8 +140,8 @@
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
 		if (to?.url == $page.url) {
-            return;
-        } else if (!isLoggedOut) {
+			return;
+		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
 				cancel();
 			} else {
@@ -152,120 +151,117 @@
 		return;
 	});
 
-    function resetTimer() {
-        // resets timer before user is automatically logged out
-        clearTimeout(logOutTimer); 
-        logOutTimer = setTimeout(logOutUser, maxSessionDuration)
-    }
+	function resetTimer() {
+		// resets timer before user is automatically logged out
+		clearTimeout(logOutTimer);
+		logOutTimer = setTimeout(logOutUser, maxSessionDuration);
+	}
 
 	// ----------------------------------------------------------------------------
 	// READ SERVICES ANG USAGE LOGS
 	// ----------------------------------------------------------------------------
 
-    const serviceFilter: ServiceFilter = {
-        service_type: '',
-        in_use: false,
-        library,
-        section,
-    }
+	async function getServices() {
+		// Reads the service types and available services in the current library and section
+		// and puts the returned values in $ServiceStore
+		const { serviceTypes, error } = await readServiceType();
 
-    async function getServices() {
-        // Reads the service types and available services in the current library and section
-        // and puts the returned values in $ServiceStore
-        const { serviceTypes, error } = await readServiceType();
+		if (error) {
+			toast.error(`Error with getting service types: ${error}`);
+			return;
+		} else if (serviceTypes != null) {
+			$ServiceStore.serviceTypes = serviceTypes;
+			const { services, error } = await readService({
+				service_type: '',
+				in_use: false,
+				library,
+				section
+			});
 
-        if (error) {
-            toast.error(`Error with getting service types: ${error}`);
-            return;
-        } else if (serviceTypes != null) {
-            $ServiceStore.serviceTypes = serviceTypes
-            const { services, error } = await readService(serviceFilter);
+			if (error) {
+				toast.error(`Error with getting services: ${error}`);
+				return;
+			} else if (services != null) {
+				$ServiceStore.services = services;
+			}
+		}
+        console.log($ServiceStore)
+		return;
+	}
 
-            if (error) {
-                toast.error(`Error with getting services: ${error}`);
-                return;
-            } else if (services != null) {
-                $ServiceStore.services = services;
-            }
-        }
-        return;
-    }
+	async function getActiveUsageLogs() {
+		// Reads the active usage logs of the user in the current library and section
+		const { usagelogs, error } = await readUsageLog({
+			usagelog_id: 0,
+			start: null,
+			end: null,
+			lib_user_id: parseInt($UserStore.formData.lib_user_id),
+			service_type: '',
+			library,
+			section
+		});
 
-    const activeUsageLogFilter: UsageLogFilter = {
-        usagelog_id: 0,
-        start: null,
-        end: null,
-        lib_user_id: parseInt($UserStore.formData.lib_user_id),
-        service_type: '',
-        library,
-        section,
-    }
+		if (error) {
+			toast.error(`Error with getting usagelogs: ${error}`);
+			return;
+		} else if (usagelogs != null) {
+			$ActiveUsageLogStore.activeUsageLogs = usagelogs;
+		}
+		console.log($ActiveUsageLogStore);
+		return;
+	}
 
-    async function getActiveUsageLogs() {
-        // Reads the active usage logs of the user in the current library and section
-        const { usagelogs, error } = await readUsageLog(activeUsageLogFilter);
+	async function getUser(): Promise<boolean> {
+		// gets user information from database
+		const { users, error } = await readUser({
+			lib_user_id: 0,
+			username: $UserStore.formData.username,
+			is_enrolled: null,
+			is_active: null,
+			college: '',
+			program: '',
+			user_type: ''
+		});
 
-        if (error) {
-            toast.error(`Error with getting usagelogs: ${error}`);
-            return;
-        } else if (usagelogs != null) {
-            $ActiveUsageLogStore.activeUsageLogs = usagelogs
-        }
-        console.log($ActiveUsageLogStore)
-        return;
-    }
+		if (error) {
+			toast.error(`Error with reading user information: ${error}`);
+			return false;
+		} else if (users != null) {
+			$UserStore.formData.lib_user_id = users[0].lib_user_id.toString();
+			$UserStore.formData.college = users[0].college;
+			$UserStore.formData.first_name = users[0].first_name;
+			$UserStore.formData.middle_name = users[0].middle_initial ? users[0].middle_initial : '';
+			$UserStore.formData.last_name = users[0].last_name;
+			$UserStore.formData.user_type = users[0].user_type;
+			$UserStore.formData.college = users[0].college;
+			$UserStore.formData.program = users[0].program ? users[0].program : '';
+		}
+		console.log($UserStore);
+		return true;
+	}
 
-    async function getUser(): Promise<boolean> {
-        // gets user information from database
-        const { users, error } = await readUser({
-            lib_user_id: 0,
-            username: $UserStore.formData.username,
-            is_enrolled: null,
-            is_active: null,
-            college: '',
-            program: '',
-            user_type: ''
-        })
-        
-        if (error) {
-            toast.error(`Error with reading user information: ${error}`)
-            return false;
-        } else if (users != null) {
-            $UserStore.formData.lib_user_id = users[0].lib_user_id.toString();
-            $UserStore.formData.college = users[0].college;
-            $UserStore.formData.first_name = users[0].first_name;
-            $UserStore.formData.middle_name = users[0].middle_initial ? users[0].middle_initial : '';
-            $UserStore.formData.last_name = users[0].last_name;
-            $UserStore.formData.user_type = users[0].user_type;
-            $UserStore.formData.college = users[0].college;
-            $UserStore.formData.program = users[0].program ? users[0].program : '';
-        }
-        console.log($UserStore)
-        return true;
-    }
+	async function getActiveAdmins() {
+		// gets two active admins from database
+		const { admins, error } = await readAdmin({
+			is_active: true,
+			library,
+			section
+		});
 
-    async function getActiveAdmins() {
-        // gets two active admins from database
-        const { admins, error } = await readAdmin({
-            is_active: true,
-            library,
-            section,
-        })
-        
-        if (error) {
-            toast.error(`Error with reading user information: ${error}`)
-            return false;
-        } else if (admins != null) {
-            $AdminStore.active_admin1 = admins[0];
-            $AdminStore.active_admin2 = admins[1];
-        }
-        console.log($AdminStore)
-        return true;
-    }
+		if (error) {
+			toast.error(`Error with reading user information: ${error}`);
+			return false;
+		} else if (admins != null) {
+			$AdminStore.active_admin1 = admins[0];
+			$AdminStore.active_admin2 = admins[1];
+		}
+		console.log($AdminStore);
+		return true;
+	}
 
 	// ----------------------------------------------------------------------------
 
-    onMount(startSession);
+	onMount(startUserSession);
 </script>
 
 <Toaster />
@@ -288,11 +284,27 @@
 		<Button on:click={logOutUser} class="flex w-full gap-2">
 			<p class="text-base">Logout</p>
 		</Button>
-        <Button on:click={() => {availService(2, parseInt($UserStore.formData.lib_user_id), 1, null)}} class="flex w-full gap-2">
-			<p class="text-base">Avail an Umbrella #55</p>
+		<Button
+			on:click={() => {
+				availService(
+					$ServiceStore.services[0].service_id,
+					parseInt($UserStore.formData.lib_user_id),
+					$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
+					$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
+				);
+                getActiveUsageLogs();
+			}}
+			class="flex w-full gap-2"
+		>
+			<p class="text-base">Avail Service</p>
 		</Button>
-        <Button on:click={() => {endService(24, 2, $UserStore.formData.username, false)}} class="flex w-full gap-2">
-			<p class="text-base">End Umbrella #55 Service</p>
+		<Button
+			on:click={() => {
+				endService($ActiveUsageLogStore.activeUsageLogs[0].usagelog_id, $ActiveUsageLogStore.activeUsageLogs[0].service_id, $UserStore.formData.username, false);
+			}}
+			class="flex w-full gap-2"
+		>
+			<p class="text-base">End Service</p>
 		</Button>
 	</div>
 </div>

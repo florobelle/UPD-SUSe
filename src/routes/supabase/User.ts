@@ -80,9 +80,9 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     const { error } = await supabaseClient.from('lib_user').insert({
         lib_user_id: userInfo.lib_user_id,
         username: userInfo.username,
-        rfid: userInfo.rfid,
+        rfid: userInfo.rfid ? userInfo.rfid : null,
         first_name: userInfo.first_name,
-        middle_initial: userInfo.middle_name,
+        middle_initial: userInfo.middle_name ? userInfo.middle_name : null,
         last_name: userInfo.last_name,
         phone_number: userInfo.phone_number,
         is_enrolled: false,
