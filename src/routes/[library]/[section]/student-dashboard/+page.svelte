@@ -1,273 +1,83 @@
 <script lang="ts">
 	// UI Imports
-	import { Input } from '$lib/components/ui/input';
-	import Button from '$lib/components/ui/button/button.svelte';
 	import toast, { Toaster } from 'svelte-5-french-toast';
+	import ServiceCard from '$lib/components/ServiceCard.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
+	import * as Dialog from '$lib/components/ui/dialog/index';
+	import * as Select from '$lib/components/ui/select/index';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { services } from '$lib/components/UIconfig/serviceConfig';
+	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
+	import Label from '$lib/components/ui/label/label.svelte';
 
-	// Backend Imports
-	import { page } from '$app/stores';
-	import { beforeNavigate, goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
-	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import type { Session } from '@supabase/supabase-js';
-	import { UserStore } from '$lib/stores/UserStore';
-	import { ServiceStore } from '$lib/stores/ServiceStore';
-	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
-	import type { ServiceFilter, UsageLogFilter } from '$lib/dataTypes/EntityFilters';
-	import { linkRfid } from '../auth/supabase/LoginReg';
-	import { readServiceType } from '../auth/supabase/ServiceType';
-	import { readService } from '../auth/supabase/Service';
-	import { readUsageLog } from '../auth/supabase/UsageLog';
-	import { readUser } from '../auth/supabase/User';
+	let serviceSelected = '';
+	let dialogOpen: Record<number, boolean> = {};
 
-	// ----------------------------------------------------------------------------
-	// SESSION FUNCTIONS
-	// ----------------------------------------------------------------------------
-
-	let rfid: string = ''; // rfid linking
-	let library: string = $page.url.pathname.split('/')[1]; // session
-
-	async function startSession(session: Session | null = null) {
-		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
-		if (!session) {
-			const sessionResponse = await supabaseClient.auth.getSession();
-			session = sessionResponse.data.session;
-
-			if (sessionResponse.error) {
-				toast.error(`Error with getting session: ${sessionResponse.error}`);
-			}
-		}
-
-		let user = session?.user;
-		const accessToken: string = readCookie('accessToken');
-		const refreshToken: string = readCookie('refreshToken');
-
-		if (session && !accessToken && !refreshToken) {
-			// if there is currently a session with no cookies, save tokens in cookies
-			createCookie('accessToken', session.access_token, 1, library);
-			createCookie('refreshToken', session.refresh_token, 1, library);
-		} else if (!session && !accessToken && !refreshToken) {
-			// if there is no session or tokens saved, go back to login
-			toast.error('Please login first.');
-			isLoggedOut = true;
-			goto('./login');
-		} else if (accessToken && refreshToken) {
-			// if there is no current session, start one with the saved tokens
-			const {
-				data: { session },
-				error
-			} = await supabaseClient.auth.setSession({
-				access_token: accessToken,
-				refresh_token: refreshToken
-			});
-			user = session?.user;
-
-			if (error) {
-				toast.error(`Error with creating session: ${error}`);
-				goto('./login');
-			} else {
-				$UserStore.authenticated = true;
-				$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
-				toast.success(`You're now logged in!`);
-			}
-		}
-		getUser();
-		getActiveUsageLogs();
-		getServices();
+	function selectService(serviceName: string) {
+		serviceSelected = serviceName;
 		return;
 	}
 
-	async function endSession() {
-		// Ends the user's current session if available.
-		const { error } = await supabaseClient.auth.signOut();
-		deleteCookie('accessToken', library);
-		deleteCookie('refreshToken', library);
+	function startService(serviceName: string, serviceIndex: number) {
+		console.log(`Service started: ${serviceName}`);
 
-		$UserStore.authenticated = false;
-		$UserStore.formData.username = '';
-
-		if (error) {
-			toast.error(`Error with ending session: ${error}`);
-		} else {
-			toast.success('Successfull end of session.');
-		}
-
-		return;
+		dialogOpen[serviceIndex] = false;
 	}
-
-	// ----------------------------------------------------------------------------
-	// RFID LINKING
-	// ----------------------------------------------------------------------------
-
-	async function checkRfidEnter(event: KeyboardEvent) {
-		// checks once RFID has been entered
-		if (event.key == 'Enter') {
-			linkRfid(rfid, $UserStore.formData.username);
-		}
-		return;
-	}
-
-	// ----------------------------------------------------------------------------
-	// LOGOUT
-	// ----------------------------------------------------------------------------
-
-	let isLoggedOut: boolean = false;
-	// const maxSessionDuration: number = 30 * 1000; // seconds * ticks
-	// const reminderTime: number = maxSessionDuration - 5000 // reminds 5 seconds before automatic logout
-	// let logOutReminder = setTimeout(remindLogOut, reminderTime); // user will be reminded of auto logout 5 seconds before
-	// let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
-
-	async function logOutUser() {
-		// Logs out the user without confirmation and goes to login page
-		await endSession();
-		isLoggedOut = true;
-		// clearTimeout(logOutReminder);
-		// clearTimeout(logOutTimer);
-		goto('./login');
-	}
-
-	// beforeNavigate(({ cancel }) => {
-	// 	// Confirms user will be logged out if they navigate to other pages
-	// 	if (!isLoggedOut) {
-	// 		if (!confirm('Leaving will logout your current session. Continue?')) {
-	// 			cancel();
-	// 		} else {
-	// 			logOutUser();
-	// 		}
-	// 	}
-	// 	return;
-	// });
-
-	// function resetReminderTimer() {
-	// 	// Resets the timer before a user is reminded to be logged out
-	// 	clearTimeout(logOutReminder);
-	// 	logOutReminder = setTimeout(remindLogOut, reminderTime);
-
-	// 	clearTimeout(logOutTimer);
-	// 	logOutTimer = setTimeout(logOutUser, maxSessionDuration);
-	// 	return;
-	// }
-
-	// function remindLogOut() {
-	//     // Reminds user of automatic logout
-	// 	toast(`You will be logged out in 5 seconds unless you select a service.`, {
-	// 		icon: '⏳'
-	// 	});
-	// 	return;
-	// }
-
-	// ----------------------------------------------------------------------------
-	// READ SERVICES ANG USAGE LOGS
-	// ----------------------------------------------------------------------------
-
-	const serviceFilter: ServiceFilter = {
-		service_type: '',
-		in_use: false,
-		library: library,
-		section: ''
-	};
-
-	async function getServices() {
-		// Reads the service types and available services in the current library and section
-		// and puts the returned values in $ServiceStore
-		const { serviceTypes, error } = await readServiceType();
-
-		if (error) {
-			toast.error(`Error with getting service types: ${error}`);
-			return;
-		} else if (serviceTypes != null) {
-			$ServiceStore.serviceTypes = serviceTypes;
-			const { services, error } = await readService(serviceFilter);
-
-			if (error) {
-				toast.error(`Error with getting services: ${error}`);
-				return;
-			} else if (services != null) {
-				$ServiceStore.services = services;
-			}
-		}
-
-		return;
-	}
-
-	const activeUsageLogFilter: UsageLogFilter = {
-		usagelog_id: 0,
-		start: null,
-		end: null,
-		lib_user_id: parseInt($UserStore.formData.lib_user_id),
-		service_type: '',
-		library: library,
-		section: ''
-	};
-
-	async function getActiveUsageLogs() {
-		// Reads the active usage logs of the user in the current library and section
-		const { usagelogs, error } = await readUsageLog(activeUsageLogFilter);
-
-		if (error) {
-			toast.error(`Error with getting usagelogs: ${error}`);
-			return;
-		} else if (usagelogs != null) {
-			$ActiveUsageLogStore.activeUsageLogs = usagelogs;
-		}
-
-		return;
-	}
-
-	async function getUser(): Promise<boolean> {
-		// gets user information from database
-		const { users, error } = await readUser({
-			lib_user_id: 0,
-			username: $UserStore.formData.username,
-			is_enrolled: null,
-			is_active: null,
-			college: '',
-			program: '',
-			user_type: ''
-		});
-
-		if (error) {
-			toast.error(`Error with reading user information: ${error}`);
-			return false;
-		} else if (users != null) {
-			$UserStore.formData.lib_user_id = users[0].lib_user_id.toString();
-			$UserStore.formData.college = users[0].college;
-			$UserStore.formData.first_name = users[0].first_name;
-			$UserStore.formData.middle_name = users[0].middle_initial ? users[0].middle_initial : '';
-			$UserStore.formData.last_name = users[0].last_name;
-			$UserStore.formData.user_type = users[0].user_type;
-			$UserStore.formData.college = users[0].college;
-			$UserStore.formData.program = users[0].program ? users[0].program : '';
-		}
-
-		return true;
-	}
-
-	// ----------------------------------------------------------------------------
-
-	onMount(startSession);
 </script>
 
 <Toaster />
 
-<!-- Select library and section to proceed to enable the website -->
-<div class="flex flex-col items-center">
-	<!-- Dashboard -->
-	<div class="flex w-full flex-col gap-8">
-		<div class="flex w-full flex-col gap-4 text-center">
-			<h1 class="text-5xl font-medium">You are now logged in</h1>
-			<h2 class="text-lg font-normal">Tap your RFID to connect it to your account!</h2>
-		</div>
-		<Input
-			type="text"
-			bind:value={rfid}
-			on:keyup={checkRfidEnter}
-			placeholder="••••••••••"
-			class="max-w-full text-center text-base"
-		/>
-		<Button on:click={logOutUser} class="flex w-full gap-2">
-			<p class="text-base">Logout</p>
-		</Button>
+<div class="flex h-full w-full flex-col gap-10 p-20">
+	<div class="flex w-full flex-col gap-4">
+		<h1 class="text-3xl font-medium">Welcome to Engglib II, Allaine!</h1>
+		<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
+	</div>
+
+	<div class="grid grid-cols-4 gap-8">
+		{#each services as service, index}
+			<Dialog.Root bind:open={dialogOpen[index]}>
+				<Dialog.Trigger class="m-0 w-full p-0">
+					<ServiceCard
+						selectService={() => selectService(service.serviceName)}
+						serviceName={service.serviceName}
+						serviceImgSrc={service.serviceImgSrc}
+					/>
+				</Dialog.Trigger>
+				<Dialog.Content>
+					<Dialog.Header>
+						<Dialog.Title>Avail {service.serviceName}</Dialog.Title>
+						<Dialog.Description>Please select the correct details!</Dialog.Description>
+					</Dialog.Header>
+					{#each serviceForms[service.serviceID] as serviceInput}
+						{#if serviceInput.type == 'input'}
+							<Label for={serviceInput.label}>{serviceInput.label}</Label>
+							<Input id="name" placeholder={serviceInput.label} />
+						{/if}
+						{#if serviceInput.type == 'select'}
+							<Label for={serviceInput.label}>{serviceInput.label}</Label>
+							<Select.Root portal={null}>
+								<Select.Trigger>
+									<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+								</Select.Trigger>
+								<Select.Content>
+									<Select.Group>
+										{#each serviceInput.options as option}
+											<Select.Item value={option.value} label={option.label}
+												>{option.label}</Select.Item
+											>
+										{/each}
+									</Select.Group>
+								</Select.Content>
+								<Select.Input name="favoriteFruit" />
+							</Select.Root>
+						{/if}
+					{/each}
+
+					<Dialog.Footer>
+						<Button on:click={() => startService(service.serviceName, index)}>Avail</Button>
+					</Dialog.Footer>
+				</Dialog.Content>
+			</Dialog.Root>
+		{/each}
 	</div>
 </div>
