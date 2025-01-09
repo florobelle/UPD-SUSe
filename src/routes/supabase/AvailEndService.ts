@@ -1,11 +1,16 @@
 import type { Error } from "$lib/dataTypes/EntityResponses";
 import { supabaseClient } from "$lib/client/SupabaseClient";
-import type { UsageLogDB } from "$lib/dataTypes/EntityTypes";
+import type { UsageLogTable } from "$lib/dataTypes/EntityTypes";
 import { updateUser } from "./User";
 
-export async function availService(serviceID:number, libUserID:number): Promise<{usagelog:UsageLogDB|null, error:string|null}> {
+export async function availService(serviceID:number, libUserID:number, adminID1:number, adminID2:number|null): Promise<{usagelog:UsageLogTable|null, error:string|null}> {
     // avails a service by creating a usage log, updating a service to in use, and updating the user to active
-    const { data, error } = await supabaseClient.rpc('avail_service', { service: serviceID, lib_user: libUserID });
+    const { data, error } = await supabaseClient.rpc('avail_service', {
+        service: serviceID, 
+        lib_user: libUserID,
+        admin_id1: adminID1,
+        admin_id2: adminID2
+    });
 
     if (error) {
         return { usagelog: null, error: error.toString() };

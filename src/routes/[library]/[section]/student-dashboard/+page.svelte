@@ -264,7 +264,7 @@
 		<Button on:click={logOutUser} class="flex w-full gap-2">
 			<p class="text-base">Logout</p>
 		</Button>
-        <Button on:click={() => {availService(2, parseInt($UserStore.formData.lib_user_id))}} class="flex w-full gap-2">
+        <Button on:click={() => {availService(2, parseInt($UserStore.formData.lib_user_id), 1, null)}} class="flex w-full gap-2">
 			<p class="text-base">Avail an Umbrella #55</p>
 		</Button>
         <Button on:click={() => {endService(24, 2, $UserStore.formData.username, false)}} class="flex w-full gap-2">

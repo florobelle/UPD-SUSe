@@ -1,4 +1,5 @@
 import { supabaseClient } from "$lib/client/SupabaseClient";
+import type { AdminFilter } from "$lib/dataTypes/EntityFilters";
 import type { AdminResponse } from "$lib/dataTypes/EntityResponses";
 import type { AdminFormData } from "$lib/stores/AdminStore";
 
@@ -28,6 +29,32 @@ export async function readEmail(rfid:string): Promise<Email> {
             email: data.length ? data[0].email : '',
             error: null
         }
+}
+
+export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
+    // reads the admin information in the admin_engglib
+    let query = supabaseClient.from(`public_admin_${filter.library}`).select("*");
+
+    if (filter.is_active != null) {
+        query = query.eq('is_active', filter.is_active)
+    }
+    if (filter.section) {
+        query = query.eq('section', filter.section)
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        return {
+            admins: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        admins: data,
+        error: null,
+    };
 }
 
 export async function createAdmin(adminData:AdminFormData): Promise<AdminResponse> {

@@ -1,4 +1,4 @@
-export type User = {
+export type UserTable = {
     lib_user_id: number,
     rfid: number | null,
     username: string,
@@ -14,7 +14,7 @@ export type User = {
     user_type: string
 }
 
-export type Admin = {
+export type AdminTable = {
     admin_id: number,
     rfid: string,
     nickname: string,
@@ -23,7 +23,7 @@ export type Admin = {
     library: string,
     section: string,
 }
-export type Service = {
+export type ServiceTable = {
     service_id: number,
     service_type: string,
     service: string,
@@ -32,12 +32,12 @@ export type Service = {
     section: string, 
 }
 
-export type ServiceType = {
+export type ServiceTypeTable = {
     service_type_id: number,
     service_type: string
 }
 
-export type UsageLog = {
+export type UsageLogView = {
     usagelog_id: number,
     start: Date | null,
     end: Date | null,
@@ -50,10 +50,12 @@ export type UsageLog = {
     section: string,
 }
 
-export type UsageLogDB = {
+export type UsageLogTable = {
     start: string | null,
     end: string | null,
     usagelog_id: number
     service_id: number,
     lib_user_id: number,
+    admin_id1: number,
+    admin_id2: number,
 }
