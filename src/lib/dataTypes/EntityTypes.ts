@@ -23,12 +23,11 @@ export type AdminTable = {
     library: string,
     section: string,
 }
-export type ServiceTable = {
+export type ServiceView = {
     service_id: number,
     service_type: string,
     service: string,
     in_use: boolean,
-    library: string,
     section: string, 
 }
 
@@ -48,6 +47,8 @@ export type UsageLogView = {
     last_name: string,
     service_type: string,
     section: string,
+    admin_id1: number,
+    admin_id2: number
 }
 
 export type UsageLogTable = {
