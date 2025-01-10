@@ -16,6 +16,7 @@
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
 	import { page } from '$app/stores';
+	export let data;
 
 	let serviceSelected = '';
 	let dialogOpen: Record<number, boolean> = {};
@@ -104,7 +105,9 @@
 
 <div class="flex h-full w-full flex-col gap-10 p-20">
 	<div class="flex w-full flex-col gap-4">
-		<h1 class="text-3xl font-medium">Welcome to Engglib II, Allaine!</h1>
+		<h1 class="text-3xl font-medium">
+			Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
+		</h1>
 		<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
 	</div>
 
