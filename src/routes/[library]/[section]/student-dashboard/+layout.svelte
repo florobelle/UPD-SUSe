@@ -164,8 +164,6 @@
 		logOutTimer = setTimeout(logOutUser, maxSessionDuration);
 		clearInterval(checkInterval);
 
-		toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
-
 		checkInterval = setInterval(() => {
 			remainingTime = Math.max(0, Math.floor(getRemainingTime() / 1000));
 
@@ -189,6 +187,11 @@
 	function getRemainingTime() {
 		const elapsed = Date.now() - startTime;
 		return maxSessionDuration - elapsed;
+	}
+
+	function attachActivityListeners() {
+		const resetEvents = ['mousemove', 'keydown', 'touchstart'];
+		resetEvents.forEach((event) => window.addEventListener(event, resetTimer));
 	}
 
 	// ----------------------------------------------------------------------------
@@ -321,9 +324,11 @@
 	}
 
 	// ----------------------------------------------------------------------------
+	toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
 
 	onMount(() => {
 		startUserSession();
+		attachActivityListeners();
 		startLogOutTimer();
 	});
 </script>
