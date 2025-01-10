@@ -124,7 +124,7 @@
 						<Dialog.Title>Avail {service.service_type}</Dialog.Title>
 						<Dialog.Description>Please select the correct details!</Dialog.Description>
 					</Dialog.Header>
-					{#each serviceForms[service.service_type_id] as serviceInput}
+					{#each serviceForms[service.service_type_id - 1] as serviceInput}
 						{#if serviceInput.type == 'input'}
 							<Label for={serviceInput.label}>{serviceInput.label}</Label>
 							<Input id="name" placeholder={serviceInput.label} />
