@@ -78,7 +78,7 @@
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
 			isLoggedOut = true;
-			goto('./login');
+			goto('./auth/login');
 		} else if (accessToken && refreshToken) {
 			// if there is no current session, start one with the saved tokens
 			const {
@@ -92,7 +92,7 @@
 
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
-				goto('./login');
+				goto('./auth/login');
 			} else {
 				toast.success(`You're now logged in!`);
 			}
@@ -143,15 +143,59 @@
 	}
 
 	// ----------------------------------------------------------------------------
+	// AUTO LOG OUT DIALOG
+	// ----------------------------------------------------------------------------
+
+	import * as Dialog from '$lib/components/ui/dialog';
+	import Button from '$lib/components/ui/button/button.svelte';
+
+	let maxSessionDuration = 60 * 1000; // 10 seconds for testing
+	let remainingTime = Math.floor(maxSessionDuration / 1000);
+	let logOutTimer: NodeJS.Timeout;
+	let checkInterval: NodeJS.Timeout;
+	let openLogoutDialog = false;
+	let startTime = Date.now();
+
+	function startLogOutTimer() {
+		// Reset variables
+		startTime = Date.now();
+		remainingTime = Math.floor(maxSessionDuration / 1000);
+		openLogoutDialog = false;
+		logOutTimer = setTimeout(logOutUser, maxSessionDuration);
+		clearInterval(checkInterval);
+
+		toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
+
+		checkInterval = setInterval(() => {
+			remainingTime = Math.max(0, Math.floor(getRemainingTime() / 1000));
+
+			// Open dialog if there are 10 seconds left
+			if (remainingTime <= 10 && !openLogoutDialog) {
+				openLogoutDialog = true;
+			}
+
+			if (remainingTime <= 0) {
+				clearInterval(checkInterval); // Stop checking when time runs out
+			}
+		}, 1000);
+	}
+
+	function resetTimer() {
+		clearTimeout(logOutTimer);
+		clearInterval(checkInterval);
+		startLogOutTimer();
+	}
+
+	function getRemainingTime() {
+		const elapsed = Date.now() - startTime;
+		return maxSessionDuration - elapsed;
+	}
+
+	// ----------------------------------------------------------------------------
 	// LOGOUT
 	// ----------------------------------------------------------------------------
 
 	let isLoggedOut: boolean = false;
-	const maxSessionDuration: number = 60 * 1000; // seconds * ticks
-	let logOutTimer = setTimeout(logOutUser, maxSessionDuration);
-	toast(`You will be logged out after 1 minute of inactivity.`, {
-		icon: '⏳'
-	});
 
 	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
@@ -175,12 +219,6 @@
 		}
 		return;
 	});
-
-	function resetTimer() {
-		// resets timer before user is automatically logged out
-		clearTimeout(logOutTimer);
-		logOutTimer = setTimeout(logOutUser, maxSessionDuration);
-	}
 
 	// ----------------------------------------------------------------------------
 	// READ SERVICES ANG USAGE LOGS
@@ -284,7 +322,10 @@
 
 	// ----------------------------------------------------------------------------
 
-	onMount(startUserSession);
+	onMount(() => {
+		startUserSession();
+		startLogOutTimer();
+	});
 </script>
 
 <!-- <Input
@@ -318,3 +359,19 @@
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>
+
+<Dialog.Root bind:open={openLogoutDialog}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>You will be logged out!</Dialog.Title>
+			<Dialog.Description>Please select stay to prevent being logged out</Dialog.Description>
+		</Dialog.Header>
+
+		<Dialog.Footer>
+			{#key remainingTime}
+				<Button on:click={resetTimer}>Stay {remainingTime}</Button>
+			{/key}
+			<Button on:click={logOutUser}>Logout</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
