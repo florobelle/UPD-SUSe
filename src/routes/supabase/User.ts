@@ -23,7 +23,7 @@ export async function readUsername(rfid:string='', username:string=''): Promise<
     if (error) {
         return {
             username: '',
-            error: `Error reading public_user_info table: ${error}`
+            error: error.toString()
         }
     }
 
@@ -64,7 +64,7 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: `Error reading user_info table: ${error}`
+            error: error.toString()
         }
     }
 
@@ -80,9 +80,9 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     const { error } = await supabaseClient.from('lib_user').insert({
         lib_user_id: userInfo.lib_user_id,
         username: userInfo.username,
-        rfid: userInfo.rfid,
+        rfid: userInfo.rfid ? userInfo.rfid : null,
         first_name: userInfo.first_name,
-        middle_initial: userInfo.middle_name,
+        middle_initial: userInfo.middle_name ? userInfo.middle_name : null,
         last_name: userInfo.last_name,
         phone_number: userInfo.phone_number,
         is_enrolled: false,
@@ -95,7 +95,7 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: `Error with creating user ${userInfo.username}: ${error}`
+            error: error.toString()
         }
     }
 
@@ -113,7 +113,7 @@ export async function updateUser(userInfo: object, username: string): Promise<Us
     if (error) {
         return {
             users: null,
-            error: `Error with updating user ${username}: ${error}`
+            error: error.toString()
         }
     }
 

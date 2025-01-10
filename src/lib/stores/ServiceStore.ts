@@ -1,9 +1,9 @@
-import type { Service, ServiceType } from "$lib/dataTypes/EntityTypes";
+import type { ServiceView, ServiceTypeTable } from "$lib/dataTypes/EntityTypes";
 import { writable, type Writable } from "svelte/store";
 
 type ServiceInformation = {
-    serviceTypes: Array<ServiceType>,
-    services: Array<Service>
+    serviceTypes: Array<ServiceTypeTable>,
+    services: Array<ServiceView>
 }
 
 export const ServiceStore: Writable<ServiceInformation> = writable({

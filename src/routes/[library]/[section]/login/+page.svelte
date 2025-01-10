@@ -40,19 +40,28 @@
 	async function checkRfid() {
 		if (checkInputValidity('rfid')) {
 			// Check if user is already registered
+			const loadID: string = toast.loading('Logging you in...');
 			const { username, error } = await readUsername(rfidGlobal, '');
 
 			if (error) {
+				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
 			$UserStore.formData.rfid = rfidGlobal;
 			if (username) {
-				if (await loginRfid(rfidGlobal, username)) {
+				const { error } = await loginRfid(rfidGlobal, username);
+				if (error) {
+					toast.dismiss(loadID);
+					toast.error(`Error with logging in with RFID: ${error}`);
+					goto('./login');
+				} else {
+					toast.dismiss(loadID);
 					$UserStore.formData.username = username;
 					goto('./student-dashboard');
 				}
 			} else {
+				toast.dismiss(loadID);
 				goto('./register');
 			}
 		} else {
@@ -65,17 +74,26 @@
 	async function checkUsername() {
 		// Check if user is already registered
 		if (checkInputValidity('UPmail')) {
+			const loadID: string = toast.loading('Logging you in...');
 			const { username, error } = await readUsername('', usernameGlobal);
 
 			if (error) {
+				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 			}
 			$UserStore.formData.username = usernameGlobal;
 			if (username) {
-				if (await sendOtp(username)) {
+				const { error } = await sendOtp(username);
+				if (error) {
+                    toast.dismiss(loadID);
+					toast.error(`Error with sending OTP: ${error}`);
+					goto('./login');
+				} else {
+                    toast.dismiss(loadID);
 					goto('./verify-otp');
 				}
 			} else {
+				toast.dismiss(loadID);
 				goto('./register');
 			}
 		} else {
@@ -87,7 +105,7 @@
 
 	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' || rfidGlobal.length == 10) {
 			checkRfid();
 		}
 	}

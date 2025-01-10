@@ -8,6 +8,12 @@ export type UserFilter = {
     user_type: string
 }
 
+export type AdminFilter = {
+    is_active: boolean,
+    library: string,
+    section: string,
+}
+
 export type ServiceFilter = {
     service_type: string,
     in_use: boolean | null,

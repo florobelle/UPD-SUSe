@@ -8,7 +8,7 @@ export async function readServiceType(): Promise<ServiceTypeResponse> {
     if (error) {
         return {
             serviceTypes: null,
-            error: `Error reading user_info table: ${error}`
+            error: error.toString()
         }
     }
 

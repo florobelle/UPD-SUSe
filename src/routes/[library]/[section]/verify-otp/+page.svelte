@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 
 	// Backend Imports
-	import { Toaster } from 'svelte-5-french-toast';
+	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { loginOtp } from '../../../supabase/LoginReg';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
@@ -20,18 +20,21 @@
 
 	async function checkOtpEnter(event: KeyboardEvent) {
 		// Listens to input in the OTP field
+		const loadID: string = toast.loading('Verifying OTP...');
 		if (event.key == 'Enter') {
-			if (
-				await loginOtp(
+            const { error } = await loginOtp(
 					otp,
 					$UserStore.formData.username,
 					$UserStore.toRegister,
 					$UserStore.formData
 				)
-			) {
-				goto('./student-dashboard');
-			} else {
+			if (error) {
+				toast.dismiss(loadID);
+                toast.error(`Error with verifying OTP: ${error}`)
 				goto('./login');
+			} else {
+				toast.dismiss(loadID);
+				goto('./student-dashboard');
 			}
 		}
 
