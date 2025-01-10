@@ -41,9 +41,11 @@
 		if (checkInputValidity('rfid')) {
 			// Check if user is already registered
 			const loadID: string = toast.loading('Logging you in...');
+			const loadID: string = toast.loading('Logging you in...');
 			const { username, error } = await readUsername(rfidGlobal, '');
 
 			if (error) {
+				toast.dismiss(loadID);
 				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
@@ -57,10 +59,18 @@
 					goto('./login');
 				} else {
 					toast.dismiss(loadID);
+				const { error } = await loginRfid(rfidGlobal, username);
+				if (error) {
+					toast.dismiss(loadID);
+					toast.error(`Error with logging in with RFID: ${error}`);
+					goto('./login');
+				} else {
+					toast.dismiss(loadID);
 					$UserStore.formData.username = username;
 					goto('../student-dashboard');
 				}
 			} else {
+				toast.dismiss(loadID);
 				toast.dismiss(loadID);
 				goto('./register');
 			}
@@ -93,6 +103,7 @@
 					goto('./verify-otp');
 				}
 			} else {
+				toast.dismiss(loadID);
 				toast.dismiss(loadID);
 				goto('./register');
 			}
