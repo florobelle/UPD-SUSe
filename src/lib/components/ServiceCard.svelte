@@ -5,7 +5,7 @@
 		selectService,
 		serviceImgSrc = '../../services/calculator.png',
 		serviceName = 'Calculator',
-		avalableNum = '3',
+		availableNum = 3,
 		selected = false,
 		inUse = false
 	} = $props();
@@ -36,12 +36,12 @@
 				<div class="flex flex-col gap-1">
 					<h2 class={`text-xl font-medium ${inUse ? 'text-white' : ''}`}>{serviceName}</h2>
 					<p class={`text-base ${inUse ? 'text-white' : 'text-[#656565]'}`}>
-						{avalableNum} available
+						{availableNum} available
 					</p>
 				</div>
 
 				{#if !inUse}<div
-						class="once group-hover:animate-spin-once invisible ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-[#656565] group-hover:visible"
+						class="once invisible ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-[#656565] group-hover:visible group-hover:animate-spin-once"
 					>
 						<MoveUpRight></MoveUpRight>
 					</div>

@@ -1,4 +1,5 @@
 import { supabaseClient } from "$lib/client/SupabaseClient";
+import type { AdminFilter } from "$lib/dataTypes/EntityFilters";
 import type { AdminResponse } from "$lib/dataTypes/EntityResponses";
 import type { AdminFormData } from "$lib/stores/AdminStore";
 
@@ -20,7 +21,7 @@ export async function readEmail(rfid:string): Promise<Email> {
         if (error) {
             return {
                 email: '',
-                error: `Error reading admin email: ${error}`
+                error: error.toString()
             }
         }
     
@@ -30,11 +31,37 @@ export async function readEmail(rfid:string): Promise<Email> {
         }
 }
 
+export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
+    // reads the admin information in the admin_engglib
+    let query = supabaseClient.from(`public_admin_${filter.library}`).select("*").limit(2);
+
+    if (filter.is_active != null) {
+        query = query.eq('is_active', filter.is_active)
+    }
+    if (filter.section) {
+        query = query.eq('section', filter.section)
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        return {
+            admins: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        admins: data,
+        error: null,
+    };
+}
+
 export async function createAdmin(adminData:AdminFormData): Promise<AdminResponse> {
     // Creates admin information in the admin_engglib table.
 
     const { error } = await supabaseClient.from('admin_engglib').insert({
-        admin_id: adminData.id,
+        admin_id: adminData.admin_id,
         rfid: adminData.rfid,
         nickname: adminData.nickname,
         email: adminData.email,
@@ -46,7 +73,7 @@ export async function createAdmin(adminData:AdminFormData): Promise<AdminRespons
     if (error) {
         return {
             admins: null,
-            error: `Error with creating user ${adminData.nickname}: ${error}`
+            error: error.toString()
         }
     }
 
@@ -64,7 +91,7 @@ export async function updateAdmin(adminInfo: object, email: string): Promise<Adm
     if (error) {
         return {
             admins: null,
-            error: `Error with updating admin ${email}: ${error}`
+            error: error.toString()
         }
     }
 

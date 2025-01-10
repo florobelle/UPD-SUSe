@@ -10,47 +10,55 @@ export type serviceInput = {
 	variant: 'default' | 'ghost';
 };
 
-export type serviceUI = {
-	serviceName: string;
-	serviceID: number;
-	serviceImgSrc: string;
+export type availableServicesUI = {
+	service_type: string;
+	service_type_id: number;
+	available_number: number;
+	service_img_src: string;
 };
 
-export const services: serviceUI[] = [
+export const services: availableServicesUI[] = [
 	{
-		serviceName: 'Umbrella',
-		serviceID: 1,
-		serviceImgSrc: '../../../services/umbrella.png'
+		service_type: 'Umbrella',
+		service_type_id: 1,
+		available_number: 2,
+		service_img_src: '../../../services/umbrella.png'
 	},
 	{
-		serviceName: 'Reading Glasses',
-		serviceID: 2,
-		serviceImgSrc: '../../../services/glasses.png'
+		service_type: 'Reading Glasses',
+		service_type_id: 2,
+		available_number: 2,
+		service_img_src: '../../../services/glasses.png'
 	},
 	{
-		serviceName: 'Extension Cord',
-		serviceID: 3,
-		serviceImgSrc: '../../../services/extension-cord.png'
+		service_type: 'Extension Cord',
+		service_type_id: 3,
+		available_number: 2,
+		service_img_src: '../../../services/extension-cord.png'
 	},
 	{
-		serviceName: 'Adapter',
-		serviceID: 4,
-		serviceImgSrc: '../../../services/adapter.png'
+		service_type: 'Adapter',
+		service_type_id: 4,
+		available_number: 2,
+		service_img_src: '../../../services/adapter.png'
 	},
 	{
-		serviceName: 'Laptop',
-		serviceID: 5,
-		serviceImgSrc: '../../../services/laptop.png'
+		service_type: 'Laptop',
+		service_type_id: 5,
+		available_number: 2,
+		service_img_src: '../../../services/laptop.png'
 	},
 	{
-		serviceName: 'Calculator',
-		serviceID: 6,
-		serviceImgSrc: '../../../services/calculator.png'
+		service_type: 'Calculator',
+		service_type_id: 6,
+		available_number: 2,
+		service_img_src: '../../../services/calculator.png'
 	},
 	{
-		serviceName: 'Discussion Room',
-		serviceID: 7,
-		serviceImgSrc: '../../../services/discussion-room.png'
+		service_type: 'Discussion Room',
+		service_type_id: 7,
+		available_number: 2,
+		service_img_src: '../../../services/discussion-room.png'
 	}
 ];
 
