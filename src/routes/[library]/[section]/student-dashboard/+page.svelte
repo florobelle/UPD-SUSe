@@ -16,7 +16,7 @@
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
 	import { page } from '$app/stores';
-	export let data;
+	export let data: { libraryName: string };
 
 	let serviceSelected = '';
 	let dialogOpen: Record<number, boolean> = {};
@@ -28,8 +28,77 @@
 
 	function startService(serviceName: string, serviceIndex: number) {
 		console.log(`Service started: ${serviceName}`);
-        dialogOpen[serviceIndex] = false;
+
+		dialogOpen[serviceIndex] = false;
 	}
+
+	// ----------------------------------------------------------------------------
+	// READ SERVICES ANG USAGE LOGS
+	// ----------------------------------------------------------------------------
+
+	const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1]; // session
+	const section: string = routes[2]; // session
+
+	async function getActiveUsageLogs() {
+		// Reads the active usage logs of the user in the current library and section
+		const { usagelogs, error } = await readUsageLog({
+			usagelog_id: 0,
+			start: null,
+			end: null,
+			lib_user_id: parseInt($UserStore.formData.lib_user_id),
+			service_type: '',
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with getting usagelogs: ${error}`);
+			return;
+		} else if (usagelogs != null) {
+			$ActiveUsageLogStore.activeUsageLogs = usagelogs;
+		}
+		return;
+	}
+
+	async function availAndUpdateUsage() {
+		// avails a given service and updates the active usage log store
+		const loadID: string = toast.loading('Availing service...');
+		const { error } = await availService(
+			$ServiceStore.services[0].service_id,
+			parseInt($UserStore.formData.lib_user_id),
+			$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
+			$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
+		);
+
+		if (error) {
+			toast.dismiss(loadID);
+			return;
+		}
+		toast.dismiss(loadID);
+		getActiveUsageLogs();
+		toast.success('Service availed!');
+	}
+
+	async function endAndUpdateUsage() {
+		// ends a given usage log and service then updates the active usage log store
+		const loadID: string = toast.loading('Ending service...');
+		const { error } = await endService(
+			$ActiveUsageLogStore.activeUsageLogs[0].usagelog_id,
+			$ActiveUsageLogStore.activeUsageLogs[0].service_id,
+			$UserStore.formData.username,
+			false
+		);
+		if (error) {
+			toast.dismiss(loadID);
+			return;
+		}
+		toast.dismiss(loadID);
+		getActiveUsageLogs();
+		toast.success('Service ended!');
+	}
+
+	// ----------------------------------------------------------------------------
 </script>
 
 <Toaster />

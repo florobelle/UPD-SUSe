@@ -20,8 +20,8 @@
 
 	async function checkOtpEnter(event: KeyboardEvent) {
 		// Listens to input in the OTP field
-		const loadID: string = toast.loading('Verifying OTP...');
 		if (event.key == 'Enter') {
+            const loadID: string = toast.loading('Verifying OTP...');
 			const { error } = await loginOtp(
 				otp,
 				$UserStore.formData.username,
@@ -34,7 +34,7 @@
 				goto('./login');
 			} else {
 				toast.dismiss(loadID);
-				goto('./student-dashboard');
+				goto('../student-dashboard');
 			}
 		}
 

@@ -4,8 +4,8 @@
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
-	import Nav from '$lib/components/Nav.svelte';
 	import * as Resizable from '$lib/components/ui/resizable/index';
+	import Nav from '$lib/components/Nav.svelte';
 	import { studentRoutes } from '../../../../lib/components/UIconfig/navConfig';
 
 	let defaultLayout = [200, 440, 655];
@@ -92,6 +92,7 @@
 
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
+                isLoggedOut = true;
 				goto('./auth/login');
 			} else {
 				toast.success(`You're now logged in!`);
@@ -104,6 +105,8 @@
 		getActiveUsageLogs();
 		getServices();
 		getActiveAdmins();
+		attachActivityListeners();
+		startLogOutTimer();
 		return;
 	}
 
@@ -328,8 +331,6 @@
 
 	onMount(() => {
 		startUserSession();
-		attachActivityListeners();
-		startLogOutTimer();
 	});
 </script>
 
