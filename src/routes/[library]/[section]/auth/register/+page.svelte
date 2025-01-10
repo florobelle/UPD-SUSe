@@ -22,7 +22,7 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { sendOtp } from '../supabase/LoginReg';
+	import { sendOtp } from '../../../../supabase/LoginReg';
 	import {
 		allColleges,
 		allPrograms,

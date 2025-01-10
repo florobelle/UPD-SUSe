@@ -13,3 +13,7 @@ export { default as Send } from 'lucide-svelte/icons/send';
 export { default as ShoppingCart } from 'lucide-svelte/icons/shopping-cart';
 export { default as Trash2 } from 'lucide-svelte/icons/trash-2';
 export { default as Users } from 'lucide-svelte/icons/users';
+export { default as Info } from 'lucide-svelte/icons/info';
+export { default as PencilRuler } from 'lucide-svelte/icons/pencil-ruler';
+export { default as Logs } from 'lucide-svelte/icons/logs';
+export { default as MessageCircleHeart } from 'lucide-svelte/icons/message-circle-heart';

@@ -13,25 +13,25 @@ export const studentRoutes: Route[] = [
 	{
 		title: 'Library Services',
 		label: '',
-		icon: Icons.Inbox,
+		icon: Icons.PencilRuler,
 		variant: 'default'
 	},
 	{
 		title: 'History',
 		label: '',
-		icon: Icons.File,
+		icon: Icons.Logs,
 		variant: 'ghost'
 	},
 	{
 		title: 'About SUSe',
 		label: '',
-		icon: Icons.Trash2,
+		icon: Icons.Info,
 		variant: 'ghost'
 	},
 	{
 		title: 'Send Feedback',
 		label: '',
-		icon: Icons.Archive,
+		icon: Icons.MessageCircleHeart,
 		variant: 'ghost'
 	}
 ];
