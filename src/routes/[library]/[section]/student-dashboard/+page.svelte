@@ -9,7 +9,7 @@
 	import { services } from '$lib/components/UIconfig/serviceConfig';
 	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
 	import Label from '$lib/components/ui/label/label.svelte';
-    // Backend Imports
+	// Backend Imports
 	import { ServiceStore } from '$lib/stores/ServiceStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { UserStore } from '$lib/stores/UserStore';
@@ -17,6 +17,7 @@
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
 	import { page } from '$app/stores';
+	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 
 	export let data: { libraryName: string };
 
@@ -105,60 +106,62 @@
 
 <Toaster />
 
-<div class="flex h-full w-full flex-col gap-10 p-20">
-	<div class="flex w-full flex-col gap-4">
-		<h1 class="text-3xl font-medium">
-			Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
-		</h1>
-		<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
-	</div>
+<ScrollArea class="h-screen">
+	<div class="flex h-full w-full flex-col gap-10 p-20">
+		<div class="flex w-full flex-col gap-4">
+			<h1 class="text-3xl font-medium">
+				Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
+			</h1>
+			<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
+		</div>
 
-	<div class="grid grid-cols-4 gap-8">
-		{#each services as service, index}
-			<Dialog.Root bind:open={dialogOpen[index]}>
-				<Dialog.Trigger class="m-0 w-full p-0">
-					<ServiceCard
-						selectService={() => selectService(service.service_type)}
-						serviceName={service.service_type}
-						serviceImgSrc={service.service_img_src}
-						availableNum={service.available_number}
-					/>
-				</Dialog.Trigger>
-				<Dialog.Content>
-					<Dialog.Header>
-						<Dialog.Title>Avail {service.service_type}</Dialog.Title>
-						<Dialog.Description>Please select the correct details!</Dialog.Description>
-					</Dialog.Header>
-					{#each serviceForms[service.service_type_id - 1] as serviceInput}
-						{#if serviceInput.type == 'input'}
-							<Label for={serviceInput.label}>{serviceInput.label}</Label>
-							<Input id="name" placeholder={serviceInput.label} />
-						{/if}
-						{#if serviceInput.type == 'select'}
-							<Label for={serviceInput.label}>{serviceInput.label}</Label>
-							<Select.Root portal={null}>
-								<Select.Trigger>
-									<Select.Value placeholder={`Select a ${serviceInput.label}`} />
-								</Select.Trigger>
-								<Select.Content>
-									<Select.Group>
-										{#each serviceInput.options as option}
-											<Select.Item value={option.value} label={option.label}
-												>{option.label}</Select.Item
-											>
-										{/each}
-									</Select.Group>
-								</Select.Content>
-								<Select.Input name="favoriteFruit" />
-							</Select.Root>
-						{/if}
-					{/each}
+		<div class="grid h-full grid-cols-4 gap-8">
+			{#each services as service, index}
+				<Dialog.Root bind:open={dialogOpen[index]}>
+					<Dialog.Trigger class="m-0 h-full w-full p-0">
+						<ServiceCard
+							selectService={() => selectService(service.service_type)}
+							serviceName={service.service_type}
+							serviceImgSrc={service.service_img_src}
+							availableNum={service.available_number}
+						/>
+					</Dialog.Trigger>
+					<Dialog.Content>
+						<Dialog.Header>
+							<Dialog.Title>Avail {service.service_type}</Dialog.Title>
+							<Dialog.Description>Please select the correct details!</Dialog.Description>
+						</Dialog.Header>
+						{#each serviceForms[service.service_type_id - 1] as serviceInput}
+							{#if serviceInput.type == 'input'}
+								<Label for={serviceInput.label}>{serviceInput.label}</Label>
+								<Input id="name" placeholder={serviceInput.label} />
+							{/if}
+							{#if serviceInput.type == 'select'}
+								<Label for={serviceInput.label}>{serviceInput.label}</Label>
+								<Select.Root portal={null}>
+									<Select.Trigger>
+										<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+									</Select.Trigger>
+									<Select.Content>
+										<Select.Group>
+											{#each serviceInput.options as option}
+												<Select.Item value={option.value} label={option.label}
+													>{option.label}</Select.Item
+												>
+											{/each}
+										</Select.Group>
+									</Select.Content>
+									<Select.Input name={serviceInput.label} />
+								</Select.Root>
+							{/if}
+						{/each}
 
-					<Dialog.Footer>
-						<Button on:click={() => startService(service.service_type, index)}>Avail</Button>
-					</Dialog.Footer>
-				</Dialog.Content>
-			</Dialog.Root>
-		{/each}
+						<Dialog.Footer>
+							<Button on:click={() => startService(service.service_type, index)}>Avail</Button>
+						</Dialog.Footer>
+					</Dialog.Content>
+				</Dialog.Root>
+			{/each}
+		</div>
 	</div>
-</div>
+</ScrollArea>

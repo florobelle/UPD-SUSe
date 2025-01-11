@@ -11,7 +11,7 @@
 	} = $props();
 </script>
 
-<button class="h-[300px] w-full text-left" onclick={selectService}>
+<button class="h-full w-full text-left" onclick={selectService}>
 	<div
 		class={`group relative h-full w-full cursor-pointer overflow-hidden rounded-[20px] bg-gradient-to-br from-[#FFA040] to-[#E1E1E1] p-[1px] `}
 	>
@@ -55,7 +55,7 @@
 
 			<!-- IMAGE -->
 			<div class="absolute -bottom-5 -right-5">
-				<img src={serviceImgSrc} class="m-2 h-auto w-[200px]" alt="service" />
+				<img src={serviceImgSrc} class="ml-auto h-auto w-[70%]" alt="service" />
 			</div>
 		</div>
 	</div>

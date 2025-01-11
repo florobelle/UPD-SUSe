@@ -8,7 +8,7 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import { studentRoutes } from '../../../../lib/components/UIconfig/navConfig';
 
-	let defaultLayout = [200, 440, 655];
+	let defaultLayout = [100, 440, 655];
 	let defaultCollapsed = false;
 	let navCollapsedSize: number = 4;
 	let isCollapsed = defaultCollapsed;
@@ -92,7 +92,7 @@
 
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
-                isLoggedOut = true;
+				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
 				toast.success(`You're now logged in!`);
@@ -210,9 +210,9 @@
 			await endUserSession();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-            toast.error('Logout error.');
-            return;
-        }
+			toast.error('Logout error.');
+			return;
+		}
 	}
 
 	// beforeNavigate(({ to, cancel }) => {
@@ -307,7 +307,7 @@
 			$UserStore.formData.user_type = users[0].user_type;
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
-            $UserStore.formData.is_enrolled = users[0].is_enrolled;
+			$UserStore.formData.is_enrolled = users[0].is_enrolled;
 		}
 		return true;
 	}
@@ -345,12 +345,12 @@
 	class="max-w-full text-center text-base"
 /> -->
 
-<div class="hidden h-screen md:block">
+<div class="hidden h-full md:block">
 	<Resizable.PaneGroup
 		on:mouseenter={resetTimer}
 		direction="horizontal"
 		{onLayoutChange}
-		class="h-full items-stretch"
+		class="items-stretch"
 	>
 		<Resizable.Pane
 			defaultSize={defaultLayout[0]}

@@ -32,7 +32,7 @@
 			college: '',
 			program: '',
 			lib_user_id: '',
-            is_enrolled: false
+			is_enrolled: false
 		}
 	};
 
@@ -86,11 +86,11 @@
 			if (username) {
 				const { error } = await sendOtp(username);
 				if (error) {
-                    toast.dismiss(loadID);
+					toast.dismiss(loadID);
 					toast.error(`Error with sending OTP: ${error}`);
 					goto('./login');
 				} else {
-                    toast.dismiss(loadID);
+					toast.dismiss(loadID);
 					goto('./verify-otp');
 				}
 			} else {

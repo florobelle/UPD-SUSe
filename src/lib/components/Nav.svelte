@@ -9,7 +9,7 @@
 
 <div
 	data-collapsed={isCollapsed}
-	class="group flex h-full flex-col gap-4 pt-8 data-[collapsed=true]:pt-8"
+	class="group flex h-screen flex-col gap-4 pt-8 data-[collapsed=true]:pt-8"
 >
 	<nav
 		class="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
