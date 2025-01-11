@@ -9,6 +9,7 @@
 	import { services } from '$lib/components/UIconfig/serviceConfig';
 	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
 	import Label from '$lib/components/ui/label/label.svelte';
+    // Backend Imports
 	import { ServiceStore } from '$lib/stores/ServiceStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { UserStore } from '$lib/stores/UserStore';
@@ -16,6 +17,7 @@
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
 	import { page } from '$app/stores';
+
 	export let data: { libraryName: string };
 
 	let serviceSelected = '';
@@ -27,7 +29,7 @@
 	}
 
 	function startService(serviceName: string, serviceIndex: number) {
-		console.log(`Service started: ${serviceName}`);
+		console.log(`Service started: ${serviceName} ${serviceIndex}`);
 
 		dialogOpen[serviceIndex] = false;
 	}

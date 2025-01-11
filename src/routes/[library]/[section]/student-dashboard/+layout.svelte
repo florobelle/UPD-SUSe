@@ -205,11 +205,14 @@
 
 	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
-		if ($page.url.pathname == '/engglib1/circulation/student-dashboard') {
-			await endUserSession();
+		try {
 			isLoggedOut = true;
+			await endUserSession();
 			goto('./auth/login');
-		}
+		} catch {
+            toast.error('Logout error.');
+            return;
+        }
 	}
 
 	beforeNavigate(({ to, cancel }) => {
