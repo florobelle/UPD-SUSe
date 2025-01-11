@@ -31,7 +31,8 @@
 			user_type: '',
 			college: '',
 			program: '',
-			lib_user_id: ''
+			lib_user_id: '',
+            is_enrolled: false
 		}
 	};
 

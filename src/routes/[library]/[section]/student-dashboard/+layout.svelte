@@ -78,7 +78,7 @@
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
 			isLoggedOut = true;
-			goto('./auth/login');
+			goto(`/${library}/${section}/auth/login`);
 		} else if (accessToken && refreshToken) {
 			// if there is no current session, start one with the saved tokens
 			const {
@@ -93,7 +93,7 @@
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
                 isLoggedOut = true;
-				goto('./auth/login');
+				goto(`/${library}/${section}/auth/login`);
 			} else {
 				toast.success(`You're now logged in!`);
 			}
@@ -208,26 +208,26 @@
 		try {
 			isLoggedOut = true;
 			await endUserSession();
-			goto('./auth/login');
+			goto(`/${library}/${section}/auth/login`);
 		} catch {
             toast.error('Logout error.');
             return;
         }
 	}
 
-	beforeNavigate(({ to, cancel }) => {
-		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url == $page.url) {
-			return;
-		} else if (!isLoggedOut) {
-			if (!confirm('Leaving will logout your current session. Continue?')) {
-				cancel();
-			} else {
-				logOutUser();
-			}
-		}
-		return;
-	});
+	// beforeNavigate(({ to, cancel }) => {
+	// 	// Confirms user will be logged out if they navigate to other pages
+	// 	if (to?.url == $page.url) {
+	// 		return;
+	// 	} else if (!isLoggedOut) {
+	// 		if (!confirm('Leaving will logout your current session. Continue?')) {
+	// 			cancel();
+	// 		} else {
+	// 			logOutUser();
+	// 		}
+	// 	}
+	// 	return;
+	// });
 
 	// ----------------------------------------------------------------------------
 	// READ SERVICES ANG USAGE LOGS
