@@ -307,6 +307,7 @@
 			$UserStore.formData.user_type = users[0].user_type;
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
+            $UserStore.formData.is_enrolled = users[0].is_enrolled;
 		}
 		return true;
 	}
