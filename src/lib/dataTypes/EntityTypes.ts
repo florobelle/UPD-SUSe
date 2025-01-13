@@ -23,6 +23,7 @@ export type AdminTable = {
     library: string,
     section: string,
 }
+
 export type ServiceView = {
     service_id: number,
     service_type: string,
