@@ -145,8 +145,8 @@
 									<Select.Content>
 										<Select.Group>
 											{#each serviceInput.options as option}
-												<Select.Item value={option.value} label={option.label}
-													>{option.label}</Select.Item
+												<Select.Item value={option.service_id} label={option.service}
+													>{option.service}</Select.Item
 												>
 											{/each}
 										</Select.Group>
