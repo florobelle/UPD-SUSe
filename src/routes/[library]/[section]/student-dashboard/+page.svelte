@@ -29,10 +29,10 @@
 		return;
 	}
 
-	function startService(serviceName: string, serviceIndex: number) {
-		console.log(`Service started: ${serviceName} ${serviceIndex}`);
+	function startService(service: string, service_id: number) {
+		console.log(`Service started: ${service} ${service_id}`);
 
-		dialogOpen[serviceIndex] = false;
+		dialogOpen[service_id] = false;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -102,6 +102,9 @@
 	}
 
 	// ----------------------------------------------------------------------------
+
+	let selectedOption: any;
+
 </script>
 
 <Toaster />
@@ -116,8 +119,8 @@
 		</div>
 
 		<div class="grid h-full grid-cols-4 gap-8">
-			{#each services as service, index}
-				<Dialog.Root bind:open={dialogOpen[index]}>
+			{#each services as service}
+				<Dialog.Root bind:open={dialogOpen[service.service_type_id]}>
 					<Dialog.Trigger class="m-0 h-full w-full p-0">
 						<ServiceCard
 							selectService={() => selectService(service.service_type)}
@@ -138,7 +141,13 @@
 							{/if}
 							{#if serviceInput.type == 'select'}
 								<Label for={serviceInput.label}>{serviceInput.label}</Label>
-								<Select.Root portal={null}>
+								<Select.Root portal={null} onSelectedChange={
+									(s)=>{ 
+										if (s){
+											selectedOption = s as unknown as { value: number, label: string, disabled: boolean };
+										}
+									}
+								}>
 									<Select.Trigger>
 										<Select.Value placeholder={`Select a ${serviceInput.label}`} />
 									</Select.Trigger>
@@ -157,7 +166,7 @@
 						{/each}
 
 						<Dialog.Footer>
-							<Button on:click={() => startService(service.service_type, index)}>Avail</Button>
+							<Button on:click={() => startService(selectedOption.label, selectedOption.value)}>Avail</Button>
 						</Dialog.Footer>
 					</Dialog.Content>
 				</Dialog.Root>
