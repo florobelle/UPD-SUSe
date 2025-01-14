@@ -6,9 +6,48 @@
 		serviceImgSrc = '../../services/calculator.png',
 		serviceName = 'Calculator',
 		availableNum = 3,
+		dateStarted = new Date(),
 		selected = false,
 		inUse = false
 	} = $props();
+
+	let dateStartedFormatted = new Date(dateStarted);
+	import { writable } from 'svelte/store';
+
+	import { onMount } from 'svelte';
+	export const elapsedTime = writable('');
+
+	function formatElapsedTime(ms: number) {
+		const totalSeconds = Math.floor(ms / 1000);
+
+		const days = Math.floor(totalSeconds / (24 * 60 * 60));
+		const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+		const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+		const seconds = totalSeconds % 60;
+
+		// Build result array conditionally
+		const parts = [];
+		if (days > 0) parts.push(`${days} days`);
+		if (hours > 0) parts.push(`${hours} hours`);
+		if (minutes > 0) parts.push(`${minutes} min`);
+		if (seconds > 0) parts.push(`${seconds} sec`);
+
+		return parts.join(' ');
+	}
+
+	function updateElapsedTime() {
+		const now = new Date();
+		const diff = now.getTime() - dateStartedFormatted.getTime(); 
+		elapsedTime.set(formatElapsedTime(diff)); 
+	}
+
+	onMount(() => {
+		const interval = setInterval(updateElapsedTime, 1000);
+		updateElapsedTime();
+
+		return () => clearInterval(interval);
+	});
+
 </script>
 
 <button class="h-full w-full text-left" onclick={selectService}>
@@ -36,11 +75,16 @@
 				<div class="flex flex-col gap-1">
 					<h2 class={`text-xl font-medium ${inUse ? 'text-white' : ''}`}>{serviceName}</h2>
 					<p class={`text-base ${inUse ? 'text-white' : 'text-[#656565]'}`}>
-						{availableNum} available
+						{#if !inUse}
+							{availableNum} available
+						{:else}
+							{$elapsedTime}
+						{/if}
 					</p>
 				</div>
 
-				{#if !inUse}<div
+				{#if !inUse}
+					<div
 						class="once invisible ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-[#656565] group-hover:visible group-hover:animate-spin-once"
 					>
 						<MoveUpRight></MoveUpRight>

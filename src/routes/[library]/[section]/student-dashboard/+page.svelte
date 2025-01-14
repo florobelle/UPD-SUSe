@@ -39,6 +39,7 @@
 	// READ SERVICES ANG USAGE LOGS
 	// ----------------------------------------------------------------------------
 
+	import { get } from 'svelte/store';
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
@@ -59,6 +60,7 @@
 			toast.error(`Error with getting usagelogs: ${error}`);
 			return;
 		} else if (usagelogs != null) {
+			console.log("usage", usagelogs)
 			$ActiveUsageLogStore.activeUsageLogs = usagelogs;
 		}
 		return;
@@ -104,7 +106,17 @@
 	// ----------------------------------------------------------------------------
 
 	let selectedOption: any;
+	
+	import { onMount } from 'svelte';
+	onMount(() => {
+		getActiveUsageLogs();
+	});
 
+	function getServiceImgSrc(serviceType: string) {
+		const service = services.find(s => s.service_type === serviceType);
+		return service ? service.service_img_src : '';
+	}
+	
 </script>
 
 <Toaster />
@@ -119,57 +131,82 @@
 		</div>
 
 		<div class="grid h-full grid-cols-4 gap-8">
-			{#each services as service}
-				<Dialog.Root bind:open={dialogOpen[service.service_type_id]}>
+			{#each Object.values($ActiveUsageLogStore.activeUsageLogs) as activeUsageLog}
+				<Dialog.Root>
 					<Dialog.Trigger class="m-0 h-full w-full p-0">
 						<ServiceCard
-							selectService={() => selectService(service.service_type)}
-							serviceName={service.service_type}
-							serviceImgSrc={service.service_img_src}
-							availableNum={service.available_number}
+							selectService={() => selectService(activeUsageLog.service_type)}
+							serviceName={activeUsageLog.service_type}
+							serviceImgSrc={getServiceImgSrc(activeUsageLog.service_type)}
+							inUse={true}
+							dateStarted={activeUsageLog.start}
 						/>
 					</Dialog.Trigger>
 					<Dialog.Content>
 						<Dialog.Header>
-							<Dialog.Title>Avail {service.service_type}</Dialog.Title>
+							<Dialog.Title>End</Dialog.Title>
 							<Dialog.Description>Please select the correct details!</Dialog.Description>
 						</Dialog.Header>
-						{#each serviceForms[service.service_type_id - 1] as serviceInput}
-							{#if serviceInput.type == 'input'}
-								<Label for={serviceInput.label}>{serviceInput.label}</Label>
-								<Input id="name" placeholder={serviceInput.label} />
-							{/if}
-							{#if serviceInput.type == 'select'}
-								<Label for={serviceInput.label}>{serviceInput.label}</Label>
-								<Select.Root portal={null} onSelectedChange={
-									(s)=>{ 
-										if (s){
-											selectedOption = s as unknown as { value: number, label: string, disabled: boolean };
-										}
-									}
-								}>
-									<Select.Trigger>
-										<Select.Value placeholder={`Select a ${serviceInput.label}`} />
-									</Select.Trigger>
-									<Select.Content>
-										<Select.Group>
-											{#each serviceInput.options as option}
-												<Select.Item value={option.service_id} label={option.service}
-													>{option.service}</Select.Item
-												>
-											{/each}
-										</Select.Group>
-									</Select.Content>
-									<Select.Input name={serviceInput.label} />
-								</Select.Root>
-							{/if}
-						{/each}
-
+						
 						<Dialog.Footer>
-							<Button on:click={() => startService(selectedOption.label, selectedOption.value)}>Avail</Button>
+							<Button>End</Button>
 						</Dialog.Footer>
 					</Dialog.Content>
 				</Dialog.Root>
+			{/each}
+			{#each services as service}
+			{#if !($ActiveUsageLogStore.activeUsageLogs.some(log => log.service_type === service.service_type))}
+			<Dialog.Root bind:open={dialogOpen[service.service_type_id]}>
+						<Dialog.Trigger class="m-0 h-full w-full p-0">
+							<ServiceCard
+								selectService={() => selectService(service.service_type)}
+								serviceName={service.service_type}
+								serviceImgSrc={service.service_img_src}
+								availableNum={service.available_number}
+							/>
+						</Dialog.Trigger>
+						<Dialog.Content>
+							<Dialog.Header>
+								<Dialog.Title>Avail {service.service_type}</Dialog.Title>
+								<Dialog.Description>Please select the correct details!</Dialog.Description>
+							</Dialog.Header>
+							{#each serviceForms[service.service_type_id - 1] as serviceInput}
+								{#if serviceInput.type == 'input'}
+									<Label for={serviceInput.label}>{serviceInput.label}</Label>
+									<Input id="name" placeholder={serviceInput.label} />
+								{/if}
+								{#if serviceInput.type == 'select'}
+									<Label for={serviceInput.label}>{serviceInput.label}</Label>
+									<Select.Root portal={null} onSelectedChange={
+										(s)=>{ 
+											if (s){
+												selectedOption = s as unknown as { value: number, label: string, disabled: boolean };
+											}
+										}
+									}>
+										<Select.Trigger>
+											<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+										</Select.Trigger>
+										<Select.Content>
+											<Select.Group>
+												{#each serviceInput.options as option}
+													<Select.Item value={option.service_id} label={option.service}
+														>{option.service}</Select.Item
+													>
+												{/each}
+											</Select.Group>
+										</Select.Content>
+										<Select.Input name={serviceInput.label} />
+									</Select.Root>
+								{/if}
+							{/each}
+
+							<Dialog.Footer>
+								<Button on:click={() => startService(selectedOption.label, selectedOption.value)}>Avail</Button>
+							</Dialog.Footer>
+						</Dialog.Content>
+					</Dialog.Root>
+				{/if}
 			{/each}
 		</div>
 	</div>
