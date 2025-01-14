@@ -191,7 +191,7 @@
 									<!-- Tab headings -->
 									<Tabs.List class="w-full">
 										{#each serviceForms[service.service_type_id - 1] as serviceInput}
-											<Tabs.Trigger on:click={() => {tabSelected = serviceInput.label}} value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger>
+											<Tabs.Trigger on:click={() => {tabSelected = serviceInput.label; selectedOption=undefined}} value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger>
 										{/each}
 									</Tabs.List>
 
