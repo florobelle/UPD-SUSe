@@ -10,6 +10,8 @@
 	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index';
+	import * as Alert from "$lib/components/ui/alert";
+	import CircleAlert from "lucide-svelte/icons/circle-alert";
 
 	// Backend Imports
 	import { ServiceStore } from '$lib/stores/ServiceStore';
@@ -132,7 +134,18 @@
 			<h1 class="text-3xl font-medium">
 				Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
 			</h1>
-			<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
+
+			{#if $UserStore.formData.is_enrolled}
+				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
+			{:else}
+				<Alert.Root variant="destructive">
+					<CircleAlert class="h-4 w-4" />
+					<Alert.Title>Heads up!</Alert.Title>
+					<Alert.Description>
+						Please show your Form 5 to the library admin to have your account approved.
+					</Alert.Description>
+				</Alert.Root>
+		  	{/if}
 		</div>
 
 		<div class="grid h-full grid-cols-4 gap-8">
