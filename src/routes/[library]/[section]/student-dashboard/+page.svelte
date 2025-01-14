@@ -9,6 +9,8 @@
 	import { services } from '$lib/components/UIconfig/serviceConfig';
 	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
 	import Label from '$lib/components/ui/label/label.svelte';
+	import * as Tabs from '$lib/components/ui/tabs/index';
+
 	// Backend Imports
 	import { ServiceStore } from '$lib/stores/ServiceStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
@@ -39,7 +41,6 @@
 	// READ SERVICES ANG USAGE LOGS
 	// ----------------------------------------------------------------------------
 
-	import { get } from 'svelte/store';
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
@@ -66,11 +67,13 @@
 		return;
 	}
 
-	async function availAndUpdateUsage() {
+	async function availAndUpdateUsage(service_id: number) {
 		// avails a given service and updates the active usage log store
+
+		console.log(service_id)
 		const loadID: string = toast.loading('Availing service...');
 		const { error } = await availService(
-			$ServiceStore.services[0].service_id,
+			service_id,
 			parseInt($UserStore.formData.lib_user_id),
 			$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
 			$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
@@ -85,12 +88,12 @@
 		toast.success('Service availed!');
 	}
 
-	async function endAndUpdateUsage() {
+	async function endAndUpdateUsage(service_id: number) {
 		// ends a given usage log and service then updates the active usage log store
 		const loadID: string = toast.loading('Ending service...');
 		const { error } = await endService(
 			$ActiveUsageLogStore.activeUsageLogs[0].usagelog_id,
-			$ActiveUsageLogStore.activeUsageLogs[0].service_id,
+			service_id,
 			$UserStore.formData.username,
 			false
 		);
@@ -105,9 +108,11 @@
 
 	// ----------------------------------------------------------------------------
 
-	let selectedOption: any;
-	
 	import { onMount } from 'svelte';
+
+	let selectedOption: any;
+	let tabSelected: string;
+	
 	onMount(() => {
 		getActiveUsageLogs();
 	});
@@ -131,6 +136,8 @@
 		</div>
 
 		<div class="grid h-full grid-cols-4 gap-8">
+
+			<!-- ACTIVE SERVICES -->
 			{#each Object.values($ActiveUsageLogStore.activeUsageLogs) as activeUsageLog}
 				<Dialog.Root>
 					<Dialog.Trigger class="m-0 h-full w-full p-0">
@@ -149,14 +156,18 @@
 						</Dialog.Header>
 						
 						<Dialog.Footer>
-							<Button>End</Button>
+							<Button on:click={()=>{endAndUpdateUsage(activeUsageLog.service_id)}}>End</Button>
 						</Dialog.Footer>
 					</Dialog.Content>
 				</Dialog.Root>
 			{/each}
+
+			<!-- INACTIVE SERVICES -->
 			{#each services as service}
-			{#if !($ActiveUsageLogStore.activeUsageLogs.some(log => log.service_type === service.service_type))}
-			<Dialog.Root bind:open={dialogOpen[service.service_type_id]}>
+				{#if !($ActiveUsageLogStore.activeUsageLogs.some(log => log.service_type === service.service_type))}
+					<Dialog.Root bind:open={dialogOpen[service.service_type_id]}>
+
+						<!-- Service Card -->
 						<Dialog.Trigger class="m-0 h-full w-full p-0">
 							<ServiceCard
 								selectService={() => selectService(service.service_type)}
@@ -165,16 +176,56 @@
 								availableNum={service.available_number}
 							/>
 						</Dialog.Trigger>
-						<Dialog.Content>
+
+						<!-- Dialog Content of Service Card -->
+						<Dialog.Content class="max-w-fit">
 							<Dialog.Header>
 								<Dialog.Title>Avail {service.service_type}</Dialog.Title>
 								<Dialog.Description>Please select the correct details!</Dialog.Description>
 							</Dialog.Header>
+
+							<!-- Load Tabs -->
+							{#if serviceForms[service.service_type_id - 1].length > 1}
+								<Tabs.Root class="w-full">
+
+									<!-- Tab headings -->
+									<Tabs.List class="w-full">
+										{#each serviceForms[service.service_type_id - 1] as serviceInput}
+											<Tabs.Trigger on:click={() => {tabSelected = serviceInput.label}} value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger>
+										{/each}
+									</Tabs.List>
+
+									<!-- Content of tabs -->
+									{#each serviceForms[service.service_type_id - 1] as serviceInput}
+										{#key tabSelected}
+										<Tabs.Content value={serviceInput.label}>
+											<Select.Root portal={null} onSelectedChange={
+												(s)=>{ 
+													if (s){
+														selectedOption = s as unknown as { value: number, label: string, disabled: boolean };
+													}
+												}
+											}>
+												<Select.Trigger>
+													<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+												</Select.Trigger>
+												<Select.Content>
+													<Select.Group>
+														{#each serviceInput.options as option}
+															<Select.Item value={option.service_id} label={option.service}
+																>{option.service}</Select.Item
+															>
+														{/each}
+													</Select.Group>
+												</Select.Content>
+												<Select.Input name={serviceInput.label} />
+											</Select.Root>
+										</Tabs.Content>
+										{/key}
+									{/each}
+								</Tabs.Root>
+							{:else}
 							{#each serviceForms[service.service_type_id - 1] as serviceInput}
-								{#if serviceInput.type == 'input'}
-									<Label for={serviceInput.label}>{serviceInput.label}</Label>
-									<Input id="name" placeholder={serviceInput.label} />
-								{/if}
 								{#if serviceInput.type == 'select'}
 									<Label for={serviceInput.label}>{serviceInput.label}</Label>
 									<Select.Root portal={null} onSelectedChange={
@@ -200,9 +251,10 @@
 									</Select.Root>
 								{/if}
 							{/each}
+							{/if}
 
 							<Dialog.Footer>
-								<Button on:click={() => startService(selectedOption.label, selectedOption.value)}>Avail</Button>
+								<Button on:click={() => availAndUpdateUsage(selectedOption.value)}>Avail</Button>
 							</Dialog.Footer>
 						</Dialog.Content>
 					</Dialog.Root>
