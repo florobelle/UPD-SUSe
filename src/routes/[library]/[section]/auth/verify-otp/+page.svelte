@@ -18,9 +18,9 @@
 		goto('./login');
 	}
 
-	async function checkOtpEnter(event: KeyboardEvent) {
+	async function checkOtpEnter() {
 		// Listens to input in the OTP field
-		if (event.key == 'Enter') {
+		if (otp.length == 6) {
             const loadID: string = toast.loading('Verifying OTP...');
 			const { error } = await loginOtp(
 				otp,
