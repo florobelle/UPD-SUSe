@@ -54,15 +54,16 @@
 	async function checkRfid() {
         // Check if user is already registered
 		if (checkInputValidity('rfid')) {
+            const loadID: string = toast.loading('Logging you in...');
 			const { username, error } = await readUsername(rfidGlobal, '');
 
 			if (error) {
+                toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
 			$UserStore.formData.rfid = rfidGlobal;
 			if (username) {
-                const loadID: string = toast.loading('Logging you in...');
 				const { error } = await loginRfid(rfidGlobal, username);
 				if (error) {
 					toast.dismiss(loadID);
@@ -74,6 +75,7 @@
 					goto(`/${routes[1]}/${routes[2]}/student-dashboard`);
 				}
 			} else {
+                toast.dismiss(loadID);
 				goto('./register');
 			}
 		} else {

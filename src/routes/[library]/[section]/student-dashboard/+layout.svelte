@@ -219,7 +219,7 @@
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url.pathname == '/engglib1/circulation/student-dashboard') {
+		if (to?.url.pathname == '/engglib1/circulation/student-dashboard' || to == null) {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
