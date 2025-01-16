@@ -164,6 +164,8 @@
 		if (event.key === 'Enter' || rfidGlobal.length == 10) {
             if (rfidGlobal.match(/[a-fA-F]+/i)) {
                 rfidConverted = convertRfidInt(rfidGlobal);
+            } else {
+                rfidConverted = rfidGlobal;
             }
 
 			if ($AdminStore.toLogin) {
