@@ -2,26 +2,28 @@
 	// UI Imports
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import ServiceCard from '$lib/components/ServiceCard.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import * as Select from '$lib/components/ui/select/index';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { services } from '$lib/components/UIconfig/serviceConfig';
+	import { servicesInfo } from '$lib/components/UIconfig/serviceConfig';
 	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index';
 	import * as Alert from "$lib/components/ui/alert";
 	import CircleAlert from "lucide-svelte/icons/circle-alert";
+	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 
 	// Backend Imports
-	import { ServiceStore } from '$lib/stores/ServiceStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
+    import { onMount } from 'svelte';
+    import { readService } from '../../../supabase/Service';
+    import type { ServiceView } from '$lib/dataTypes/EntityTypes';
+    import { readAdmin } from '../../../supabase/Admin';
 	import { page } from '$app/stores';
-	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 
 	export let data: { libraryName: string };
 
@@ -33,12 +35,6 @@
 		return;
 	}
 
-	function startService(service: string, service_id: number) {
-		console.log(`Service started: ${service} ${service_id}`);
-
-		dialogOpen[service_id] = false;
-	}
-
 	// ----------------------------------------------------------------------------
 	// READ SERVICES ANG USAGE LOGS
 	// ----------------------------------------------------------------------------
@@ -46,6 +42,58 @@
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
+
+	async function getServices() {
+		// Reads the service types and available services in the current library and section
+		// and puts the returned values in $ServiceStore
+        const { services, error } = await readService({
+            service_type: '',
+            in_use: false,
+            library,
+            section
+        });
+
+        if (error) {
+            toast.error(`Error with getting services: ${error}`);
+            return;
+        } else if (services != null) {
+            for (let card of servicesInfo) {
+                const specificServices: ServiceView[] = services.filter((value) => value.service_type == card.service_type)
+                card.available_number = specificServices.length;
+
+                if (card.service_type == "Umbrella") {
+                    const smallOrange: ServiceView[] = specificServices.filter((value) => value.service.includes('Small Orange'))
+                    const smallBlack: ServiceView[] = specificServices.filter((value) => value.service.includes('Small Black'))
+                    const bigOrange: ServiceView[] = specificServices.filter((value) => value.service.includes('Big Orange'))
+
+                    serviceForms[card.service_type_id-1][0].options = smallOrange;
+                    serviceForms[card.service_type_id-1][1].options = smallBlack;
+                    serviceForms[card.service_type_id-1][2].options = bigOrange;
+                } else {
+                    serviceForms[card.service_type_id-1][0].options = specificServices;
+                }
+            }
+        }
+		return;
+	}
+
+	async function getActiveAdmins() {
+		// gets two active admins from database
+		const { admins, error } = await readAdmin({
+			is_active: true,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading user information: ${error}`);
+			return false;
+		} else if (admins != null) {
+			$AdminStore.active_admin1 = admins[0];
+			$AdminStore.active_admin2 = admins[1];
+		}
+		return true;
+	}
 
 	async function getActiveUsageLogs() {
 		// Reads the active usage logs of the user in the current library and section
@@ -63,7 +111,6 @@
 			toast.error(`Error with getting usagelogs: ${error}`);
 			return;
 		} else if (usagelogs != null) {
-			console.log("usage", usagelogs)
 			$ActiveUsageLogStore.activeUsageLogs = usagelogs;
 		}
 		return;
@@ -71,8 +118,6 @@
 
 	async function availAndUpdateUsage(service_id: number) {
 		// avails a given service and updates the active usage log store
-
-		console.log(service_id)
 		const loadID: string = toast.loading('Availing service...');
 		const { error } = await availService(
 			service_id,
@@ -87,6 +132,7 @@
 		}
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
+        getServices();
 		toast.success('Service availed!');
 	}
 
@@ -105,22 +151,23 @@
 		}
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
+        getServices();
 		toast.success('Service ended!');
 	}
 
 	// ----------------------------------------------------------------------------
-
-	import { onMount } from 'svelte';
 
 	let selectedOption: any;
 	let tabSelected: string;
 	
 	onMount(() => {
 		getActiveUsageLogs();
+        getActiveAdmins();
+        getServices();
 	});
 
 	function getServiceImgSrc(serviceType: string) {
-		const service = services.find(s => s.service_type === serviceType);
+		const service = servicesInfo.find(s => s.service_type === serviceType);
 		return service ? service.service_img_src : '';
 	}
 	
@@ -176,7 +223,7 @@
 			{/each}
 
 			<!-- INACTIVE SERVICES -->
-			{#each services as service}
+			{#each servicesInfo as service}
 				{#if !($ActiveUsageLogStore.activeUsageLogs.some(log => log.service_type === service.service_type))}
 					<Dialog.Root bind:open={dialogOpen[service.service_type_id]}>
 

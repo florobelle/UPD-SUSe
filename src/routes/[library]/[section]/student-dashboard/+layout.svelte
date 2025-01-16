@@ -1,13 +1,25 @@
 <script lang="ts">
-	import toast, { Toaster } from 'svelte-5-french-toast';
-
-	// ----------------------------------------------------------------------------
-	// NAVBAR
-	// ----------------------------------------------------------------------------
 	import * as Resizable from '$lib/components/ui/resizable/index';
 	import Nav from '$lib/components/Nav.svelte';
 	import { studentRoutes } from '../../../../lib/components/UIconfig/navConfig';
+	import toast, { Toaster } from 'svelte-5-french-toast';
 
+	// Backend Imports
+	import { page } from '$app/stores';
+	import { beforeNavigate, goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
+	import { supabaseClient } from '$lib/client/SupabaseClient';
+	import type { Session } from '@supabase/supabase-js';
+	import { UserStore } from '$lib/stores/UserStore';
+	import { linkRfid } from '../../../supabase/LoginReg';
+	import { readUser } from '../../../supabase/User';
+
+    import * as Dialog from '$lib/components/ui/dialog';
+    import Button from '$lib/components/ui/button/button.svelte';
+	// ----------------------------------------------------------------------------
+	// NAVBAR
+	// ----------------------------------------------------------------------------
 	let defaultLayout = [100, 440, 655];
 	let defaultCollapsed = false;
 	let navCollapsedSize: number = 4;
@@ -26,24 +38,6 @@
 		isCollapsed = false;
 		document.cookie = `PaneForge:collapsed=${false}`;
 	}
-
-	// Backend Imports
-	import { page } from '$app/stores';
-	import { beforeNavigate, goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
-	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import type { Session } from '@supabase/supabase-js';
-	import { UserStore } from '$lib/stores/UserStore';
-	import { ServiceStore } from '$lib/stores/ServiceStore';
-	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
-	import { linkRfid } from '../../../supabase/LoginReg';
-	import { readServiceType } from '../../../supabase/ServiceType';
-	import { readService } from '../../../supabase/Service';
-	import { readUsageLog } from '../../../supabase/UsageLog';
-	import { readUser } from '../../../supabase/User';
-	import { AdminStore } from '$lib/stores/AdminStore';
-	import { readAdmin } from '../../../supabase/Admin';
 
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
@@ -102,9 +96,6 @@
 		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
 
 		getUser();
-		getActiveUsageLogs();
-		getServices();
-		getActiveAdmins();
 		attachActivityListeners();
 		startLogOutTimer();
 		return;
@@ -148,9 +139,6 @@
 	// ----------------------------------------------------------------------------
 	// AUTO LOG OUT DIALOG
 	// ----------------------------------------------------------------------------
-
-	import * as Dialog from '$lib/components/ui/dialog';
-	import Button from '$lib/components/ui/button/button.svelte';
 
 	let maxSessionDuration = 600 * 1000; // 10 seconds for testing
 	let remainingTime = Math.floor(maxSessionDuration / 1000);
@@ -205,11 +193,14 @@
 
 	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
+        const loadID: string = toast.loading('Logging you out...');
 		try {
 			isLoggedOut = true;
 			await endUserSession();
+            toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
+            toast.dismiss(loadID);
 			toast.error('Logout error.');
 			return;
 		}
@@ -230,58 +221,8 @@
 	// });
 
 	// ----------------------------------------------------------------------------
-	// READ SERVICES ANG USAGE LOGS
+	// READ USER INFO
 	// ----------------------------------------------------------------------------
-
-	async function getServices() {
-		// Reads the service types and available services in the current library and section
-		// and puts the returned values in $ServiceStore
-		const { serviceTypes, error } = await readServiceType();
-
-		if (error) {
-			toast.error(`Error with getting service types: ${error}`);
-			return;
-		} else if (serviceTypes != null) {
-			$ServiceStore.serviceTypes = serviceTypes;
-			const { services, error } = await readService({
-				service_type: '',
-				in_use: false,
-				library,
-				section
-			});
-
-			if (error) {
-				toast.error(`Error with getting services: ${error}`);
-				return;
-			} else if (services != null) {
-				$ServiceStore.services = services;
-				console.log(services);
-			}
-		}
-		return;
-	}
-
-	async function getActiveUsageLogs() {
-		// Reads the active usage logs of the user in the current library and section
-		const { usagelogs, error } = await readUsageLog({
-			usagelog_id: 0,
-			start: null,
-			end: null,
-			lib_user_id: parseInt($UserStore.formData.lib_user_id),
-			service_type: '',
-			library,
-			section
-		});
-
-		if (error) {
-			toast.error(`Error with getting usagelogs: ${error}`);
-			return;
-		} else if (usagelogs != null) {
-			$ActiveUsageLogStore.activeUsageLogs = usagelogs;
-			console.log(usagelogs);
-		}
-		return;
-	}
 
 	async function getUser(): Promise<boolean> {
 		// gets user information from database
@@ -308,24 +249,6 @@
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
 			$UserStore.formData.is_enrolled = users[0].is_enrolled;
-		}
-		return true;
-	}
-
-	async function getActiveAdmins() {
-		// gets two active admins from database
-		const { admins, error } = await readAdmin({
-			is_active: true,
-			library,
-			section
-		});
-
-		if (error) {
-			toast.error(`Error with reading user information: ${error}`);
-			return false;
-		} else if (admins != null) {
-			$AdminStore.active_admin1 = admins[0];
-			$AdminStore.active_admin2 = admins[1];
 		}
 		return true;
 	}
