@@ -10,3 +10,5 @@ export const ServiceStore: Writable<ServiceInformation> = writable({
     serviceTypes: [],
     services: [],
 })
+
+export const ServiceTableStore: Writable<Array<ServiceView>> = writable();

@@ -29,6 +29,8 @@
 	try {
 		deleteCookie('accessToken', `${library}/${section}`);
 		deleteCookie('refreshToken', `${library}/${section}`);
+		deleteCookie('accessTokenAdmin', `${library}/${section}`);
+		deleteCookie('refreshTokenAdmin', `${library}/${section}`);
 	} catch {}
 
 	$UserStore = {
@@ -72,7 +74,7 @@
 				} else {
 					toast.dismiss(loadID);
 					$AdminStore.formData.email = email;
-					goto(`/${routes[1]}/${routes[2]}/admin-dashboard`);
+					goto(`/${routes[1]}/${routes[2]}/admin-dashboard/users`);
 				}
 			} else {
 				toast.dismiss(loadID);

@@ -6,6 +6,7 @@ export type AdminFormData = {
     rfid: string,
     nickname: string,
     email: string,
+    is_approved: boolean,
     library: string,
     section: string
 }
@@ -30,7 +31,10 @@ export const AdminStore: Writable<AdminInformation> = writable({
         rfid: '',
         nickname: '',
         email: '',
+        is_approved: false,
         library: '',
         section: ''
     }
 })
+
+export const AdminTableStore: Writable<Array<AdminTable>> = writable();

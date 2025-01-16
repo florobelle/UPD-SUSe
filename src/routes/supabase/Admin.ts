@@ -42,10 +42,12 @@ export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
         query = query.eq('section', filter.section)
     }
     if (filter.is_approved != null) {
-        query = query.eq('is_approved', filter.section)
+        query = query.eq('is_approved', filter.is_approved)
     }
 
     const { data, error } = await query;
+    console.log(data)
+    console.log(error)
 
     if (error) {
         return {
