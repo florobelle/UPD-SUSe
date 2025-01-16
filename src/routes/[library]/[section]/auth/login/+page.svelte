@@ -11,12 +11,25 @@
 	import { goto } from '$app/navigation';
 	import { loginRfid, sendOtp } from '../../../../supabase/LoginReg';
 	import { readUsername } from '../../../../supabase/User';
+	import { page } from '$app/stores';
+	import { deleteCookie } from '$lib/client/Cookie';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
 	let usernameGlobal: string = '';
 	let rfidError: boolean = false;
 	let UPMailError: boolean = false;
+
+	const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1]; // session
+	const section: string = routes[2]; // session
+
+    try {
+        deleteCookie('accessToken', `${library}/${section}`);
+        deleteCookie('refreshToken', `${library}/${section}`);
+    } catch {
+        
+    }
 
 	$UserStore = {
 		authenticated: false,
@@ -39,30 +52,28 @@
 	// ----------------------------------------------------------------------------
 
 	async function checkRfid() {
+        // Check if user is already registered
 		if (checkInputValidity('rfid')) {
-			// Check if user is already registered
-			const loadID: string = toast.loading('Logging you in...');
 			const { username, error } = await readUsername(rfidGlobal, '');
 
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
 			$UserStore.formData.rfid = rfidGlobal;
 			if (username) {
+                const loadID: string = toast.loading('Logging you in...');
 				const { error } = await loginRfid(rfidGlobal, username);
 				if (error) {
 					toast.dismiss(loadID);
 					toast.error(`Error with logging in with RFID: ${error}`);
-					goto('./login');
+					goto(`/${routes[1]}/${routes[2]}/auth/login`);
 				} else {
 					toast.dismiss(loadID);
 					$UserStore.formData.username = username;
-					goto('../student-dashboard');
+					goto(`/${routes[1]}/${routes[2]}/student-dashboard`);
 				}
 			} else {
-				toast.dismiss(loadID);
 				goto('./register');
 			}
 		} else {
@@ -104,9 +115,9 @@
 		return;
 	}
 
-	function handleKeydownRfid(event: KeyboardEvent) {
+	function handleKeydownRfid() {
 		// Listens to input in the RFID field
-		if (event.key === 'Enter' || rfidGlobal.length == 10) {
+		if (rfidGlobal.length == 10) {
 			checkRfid();
 		}
 	}

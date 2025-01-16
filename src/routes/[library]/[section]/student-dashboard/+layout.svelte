@@ -2,7 +2,7 @@
 	import * as Resizable from '$lib/components/ui/resizable/index';
 	import Nav from '$lib/components/Nav.svelte';
 	import { studentRoutes } from '../../../../lib/components/UIconfig/navConfig';
-	import toast, { Toaster } from 'svelte-5-french-toast';
+	import toast from 'svelte-5-french-toast';
 
 	// Backend Imports
 	import { page } from '$app/stores';
@@ -219,7 +219,7 @@
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to == null) {
+		if (to?.url.pathname == '/engglib1/circulation/student-dashboard') {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
