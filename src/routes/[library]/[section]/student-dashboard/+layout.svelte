@@ -61,6 +61,8 @@
 		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
 
 		getUser();
+        getServices();
+        getActiveAdmins();
 		attachActivityListeners();
 		startLogOutTimer();
     }
@@ -331,8 +333,6 @@
 
 	onMount(() => {
 		startUserSession();
-        getServices();
-        getActiveAdmins();
 	});
 </script>
 

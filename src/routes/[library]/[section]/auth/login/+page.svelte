@@ -18,6 +18,7 @@
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
+    let rfidConverted: string = '';
 	let usernameGlobal: string = '';
 	let rfidError: boolean = false;
 	let UPMailError: boolean = false;
@@ -53,20 +54,25 @@
 
 	// ----------------------------------------------------------------------------
 
+    function convertRfidInt(hex: string) {
+        const reverseHex = hex.match(/.{1,2}/g)?.reverse().join("")
+        return reverseHex ? parseInt(reverseHex, 16).toString() : "0"
+    }
+
 	async function checkAdminRfid() {
 		// Check if admin is already registered
 		if (checkInputValidity('adminRfid')) {
 			const loadID: string = toast.loading('Logging you in...');
-			const { email, error } = await readEmail(rfidGlobal);
+			const { email, error } = await readEmail(rfidConverted);
 
 			if (error) {
 				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
-			$AdminStore.formData.rfid = rfidGlobal;
+			$AdminStore.formData.rfid = rfidConverted;
 			if (email) {
-				const { error } = await loginAdmin(rfidGlobal, email);
+				const { error } = await loginAdmin(rfidConverted, email);
 				if (error) {
 					toast.dismiss(loadID);
 					toast.error(`Error with logging in with RFID: ${error}`);
@@ -91,16 +97,16 @@
 		// Check if user is already registered
 		if (checkInputValidity('userRfid')) {
 			const loadID: string = toast.loading('Logging you in...');
-			const { username, error } = await readUsername(rfidGlobal, '');
+			const { username, error } = await readUsername(rfidConverted, '');
 
 			if (error) {
 				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
-			$UserStore.formData.rfid = rfidGlobal;
+			$UserStore.formData.rfid = rfidConverted;
 			if (username) {
-				const { error } = await loginRfid(rfidGlobal, username);
+				const { error } = await loginRfid(rfidConverted, username);
 				if (error) {
 					toast.dismiss(loadID);
 					toast.error(`Error with logging in with RFID: ${error}`);
@@ -153,9 +159,13 @@
 		return;
 	}
 
-	function handleKeydownRfid() {
+	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
-		if (rfidGlobal.length == 10) {
+		if (event.key === 'Enter' || rfidGlobal.length == 10) {
+            if (rfidGlobal.match(/[a-fA-F]+/i)) {
+                rfidConverted = convertRfidInt(rfidGlobal);
+            }
+
 			if ($AdminStore.toLogin) {
 				checkAdminRfid();
 			} else {
@@ -272,7 +282,7 @@
 						id="userRfid"
 						type="password"
 						placeholder="••••••••••"
-						pattern="^{'\\'}d{'{'}10{'}'}$"
+						pattern="[0-9a-fA-F]+"
 						bind:value={rfidGlobal}
 						on:keyup={handleKeydownRfid}
 						class="max-w-full text-center text-base"
@@ -311,7 +321,7 @@
 						id="adminRfid"
 						type="password"
 						placeholder="••••••••••"
-						pattern="^{'\\'}d{'{'}10{'}'}$"
+						pattern="[0-9a-fA-F]+"
 						bind:value={rfidGlobal}
 						on:keyup={handleKeydownRfid}
 						class="max-w-full text-center text-base"
