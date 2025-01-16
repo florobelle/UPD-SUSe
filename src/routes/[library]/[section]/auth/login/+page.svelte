@@ -9,14 +9,27 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
-	import { loginRfid, sendOtp } from '../../../supabase/LoginReg';
-	import { readUsername } from '../../../supabase/User';
+	import { loginRfid, sendOtp } from '../../../../supabase/LoginReg';
+	import { readUsername } from '../../../../supabase/User';
+	import { page } from '$app/stores';
+	import { deleteCookie } from '$lib/client/Cookie';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
 	let usernameGlobal: string = '';
 	let rfidError: boolean = false;
 	let UPMailError: boolean = false;
+
+	const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1]; // session
+	const section: string = routes[2]; // session
+
+    try {
+        deleteCookie('accessToken', `${library}/${section}`);
+        deleteCookie('refreshToken', `${library}/${section}`);
+    } catch {
+        
+    }
 
 	$UserStore = {
 		authenticated: false,
@@ -31,20 +44,21 @@
 			user_type: '',
 			college: '',
 			program: '',
-			lib_user_id: ''
+			lib_user_id: '',
+			is_enrolled: false
 		}
 	};
 
 	// ----------------------------------------------------------------------------
 
 	async function checkRfid() {
+        // Check if user is already registered
 		if (checkInputValidity('rfid')) {
-			// Check if user is already registered
-			const loadID: string = toast.loading('Logging you in...');
+            const loadID: string = toast.loading('Logging you in...');
 			const { username, error } = await readUsername(rfidGlobal, '');
 
 			if (error) {
-				toast.dismiss(loadID);
+                toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
@@ -54,14 +68,14 @@
 				if (error) {
 					toast.dismiss(loadID);
 					toast.error(`Error with logging in with RFID: ${error}`);
-					goto('./login');
+					goto(`/${routes[1]}/${routes[2]}/auth/login`);
 				} else {
 					toast.dismiss(loadID);
 					$UserStore.formData.username = username;
-					goto('./student-dashboard');
+					goto(`/${routes[1]}/${routes[2]}/student-dashboard`);
 				}
 			} else {
-				toast.dismiss(loadID);
+                toast.dismiss(loadID);
 				goto('./register');
 			}
 		} else {
@@ -85,11 +99,11 @@
 			if (username) {
 				const { error } = await sendOtp(username);
 				if (error) {
-                    toast.dismiss(loadID);
+					toast.dismiss(loadID);
 					toast.error(`Error with sending OTP: ${error}`);
 					goto('./login');
 				} else {
-                    toast.dismiss(loadID);
+					toast.dismiss(loadID);
 					goto('./verify-otp');
 				}
 			} else {
@@ -103,9 +117,9 @@
 		return;
 	}
 
-	function handleKeydownRfid(event: KeyboardEvent) {
+	function handleKeydownRfid() {
 		// Listens to input in the RFID field
-		if (event.key === 'Enter' || rfidGlobal.length == 10) {
+		if (rfidGlobal.length == 10) {
 			checkRfid();
 		}
 	}
@@ -225,7 +239,7 @@
 
 			<!-- Login with UP Mail -->
 			<Button on:click={selectLoginWithUPMail} class="flex w-full gap-2">
-				<img src="../../logos/google.png" class="h-[70%]" alt="Google logo" />
+				<img src="../../../logos/google.png" class="h-[70%]" alt="Google logo" />
 				<p class="text-base">Login with UP Mail</p>
 			</Button>
 		</div>

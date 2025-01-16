@@ -22,8 +22,13 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { sendOtp } from '../../../supabase/LoginReg';
-	import { allColleges, allPrograms, collegeProgramsList, type College } from '$lib/stores/CollegeProgramStore';
+	import { sendOtp } from '../../../../supabase/LoginReg';
+	import {
+		allColleges,
+		allPrograms,
+		collegeProgramsList,
+		type College
+	} from '$lib/stores/CollegeProgramStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 
 	// ----------------------------------------------------------------------------
@@ -120,7 +125,7 @@
 
 	async function saveFormData() {
 		// Saves user data in the User Store for inserting in the database once user has been authenticated
-        const loadID: string = toast.loading('Registering...');
+		const loadID: string = toast.loading('Registering...');
 		$UserStore.toRegister = true;
 		$UserStore.formData = {
 			rfid: $UserStore.formData.rfid,
@@ -135,19 +140,19 @@
 			lib_user_id: $formData.id
 		};
 
-        const { error } = await sendOtp($formData.username);
+		const { error } = await sendOtp($formData.username);
 		if (error) {
-            toast.dismiss(loadID);
-            toast.error(`Error with sending OTP: ${error}`);
+			toast.dismiss(loadID);
+			toast.error(`Error with sending OTP: ${error}`);
 		} else {
-            toast.dismiss(loadID);
+			toast.dismiss(loadID);
 			goto('./verify-otp');
 		}
 		return;
 	}
 </script>
 
-<Toaster/>
+<Toaster />
 
 <!-- Register -->
 <div class="flex h-[90%] w-[80%] items-center">

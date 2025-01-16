@@ -4,7 +4,7 @@
 
 	// Backend Imports
 	import toast, { Toaster } from 'svelte-5-french-toast';
-	import { loginOtp } from '../../../supabase/LoginReg';
+	import { loginOtp } from '../../../../supabase/LoginReg';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
@@ -18,23 +18,23 @@
 		goto('./login');
 	}
 
-	async function checkOtpEnter(event: KeyboardEvent) {
+	async function checkOtpEnter() {
 		// Listens to input in the OTP field
-		const loadID: string = toast.loading('Verifying OTP...');
-		if (event.key == 'Enter') {
-            const { error } = await loginOtp(
-					otp,
-					$UserStore.formData.username,
-					$UserStore.toRegister,
-					$UserStore.formData
-				)
+		if (otp.length == 6) {
+            const loadID: string = toast.loading('Verifying OTP...');
+			const { error } = await loginOtp(
+				otp,
+				$UserStore.formData.username,
+				$UserStore.toRegister,
+				$UserStore.formData
+			);
 			if (error) {
 				toast.dismiss(loadID);
-                toast.error(`Error with verifying OTP: ${error}`)
+				toast.error(`Error with verifying OTP: ${error}`);
 				goto('./login');
 			} else {
 				toast.dismiss(loadID);
-				goto('./student-dashboard');
+				goto('../student-dashboard');
 			}
 		}
 
@@ -51,7 +51,10 @@
 		<div class="flex w-full flex-col gap-8">
 			<div class="flex w-full flex-col gap-4 text-center">
 				<h1 class="text-5xl font-medium">Enter the OTP sent to your UP Mail</h1>
-				<h2 class="text-lg font-normal">The One-Time Password has been sent to you UP Mail!</h2>
+				<h2 class="text-lg font-normal">
+					The One-Time Password has been sent to your UP Mail! Please check the spam folder if it
+					doesn't appear in your inbox.
+				</h2>
 			</div>
 			<Input
 				type="text"
