@@ -1,7 +1,18 @@
 <script lang="ts">
 	// UI Component Imports
 	import PhotoCard from '$lib/components/PhotoCard.svelte';
+	import { AdminStore } from '$lib/stores/AdminStore.js';
 	export let data;
+    let clickCount = 0;
+
+    function checkAdminLogin() {
+        // Enables Admins to log in after 5 clicks
+        clickCount++;
+        if (clickCount == 5) {
+            $AdminStore.toLogin = true;
+            clickCount = 0;
+        }
+    }
 </script>
 
 <section class="grid h-screen max-h-dvh grid-cols-2">
@@ -33,6 +44,7 @@
 				src="../../../logos/engglib-logo.png"
 				class="h-full w-auto"
 				alt="Engineering Library logo"
+                on:click={checkAdminLogin}
 			/>
 		</div>
 

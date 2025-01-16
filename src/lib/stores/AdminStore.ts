@@ -11,6 +11,7 @@ export type AdminFormData = {
 }
 
 type AdminInformation = {
+    toLogin: boolean,
     authenticated: boolean,
     toRegister: boolean,
     active_admin1: AdminTable | null,
@@ -19,6 +20,7 @@ type AdminInformation = {
 }
 
 export const AdminStore: Writable<AdminInformation> = writable({
+    toLogin: false,
     authenticated: false,
     toRegister: false,
     active_admin1: null,
