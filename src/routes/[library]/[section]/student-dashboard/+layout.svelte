@@ -10,13 +10,18 @@
 	import { onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import type { Session } from '@supabase/supabase-js';
+	import type { Session, User } from '@supabase/supabase-js';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { linkRfid } from '../../../supabase/LoginReg';
 	import { readUser } from '../../../supabase/User';
 
     import * as Dialog from '$lib/components/ui/dialog';
     import Button from '$lib/components/ui/button/button.svelte';
+	import { readAdmin } from '../../../supabase/Admin';
+	import { AdminStore } from '$lib/stores/AdminStore';
+	import { readService } from '../../../supabase/Service';
+	import { serviceForms, servicesInfo } from '$lib/components/UIconfig/serviceConfig';
+	import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -48,6 +53,18 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
+    function getSessionData(user: User | undefined) {
+        // gets user data and starts countdown if login is successfull
+        toast.success(`You're now logged in!`);
+
+		$UserStore.authenticated = true;
+		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
+
+		getUser();
+		attachActivityListeners();
+		startLogOutTimer();
+    }
+
 	async function startUserSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
 		if (!session) {
@@ -67,7 +84,7 @@
 			// if there is currently a session with no cookies, save tokens in cookies
 			createCookie('accessToken', session.access_token, 1, `${library}/${section}`);
 			createCookie('refreshToken', session.refresh_token, 1, `${library}/${section}`);
-			toast.success(`You're now logged in!`);
+            getSessionData(user);
 		} else if (!session && !accessToken && !refreshToken) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
@@ -89,15 +106,9 @@
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-				toast.success(`You're now logged in!`);
+                getSessionData(user);
 			}
 		}
-		$UserStore.authenticated = true;
-		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
-
-		getUser();
-		attachActivityListeners();
-		startLogOutTimer();
 		return;
 	}
 
@@ -206,19 +217,19 @@
 		}
 	}
 
-	// beforeNavigate(({ to, cancel }) => {
-	// 	// Confirms user will be logged out if they navigate to other pages
-	// 	if (to?.url == $page.url) {
-	// 		return;
-	// 	} else if (!isLoggedOut) {
-	// 		if (!confirm('Leaving will logout your current session. Continue?')) {
-	// 			cancel();
-	// 		} else {
-	// 			logOutUser();
-	// 		}
-	// 	}
-	// 	return;
-	// });
+	beforeNavigate(({ to, cancel }) => {
+		// Confirms user will be logged out if they navigate to other pages
+		if (to == null) {
+			return;
+		} else if (!isLoggedOut) {
+			if (!confirm('Leaving will logout your current session. Continue?')) {
+				cancel();
+			} else {
+				logOutUser();
+			}
+		}
+		return;
+	});
 
 	// ----------------------------------------------------------------------------
 	// READ USER INFO
@@ -253,11 +264,73 @@
 		return true;
 	}
 
+	async function getServices() {
+		// Reads the service types and available services in the current library and section
+		// and puts the returned values in $ServiceStore
+		const { services, error } = await readService({
+			service_type: '',
+			in_use: false,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with getting services: ${error}`);
+			return;
+		} else if (services != null) {
+			for (let card of servicesInfo) {
+				const specificServices: ServiceView[] = services.filter(
+					(value) => value.service_type == card.service_type
+				);
+				card.available_number = specificServices.length;
+
+				if (card.service_type == 'Umbrella') {
+					const smallOrange: ServiceView[] = specificServices.filter((value) =>
+						value.service.includes('Small Orange')
+					);
+					const smallBlack: ServiceView[] = specificServices.filter((value) =>
+						value.service.includes('Small Black')
+					);
+					const bigOrange: ServiceView[] = specificServices.filter((value) =>
+						value.service.includes('Big Orange')
+					);
+
+					serviceForms[card.service_type_id - 1][0].options = smallOrange;
+					serviceForms[card.service_type_id - 1][1].options = smallBlack;
+					serviceForms[card.service_type_id - 1][2].options = bigOrange;
+				} else {
+					serviceForms[card.service_type_id - 1][0].options = specificServices;
+				}
+			}
+		}
+		return;
+	}
+
+	async function getActiveAdmins() {
+		// gets two active admins from database
+		const { admins, error } = await readAdmin({
+			is_active: true,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading user information: ${error}`);
+			return false;
+		} else if (admins != null) {
+			$AdminStore.active_admin1 = admins[0];
+			$AdminStore.active_admin2 = admins[1];
+		}
+		return true;
+	}
+
 	// ----------------------------------------------------------------------------
 	toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
 
 	onMount(() => {
 		startUserSession();
+        getServices();
+        getActiveAdmins();
 	});
 </script>
 
