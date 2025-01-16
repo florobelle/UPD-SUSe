@@ -129,6 +129,7 @@
 		$UserStore.toRegister = true;
 		$UserStore.formData = {
 			rfid: $UserStore.formData.rfid,
+            is_enrolled: false,
 			username: $formData.username,
 			first_name: $formData.first_name,
 			middle_name: $formData.middle_name,

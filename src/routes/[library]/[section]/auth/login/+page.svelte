@@ -9,11 +9,12 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
-	import { loginRfid, sendOtp } from '../../../../supabase/LoginReg';
+	import { loginAdmin, loginRfid, sendOtp } from '../../../../supabase/LoginReg';
 	import { readUsername } from '../../../../supabase/User';
 	import { page } from '$app/stores';
 	import { deleteCookie } from '$lib/client/Cookie';
 	import { AdminStore } from '$lib/stores/AdminStore';
+	import { readEmail } from '../../../../supabase/Admin';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
@@ -25,12 +26,10 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-    try {
-        deleteCookie('accessToken', `${library}/${section}`);
-        deleteCookie('refreshToken', `${library}/${section}`);
-    } catch {
-        
-    }
+	try {
+		deleteCookie('accessToken', `${library}/${section}`);
+		deleteCookie('refreshToken', `${library}/${section}`);
+	} catch {}
 
 	$UserStore = {
 		authenticated: false,
@@ -52,18 +51,48 @@
 
 	// ----------------------------------------------------------------------------
 
-    async function checkAdminRfid() {
+	async function checkAdminRfid() {
+		// Check if admin is already registered
+		if (checkInputValidity('adminRfid')) {
+			const loadID: string = toast.loading('Logging you in...');
+			const { email, error } = await readEmail(rfidGlobal);
 
-    }
+			if (error) {
+				toast.dismiss(loadID);
+				toast.error(`Error with looking for a username: ${error}`);
+				return;
+			}
+			$AdminStore.formData.rfid = rfidGlobal;
+			if (email) {
+				const { error } = await loginAdmin(rfidGlobal, email);
+				if (error) {
+					toast.dismiss(loadID);
+					toast.error(`Error with logging in with RFID: ${error}`);
+					goto(`/${routes[1]}/${routes[2]}/auth/login`);
+				} else {
+					toast.dismiss(loadID);
+					$AdminStore.formData.email = email;
+					goto(`/${routes[1]}/${routes[2]}/admin-dashboard`);
+				}
+			} else {
+				toast.dismiss(loadID);
+				goto('./register-admin');
+			}
+		} else {
+			rfidError = true;
+		}
+
+		return;
+	}
 
 	async function checkUserRfid() {
-        // Check if user is already registered
-		if (checkInputValidity('rfid')) {
-            const loadID: string = toast.loading('Logging you in...');
+		// Check if user is already registered
+		if (checkInputValidity('userRfid')) {
+			const loadID: string = toast.loading('Logging you in...');
 			const { username, error } = await readUsername(rfidGlobal, '');
 
 			if (error) {
-                toast.dismiss(loadID);
+				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
@@ -80,7 +109,7 @@
 					goto(`/${routes[1]}/${routes[2]}/student-dashboard`);
 				}
 			} else {
-                toast.dismiss(loadID);
+				toast.dismiss(loadID);
 				goto('./register');
 			}
 		} else {
@@ -126,10 +155,10 @@
 		// Listens to input in the RFID field
 		if (rfidGlobal.length == 10) {
 			if ($AdminStore.toLogin) {
-                checkAdminRfid();
-            } else {
-                checkUserRfid();
-            }
+				checkAdminRfid();
+			} else {
+				checkUserRfid();
+			}
 		}
 	}
 
@@ -201,25 +230,25 @@
 
 	async function selectLoginWithUserRfid() {
 		loginWithRfid = true;
-        $AdminStore.toLogin = false;
+		$AdminStore.toLogin = false;
 		await tick(); // Ensure DOM updates before interacting
 		deselectText('UPmail');
-        deselectText('adminRfid');
+		deselectText('adminRfid');
 		selectText('userRfid');
 	}
 
-    async function selectLoginWithAdminRfid() {
+	async function selectLoginWithAdminRfid() {
 		await tick(); // Ensure DOM updates before interacting
 		deselectText('UPmail');
 		deselectText('userRfid');
 		selectText('adminRfid');
 	}
 
-    $: {
-        if ($AdminStore.toLogin) {
-            selectLoginWithAdminRfid()
-        }
-    }
+	$: {
+		if ($AdminStore.toLogin) {
+			selectLoginWithAdminRfid();
+		}
+	}
 </script>
 
 <Toaster />
@@ -268,45 +297,43 @@
 			</Button>
 		</div>
 	{:else if $AdminStore.toLogin}
-        <div class="flex w-full flex-col gap-4">
-            <!-- Login with RFID Admin -->
-            <div class="flex w-full flex-col gap-8">
-                <div class="flex w-full flex-col gap-4 text-center">
-                    <h1 class="text-5xl font-medium">Tap your UP ID to begin</h1>
-                    <h2 class="text-lg font-normal">
-                        Login as an admin in SUSê by tapping your RFID!
-                    </h2>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <Input
-                        id="adminRfid"
-                        type="password"
-                        placeholder="••••••••••"
-                        pattern="^{'\\'}d{'{'}10{'}'}$"
-                        bind:value={rfidGlobal}
-                        on:keyup={handleKeydownRfid}
-                        class="max-w-full text-center text-base"
-                    />
-                    {#if rfidError}
-                        <p class="text-sm font-semibold text-muted-foreground text-red-500">Tap your RFID 😡</p>
-                    {/if}
-                </div>
-            </div>
+		<div class="flex w-full flex-col gap-4">
+			<!-- Login with RFID Admin -->
+			<div class="flex w-full flex-col gap-8">
+				<div class="flex w-full flex-col gap-4 text-center">
+					<h1 class="text-5xl font-medium">Tap your UP ID to begin</h1>
+					<h2 class="text-lg font-normal">Login as an admin in SUSê by tapping your RFID!</h2>
+				</div>
+				<div class="flex flex-col gap-2">
+					<Input
+						id="adminRfid"
+						type="password"
+						placeholder="••••••••••"
+						pattern="^{'\\'}d{'{'}10{'}'}$"
+						bind:value={rfidGlobal}
+						on:keyup={handleKeydownRfid}
+						class="max-w-full text-center text-base"
+					/>
+					{#if rfidError}
+						<p class="text-sm font-semibold text-muted-foreground text-red-500">Tap your RFID 😡</p>
+					{/if}
+				</div>
+			</div>
 
-            <!-- Divider -->
-            <div class="my-4 flex w-full items-center justify-center">
-                <div class="h-[0.5px] flex-grow bg-black/20"></div>
-                <!-- Left line -->
-                <span class="mx-4"><p>or</p></span>
-                <div class="h-[0.5px] flex-grow bg-black/20"></div>
-                <!-- Right line -->
-            </div>
+			<!-- Divider -->
+			<div class="my-4 flex w-full items-center justify-center">
+				<div class="h-[0.5px] flex-grow bg-black/20"></div>
+				<!-- Left line -->
+				<span class="mx-4"><p>or</p></span>
+				<div class="h-[0.5px] flex-grow bg-black/20"></div>
+				<!-- Right line -->
+			</div>
 
-            <!-- Login with UP Mail -->
+			<!-- Login with UP Mail -->
 			<Button on:click={selectLoginWithUserRfid} class="flex w-full gap-2">
 				<p class="text-base">Go Back to User Login</p>
 			</Button>
-        </div>
+		</div>
 	{:else}
 		<div class="flex w-full flex-col gap-4">
 			<!-- Login with UP Mail User -->

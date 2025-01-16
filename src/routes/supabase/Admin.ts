@@ -41,6 +41,9 @@ export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
     if (filter.section) {
         query = query.eq('section', filter.section)
     }
+    if (filter.is_approved != null) {
+        query = query.eq('is_approved', filter.section)
+    }
 
     const { data, error } = await query;
 
@@ -61,11 +64,11 @@ export async function createAdmin(adminData:AdminFormData): Promise<AdminRespons
     // Creates admin information in the admin_engglib table.
 
     const { error } = await supabaseClient.from('admin_engglib').insert({
-        admin_id: adminData.admin_id,
         rfid: adminData.rfid,
         nickname: adminData.nickname,
         email: adminData.email,
         is_active: false,
+        is_approved: false,
         library_id: parseInt(adminData.library),
         section_id: parseInt(adminData.section),
     })

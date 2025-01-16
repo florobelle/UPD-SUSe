@@ -9,7 +9,8 @@ export type UserFilter = {
 }
 
 export type AdminFilter = {
-    is_active: boolean,
+    is_active: boolean | null,
+    is_approved: boolean | null,
     library: string,
     section: string,
 }

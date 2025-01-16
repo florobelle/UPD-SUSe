@@ -97,7 +97,7 @@ export async function signUpAdmin(email:string): Promise<Error> {
     return { error: null };
 }
 
-export async function verifyAdmin(otp:string, email:string, adminData:AdminFormData): Promise<Error> {
+export async function verifyAdmin(otp:string, email:string, toRegister:boolean, formData:AdminFormData): Promise<Error> {
     // Logs in using admin email with OTP
     const { error } = await supabaseClient.auth.verifyOtp({
         email: email,
@@ -107,13 +107,15 @@ export async function verifyAdmin(otp:string, email:string, adminData:AdminFormD
 
     if (error) {
         return { error: error.toString()};
-    } else {
-        const { error } = await createAdmin(adminData);
+    } 
+    
+    if (toRegister) {
+        const { error } = await createAdmin(formData);
 
         if (error) {
             return { error: error.toString()};
         } else {
-            const { error } = await supabaseClient.auth.updateUser({ password: adminData.rfid})
+            const { error } = await supabaseClient.auth.updateUser({ password: formData.rfid})
 
             if (error) {
                 return { error: error.toString()};
