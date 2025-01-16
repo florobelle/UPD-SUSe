@@ -17,3 +17,7 @@ export { default as Info } from 'lucide-svelte/icons/info';
 export { default as PencilRuler } from 'lucide-svelte/icons/pencil-ruler';
 export { default as Logs } from 'lucide-svelte/icons/logs';
 export { default as MessageCircleHeart } from 'lucide-svelte/icons/message-circle-heart';
+export { default as ChevronRight } from 'lucide-svelte/icons/chevron-right';
+export { default as ChevronsRight } from 'lucide-svelte/icons/chevrons-right';
+export { default as ChevronLeft } from 'lucide-svelte/icons/chevron-left';
+export { default as ChevronsLeft } from 'lucide-svelte/icons/chevrons-left';
