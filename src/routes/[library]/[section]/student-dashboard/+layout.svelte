@@ -151,7 +151,7 @@
 	// AUTO LOG OUT DIALOG
 	// ----------------------------------------------------------------------------
 
-	let maxSessionDuration = 600 * 1000; // 10 seconds for testing
+	let maxSessionDuration = 60 * 1000; // 10 seconds for testing
 	let remainingTime = Math.floor(maxSessionDuration / 1000);
 	let logOutTimer: NodeJS.Timeout;
 	let checkInterval: NodeJS.Timeout;
@@ -219,7 +219,7 @@
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url.pathname == '/engglib1/circulation/student-dashboard' || to == null) {
+		if (to?.url.pathname == `/${library}/${section}/student-dashboard` || to == null) {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
