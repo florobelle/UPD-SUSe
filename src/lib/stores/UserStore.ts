@@ -1,3 +1,4 @@
+import type { UserTable } from '$lib/dataTypes/EntityTypes';
 import { writable, type Writable } from 'svelte/store';
 
 export type UserFormData = {
@@ -37,3 +38,5 @@ export const UserStore: Writable<UserInformation> = writable({
         is_enrolled: false
 	}
 });
+
+export let UserTableStore: Writable<Array<UserTable>> = writable();

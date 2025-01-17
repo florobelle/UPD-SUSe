@@ -6,11 +6,13 @@ export type AdminFormData = {
     rfid: string,
     nickname: string,
     email: string,
+    is_approved: boolean,
     library: string,
     section: string
 }
 
 type AdminInformation = {
+    toLogin: boolean,
     authenticated: boolean,
     toRegister: boolean,
     active_admin1: AdminTable | null,
@@ -19,6 +21,7 @@ type AdminInformation = {
 }
 
 export const AdminStore: Writable<AdminInformation> = writable({
+    toLogin: false,
     authenticated: false,
     toRegister: false,
     active_admin1: null,
@@ -28,7 +31,10 @@ export const AdminStore: Writable<AdminInformation> = writable({
         rfid: '',
         nickname: '',
         email: '',
+        is_approved: false,
         library: '',
         section: ''
     }
 })
+
+export const AdminTableStore: Writable<Array<AdminTable>> = writable();
