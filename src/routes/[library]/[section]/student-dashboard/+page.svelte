@@ -273,8 +273,8 @@
 
 	$: {
 		if ($UserStore.authenticated) {
-			getActiveUsageLogs();
 			getServices();
+			getActiveUsageLogs();
 			getActiveAdmins();
 		}
 	}

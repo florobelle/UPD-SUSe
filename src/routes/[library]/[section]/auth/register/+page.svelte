@@ -30,6 +30,7 @@
 		type College
 	} from '$lib/stores/CollegeProgramStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
+	import { page } from '$app/stores';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -118,9 +119,13 @@
 	// ----------------------------------------------------------------------------
 	$formData.username = $UserStore.formData.username ? $UserStore.formData.username : ''; // Auto-inputs the username if user picked Login with UP Mail
 
+    const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1];
+	const section: string = routes[2]; 
+
 	// Returns to Login if both username and rfid are lost after page refresh
 	if (browser && !$UserStore.formData.rfid && !$UserStore.formData.username) {
-		goto('./login');
+		goto(`/${library}/${section}/auth/login`);
 	}
 
 	async function saveFormData() {
@@ -147,7 +152,7 @@
 			toast.error(`Error with sending OTP: ${error}`);
 		} else {
 			toast.dismiss(loadID);
-			goto('./verify-otp');
+			goto(`/${library}/${section}/auth/verify-otp`);
 		}
 		return;
 	}

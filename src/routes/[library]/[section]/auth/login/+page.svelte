@@ -76,15 +76,15 @@
 				if (error) {
 					toast.dismiss(loadID);
 					toast.error(`Error with logging in with RFID: ${error}`);
-					goto(`/${routes[1]}/${routes[2]}/auth/login`);
+					goto(`/${library}/${section}/auth/login`);
 				} else {
 					toast.dismiss(loadID);
 					$AdminStore.formData.email = email;
-					goto(`/${routes[1]}/${routes[2]}/admin-dashboard/users`);
+					goto(`/${library}/${section}/admin-dashboard/users`);
 				}
 			} else {
 				toast.dismiss(loadID);
-				goto('./register-admin');
+				goto(`/${library}/${section}/auth/register-admin`);
 			}
 		} else {
 			rfidError = true;
@@ -110,15 +110,15 @@
 				if (error) {
 					toast.dismiss(loadID);
 					toast.error(`Error with logging in with RFID: ${error}`);
-					goto(`/${routes[1]}/${routes[2]}/auth/login`);
+					goto(`/${library}/${section}/auth/login`);
 				} else {
 					toast.dismiss(loadID);
 					$UserStore.formData.username = username;
-					goto(`/${routes[1]}/${routes[2]}/student-dashboard`);
+					goto(`/${library}/${section}/student-dashboard`);
 				}
 			} else {
 				toast.dismiss(loadID);
-				goto('./register');
+				goto(`/${library}/${section}/auth/register`);
 			}
 		} else {
 			rfidError = true;
@@ -143,14 +143,14 @@
 				if (error) {
 					toast.dismiss(loadID);
 					toast.error(`Error with sending OTP: ${error}`);
-					goto('./login');
+					goto(`/${library}/${section}/auth/login`);
 				} else {
 					toast.dismiss(loadID);
-					goto('./verify-otp');
+					goto(`/${library}/${section}/auth/verify-otp`);
 				}
 			} else {
 				toast.dismiss(loadID);
-				goto('./register');
+				goto(`/${library}/${section}/auth/register`);
 			}
 		} else {
 			UPMailError = true;
