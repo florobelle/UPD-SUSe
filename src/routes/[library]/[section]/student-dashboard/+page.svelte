@@ -28,6 +28,7 @@
 		type ServiceOption
 	} from '$lib/stores/ServiceStore';
 	import { readService } from '../../../supabase/Service';
+	import type { UsageLogView } from '$lib/dataTypes/EntityTypes';
 
 	export let data: { libraryName: string };
 
@@ -60,6 +61,7 @@
 			let serviceOption: { [key: string]: Array<ServiceOption> } = {};
 
 			for (const serviceType of serviceTypes) {
+                // service info store
 				serviceInfo[serviceType.service_type] = {
 					service_type: serviceType.service_type,
 					service_type_id: serviceType.service_type_id,
@@ -67,6 +69,7 @@
 					service_img_src: `../../../services/${serviceType.service_type}.png`
 				};
 
+                // service option store
 				if (serviceType.service_type == 'Discussion Room') {
 					serviceOption[serviceType.service_type] = [
 						{
@@ -214,9 +217,14 @@
 			toast.error(`Error with getting usagelogs: ${error}`);
 			return;
 		} else if (usagelogs != null) {
-			$ActiveUsageLogStore = usagelogs;
+            let activeUsagelogs:{ [key: string]: UsageLogView } = {};
+			for (const usagelog of usagelogs) {
+                activeUsagelogs[usagelog.service_type] = usagelog;
+            }
+
+            $ActiveUsageLogStore = activeUsagelogs;
 		}
-        console.log(usagelogs)
+        
 		return;
 	}
 
@@ -242,22 +250,22 @@
         return;
 	}
 
-	async function endAndUpdateUsage(service_id: number) {
+	async function endAndUpdateUsage(service_type:string) {
 		// ends a given usage log and service then updates the active usage log store
 		const loadID: string = toast.loading('Ending service...');
 		const { error } = await endService(
-			$ActiveUsageLogStore[0].usagelog_id,
-			service_id,
+			$ActiveUsageLogStore[service_type].usagelog_id,
+			$ActiveUsageLogStore[service_type].service_id,
 			$UserStore.formData.username,
-			$ActiveUsageLogStore.length == 1 ? false : true
+			Object.keys($ActiveUsageLogStore).length == 1 ? false : true
 		);
 		if (error) {
 			toast.dismiss(loadID);
 			return;
 		}
 		toast.dismiss(loadID);
-		getActiveUsageLogs();
 		getServices();
+		getActiveUsageLogs();
 		toast.success('Service ended!');
 	}
 
@@ -295,33 +303,32 @@
 				<div class="grid h-full grid-cols-4 gap-8">
 					<!-- SERVICES -->
 					{#each $ServiceTypeStore as serviceType}
-						{#if $ActiveUsageLogStore.length}
-                        <p>Usage Log!</p>
-                            <!-- <Dialog.Root>
+						{#if $ActiveUsageLogStore[serviceType.service_type]}
+                            <Dialog.Root>
                                 <Dialog.Trigger class="m-0 h-full w-full p-0">
                                     <ServiceCard
-                                        selectService={() => selectService(activeUsageLog.service_type)}
-                                        serviceName={activeUsageLog.service_type}
-                                        serviceImgSrc={getServiceImgSrc(activeUsageLog.service_type)}
+                                        selectService={() => selectService(serviceType.service_type)}
+                                        serviceName={serviceType.service_type}
+                                        serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
                                         inUse={true}
-                                        dateStarted={activeUsageLog.start}
+                                        dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
                                     />
                                 </Dialog.Trigger>
                                 <Dialog.Content>
                                     <Dialog.Header>
                                         <Dialog.Title>End</Dialog.Title>
-                                        <Dialog.Description>Please select the correct details!</Dialog.Description>
+                                        <Dialog.Description>Please confirm to end using {serviceType.service_type}.</Dialog.Description>
                                     </Dialog.Header>
 
                                     <Dialog.Footer>
                                         <Button
                                             on:click={() => {
-                                                endAndUpdateUsage(activeUsageLog.service_id);
+                                                endAndUpdateUsage(serviceType.service_type);
                                             }}>End</Button
                                         >
                                     </Dialog.Footer>
                                 </Dialog.Content>
-                            </Dialog.Root> -->
+                            </Dialog.Root>
                         {:else if $ServiceInfoStore[serviceType.service_type].available_number}
 							<Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
 								<!-- Service Card -->
@@ -338,7 +345,7 @@
 								<Dialog.Content class="min-w-fit">
 									<Dialog.Header>
 										<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
-										<Dialog.Description>Please select the correct details!</Dialog.Description>
+										<Dialog.Description>Please select the specific {serviceType.service_type} ID!</Dialog.Description>
 									</Dialog.Header>
 
 									<!-- Load Tabs -->
