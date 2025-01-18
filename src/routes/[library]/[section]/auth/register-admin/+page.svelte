@@ -50,6 +50,7 @@
             admin_id: 0,
             rfid: $AdminStore.formData.rfid,
             nickname: $formData.nickname,
+            is_approved: false,
             email: $formData.email,
             library: library == 'engglib1' ? '1' : '2',
             section: '1'

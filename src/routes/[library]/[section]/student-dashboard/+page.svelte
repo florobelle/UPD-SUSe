@@ -5,8 +5,6 @@
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import * as Select from '$lib/components/ui/select/index';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { servicesInfo } from '$lib/components/UIconfig/serviceConfig';
-	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index';
 	import * as Alert from '$lib/components/ui/alert';
@@ -22,7 +20,13 @@
 	import { page } from '$app/stores';
 	import { readAdmin } from '../../../supabase/Admin';
 	import { readServiceType } from '../../../supabase/ServiceType';
-	import { ServiceInfoStore, ServiceTypeStore, type ServiceInfo } from '$lib/stores/ServiceStore';
+	import {
+		ServiceInfoStore,
+		ServiceTypeStore,
+		type ServiceInfo,
+		type ServiceOption
+	} from '$lib/stores/ServiceStore';
+	import { readService } from '../../../supabase/Service';
 
 	export let data: { libraryName: string };
 
@@ -43,36 +47,142 @@
 	const section: string = routes[2]; // session
 
 	async function getServices() {
-        // Reads the service types and available services in the current library and section
+		// Reads the service types and available services in the current library and section
 		// and puts the returned values in $ServiceStore
 
-        const { serviceTypes, error } = await readServiceType();
+		const { serviceTypes, error } = await readServiceType();
 
-        if (error) {
-            toast.error(`Error with reading service types: ${error}`);
-        } else if (serviceTypes) {
-            $ServiceTypeStore = serviceTypes;
-            let serviceInfo:{ [key: string]: ServiceInfo } = {};
+		if (error) {
+			toast.error(`Error with reading service types: ${error}`);
+		} else if (serviceTypes) {
+			let serviceInfo: { [key: string]: ServiceInfo } = {};
+			let serviceOption: { [key: string]: Array<ServiceOption> } = {};
 
-            for (const serviceType of serviceTypes) {
-                serviceInfo[serviceType.service_type] = {
-                    service_type: serviceType.service_type,
-                    service_type_id: serviceType.service_type_id,
-                    available_number: 0,
-                    service_img_src: `../../../services/${serviceType.service_type}.png`,
+			for (const serviceType of serviceTypes) {
+				serviceInfo[serviceType.service_type] = {
+					service_type: serviceType.service_type,
+					service_type_id: serviceType.service_type_id,
+					available_number: 0,
+					service_img_src: `../../../services/${serviceType.service_type}.png`
+				};
+
+				if (serviceType.service_type == 'Discussion Room') {
+					serviceOption[serviceType.service_type] = [
+						{
+							type: 'select',
+							label: 'Frequency',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Programming',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Signal',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Transistor',
+							options: [],
+							variant: 'default'
+						}
+					];
+				} else if (serviceType.service_type == 'Umbrella') {
+					serviceOption[serviceType.service_type] = [
+						{
+							type: 'select',
+							label: 'Small Orange Umbrella',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Small Black Umbrella',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Big Orange Umbrella',
+							options: [],
+							variant: 'default'
+						}
+					];
+				} else {
+					serviceOption[serviceType.service_type] = [
+						{
+							type: 'select',
+							label: serviceType.service_type,
+							options: [],
+							variant: 'default'
+						}
+					];
+				}
+			}
+
+			const { services, error } = await readService({
+				service_type: '',
+				in_use: false,
+				library,
+				section
+			});
+
+			if (error) {
+				toast.error(`Error with getting services: ${error}`);
+				return;
+			} else if (services) {
+				for (const service of services) {
+
+                    if (service.service_type == "Discussion Room") {
+                        if (service.service.includes("Frequency")) {
+                            serviceOption[service.service_type][0].options.push(service)
+                        } else if (service.service.includes("Programming")) {
+                            serviceOption[service.service_type][1].options.push(service)
+                        } else if (service.service.includes("Signal")) {
+                            serviceOption[service.service_type][2].options.push(service)
+                        }else {
+                            serviceOption[service.service_type][3].options.push(service)
+                        }
+                    } else if (service.service_type == "Umbrella") {
+                        serviceInfo[service.service_type].available_number++;
+                        if (service.service.includes("Small Orange")) {
+                            serviceOption[service.service_type][0].options.push(service)
+                        } else if (service.service.includes("Small Black")) {
+                            serviceOption[service.service_type][1].options.push(service)
+                        } else {
+                            serviceOption[service.service_type][2].options.push(service)
+                        }
+                    } else {
+                        serviceInfo[service.service_type].available_number++;
+                        serviceOption[service.service_type][0].options.push(service)
+                    }
+				}
+
+                for (const subset of serviceOption["Discussion Room"]) {
+                    if (subset.options.length == 10) {
+                        serviceInfo["Discussion Room"].available_number++;
+                    }
                 }
-            }
-            $ServiceInfoStore = serviceInfo;
-        }
-        return;
-    }
+			}
+			$ServiceTypeStore = serviceTypes;
+			$ServiceInfoStore = serviceInfo;
+            console.log(serviceInfo)
+		}
+		return;
+	}
 
 	async function getActiveAdmins() {
 		// gets two active admins from database
 		const { admins, error } = await readAdmin({
-            email: '',
+			email: '',
 			is_active: true,
-            is_approved: true,
+			is_approved: true,
 			library,
 			section
 		});
@@ -83,6 +193,7 @@
 		} else if (admins) {
 			$AdminStore.active_admin1 = admins[0];
 			$AdminStore.active_admin2 = admins[1];
+            $AdminStore = $AdminStore;
 		}
 		return;
 	}
@@ -125,7 +236,7 @@
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
 		// getServices();
-        selectedOption = null;
+		// selectedOption = null;
 		toast.success('Service availed!');
 	}
 
@@ -150,50 +261,52 @@
 
 	// ----------------------------------------------------------------------------
 
-	let selectedOption: any;
-	let tabSelected: string;
+	// let selectedOption: any;
+	// let tabSelected: string;
 
-	function getServiceImgSrc(serviceType: string) {
-		const service = servicesInfo.find((s) => s.service_type === serviceType);
-		return service ? service.service_img_src : '';
+	// function getServiceImgSrc(serviceType: string) {
+	// 	const service = servicesInfo.find((s) => s.service_type === serviceType);
+	// 	return service ? service.service_img_src : '';
+	// }
+
+	// ----------------------------------------------------------------------------
+
+	$: {
+		if ($UserStore.authenticated) {
+			getActiveUsageLogs();
+			getServices();
+			getActiveAdmins();
+		}
 	}
-
-    // ----------------------------------------------------------------------------
-
-    $: {
-        if ($UserStore.authenticated) {
-            getActiveUsageLogs();
-            getServices();
-            getActiveAdmins();
-        }
-    }
 </script>
 
 <Toaster />
 
 <ScrollArea class="h-screen">
 	<div class="flex h-full w-full flex-col gap-10 p-20">
-		<div class="flex w-full flex-col gap-4 grow">
+		<div class="flex w-full grow flex-col gap-4">
 			<h1 class="text-3xl font-medium">
 				Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
 			</h1>
 
 			{#if $UserStore.formData.is_enrolled}
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
-                <div class="grid h-full grid-cols-4 gap-8">
+				<div class="grid h-full grid-cols-4 gap-8">
 					<!-- SERVICES -->
 					{#each $ServiceTypeStore as serviceType}
-                        <Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
-                            <!-- Service Card -->
-                            <Dialog.Trigger class="m-0 h-full w-full p-0">
-                                <ServiceCard
-                                    selectService={() => selectService(serviceType.service_type)}
-                                    serviceName={serviceType.service_type}
-                                    serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
-                                    availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
-                                />
-                            </Dialog.Trigger>
-                        </Dialog.Root>
+						{#if $ServiceInfoStore[serviceType.service_type].available_number}
+                            <Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
+                                <!-- Service Card -->
+                                <Dialog.Trigger class="m-0 h-full w-full p-0">
+                                    <ServiceCard
+                                        selectService={() => selectService(serviceType.service_type)}
+                                        serviceName={serviceType.service_type}
+                                        serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+                                        availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
+                                    />
+                                </Dialog.Trigger>
+                            </Dialog.Root>
+                        {/if}
 					{/each}
 				</div>
 			{:else}
@@ -201,7 +314,8 @@
 					<CircleAlert class="h-4 w-4" />
 					<Alert.Title>Heads up!</Alert.Title>
 					<Alert.Description>
-						Please show your Form 5 to the library admin to have your account approved and soon avail {data.libraryName} miscellaneous services.
+						Please show your Form 5 to the library admin to have your account approved and soon
+						avail {data.libraryName} miscellaneous services.
 					</Alert.Description>
 				</Alert.Root>
 			{/if}

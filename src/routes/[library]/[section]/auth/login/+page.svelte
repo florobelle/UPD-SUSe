@@ -245,6 +245,7 @@
 	async function selectLoginWithUserRfid() {
 		loginWithRfid = true;
 		$AdminStore.toLogin = false;
+        $AdminStore = $AdminStore;
 		await tick(); // Ensure DOM updates before interacting
 		deselectText('UPmail');
 		deselectText('adminRfid');

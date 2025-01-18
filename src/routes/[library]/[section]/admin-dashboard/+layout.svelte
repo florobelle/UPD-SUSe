@@ -49,6 +49,7 @@
 		// gets user data and starts countdown if login is successfull
 		$AdminStore.authenticated = true;
 		$AdminStore.formData.email = admin?.email ? admin.email : '';
+        $AdminStore = $AdminStore;
 
         toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
@@ -111,6 +112,7 @@
 
 		$AdminStore.authenticated = false;
 		$AdminStore.formData.email = '';
+        $AdminStore = $AdminStore;
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
@@ -227,6 +229,8 @@
 			$AdminStore.formData.is_approved = admins[0].is_approved;
 			$AdminStore.formData.library = library;
 			$AdminStore.formData.section = section;
+
+            $AdminStore = $AdminStore;
 		}
 		return true;
 	}

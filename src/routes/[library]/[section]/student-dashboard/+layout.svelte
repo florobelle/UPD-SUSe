@@ -16,12 +16,6 @@
 	import { readUser } from '../../../supabase/User';
 
     import * as Dialog from '$lib/components/ui/dialog';
-    import Button from '$lib/components/ui/button/button.svelte';
-	import { readAdmin } from '../../../supabase/Admin';
-	import { AdminStore } from '$lib/stores/AdminStore';
-	import { readService } from '../../../supabase/Service';
-	import { serviceForms, servicesInfo } from '$lib/components/UIconfig/serviceConfig';
-	import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -57,6 +51,7 @@
         // gets user data and starts countdown if login is successfull
 		$UserStore.authenticated = true;
 		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
+        $UserStore = $UserStore;
 
 		toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
@@ -119,6 +114,7 @@
 
 		$UserStore.authenticated = false;
 		$UserStore.formData.username = '';
+        $UserStore = $UserStore;
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
@@ -257,6 +253,7 @@
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
 			$UserStore.formData.is_enrolled = users[0].is_enrolled;
+            $UserStore = $UserStore;
 		}
 		return true;
 	}
