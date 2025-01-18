@@ -19,10 +19,10 @@
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
-	import { readService } from '../../../supabase/Service';
-	import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 	import { page } from '$app/stores';
 	import { readAdmin } from '../../../supabase/Admin';
+	import { readServiceType } from '../../../supabase/ServiceType';
+	import { ServiceInfoStore, ServiceTypeStore, type ServiceInfo } from '$lib/stores/ServiceStore';
 
 	export let data: { libraryName: string };
 
@@ -43,46 +43,29 @@
 	const section: string = routes[2]; // session
 
 	async function getServices() {
-		// Reads the service types and available services in the current library and section
+        // Reads the service types and available services in the current library and section
 		// and puts the returned values in $ServiceStore
-		const { services, error } = await readService({
-			service_type: '',
-			in_use: false,
-			library,
-			section
-		});
 
-		if (error) {
-			toast.error(`Error with getting services: ${error}`);
-			return;
-		} else if (services != null) {
-			for (let card of servicesInfo) {
-				const specificServices: ServiceView[] = services.filter(
-					(value) => value.service_type == card.service_type
-				);
-				card.available_number = specificServices.length;
+        const { serviceTypes, error } = await readServiceType();
 
-				if (card.service_type == 'Umbrella') {
-					const smallOrange: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Small Orange')
-					);
-					const smallBlack: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Small Black')
-					);
-					const bigOrange: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Big Orange')
-					);
+        if (error) {
+            toast.error(`Error with reading service types: ${error}`);
+        } else if (serviceTypes) {
+            $ServiceTypeStore = serviceTypes;
+            let serviceInfo:{ [key: string]: ServiceInfo } = {};
 
-					serviceForms[card.service_type_id - 1][0].options = smallOrange;
-					serviceForms[card.service_type_id - 1][1].options = smallBlack;
-					serviceForms[card.service_type_id - 1][2].options = bigOrange;
-				} else {
-					serviceForms[card.service_type_id - 1][0].options = specificServices;
-				}
-			}
-		}
-		return;
-	}
+            for (const serviceType of serviceTypes) {
+                serviceInfo[serviceType.service_type] = {
+                    service_type: serviceType.service_type,
+                    service_type_id: serviceType.service_type_id,
+                    available_number: 0,
+                    service_img_src: `../../../services/${serviceType.service_type}.png`,
+                }
+            }
+            $ServiceInfoStore = serviceInfo;
+        }
+        return;
+    }
 
 	async function getActiveAdmins() {
 		// gets two active admins from database
@@ -96,12 +79,12 @@
 
 		if (error) {
 			toast.error(`Error with reading active admin information: ${error}`);
-			return false;
-		} else if (admins != null) {
+			return;
+		} else if (admins) {
 			$AdminStore.active_admin1 = admins[0];
 			$AdminStore.active_admin2 = admins[1];
 		}
-		return true;
+		return;
 	}
 
 	async function getActiveUsageLogs() {
@@ -141,7 +124,7 @@
 		}
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
-		getServices();
+		// getServices();
         selectedOption = null;
 		toast.success('Service availed!');
 	}
@@ -161,7 +144,7 @@
 		}
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
-		getServices();
+		// getServices();
 		toast.success('Service ended!');
 	}
 
@@ -197,6 +180,22 @@
 
 			{#if $UserStore.formData.is_enrolled}
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
+                <div class="grid h-full grid-cols-4 gap-8">
+					<!-- SERVICES -->
+					{#each $ServiceTypeStore as serviceType}
+                        <Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
+                            <!-- Service Card -->
+                            <Dialog.Trigger class="m-0 h-full w-full p-0">
+                                <ServiceCard
+                                    selectService={() => selectService(serviceType.service_type)}
+                                    serviceName={serviceType.service_type}
+                                    serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+                                    availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
+                                />
+                            </Dialog.Trigger>
+                        </Dialog.Root>
+					{/each}
+				</div>
 			{:else}
 				<Alert.Root variant="destructive">
 					<CircleAlert class="h-4 w-4" />
