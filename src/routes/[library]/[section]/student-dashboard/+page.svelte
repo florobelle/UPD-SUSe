@@ -19,7 +19,6 @@
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
-	import { onMount } from 'svelte';
 	import { readService } from '../../../supabase/Service';
 	import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 	import { page } from '$app/stores';
@@ -171,14 +170,20 @@
 	let selectedOption: any;
 	let tabSelected: string;
 
-	onMount(() => {
-		getActiveUsageLogs();
-	});
-
 	function getServiceImgSrc(serviceType: string) {
 		const service = servicesInfo.find((s) => s.service_type === serviceType);
 		return service ? service.service_img_src : '';
 	}
+
+    // ----------------------------------------------------------------------------
+
+    $: {
+        if ($UserStore.authenticated) {
+            getActiveUsageLogs();
+            getServices();
+            getActiveAdmins();
+        }
+    }
 </script>
 
 <Toaster />
@@ -195,7 +200,7 @@
 
 				<div class="grid h-full grid-cols-4 gap-8">
 					<!-- ACTIVE SERVICES -->
-					{#each Object.values($ActiveUsageLogStore) as activeUsageLog}
+					{#each $ActiveUsageLogStore as activeUsageLog}
 						<Dialog.Root>
 							<Dialog.Trigger class="m-0 h-full w-full p-0">
 								<ServiceCard
@@ -343,7 +348,7 @@
 					<CircleAlert class="h-4 w-4" />
 					<Alert.Title>Heads up!</Alert.Title>
 					<Alert.Description>
-						Please show your Form 5 to the library admin to have your account approved.
+						Please show your Form 5 to the library admin to have your account approved and soon avail {data.libraryName} miscellaneous services.
 					</Alert.Description>
 				</Alert.Root>
 			{/if}

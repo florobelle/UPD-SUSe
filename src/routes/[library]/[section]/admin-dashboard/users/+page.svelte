@@ -131,7 +131,7 @@
                     <CircleAlert class="h-4 w-4" />
                     <Alert.Title>Heads up!</Alert.Title>
                     <Alert.Description>
-                        You are not yet an approved Administrator. Please contact Sir Jeffrey for approval.
+                        Please contact another library admin to have your account approved and soon view library records.
                     </Alert.Description>
                 </Alert.Root>
             {/if}
