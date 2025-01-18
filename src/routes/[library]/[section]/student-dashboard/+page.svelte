@@ -22,6 +22,7 @@
 	import { readServiceType } from '../../../supabase/ServiceType';
 	import {
 		ServiceInfoStore,
+		ServiceOptionStore,
 		ServiceTypeStore,
 		type ServiceInfo,
 		type ServiceOption
@@ -70,25 +71,25 @@
 					serviceOption[serviceType.service_type] = [
 						{
 							type: 'select',
-							label: 'Frequency',
+							label: 'Frequency DR',
 							options: [],
 							variant: 'default'
 						},
 						{
 							type: 'select',
-							label: 'Programming',
+							label: 'Programming DR',
 							options: [],
 							variant: 'default'
 						},
 						{
 							type: 'select',
-							label: 'Signal',
+							label: 'Signal DR',
 							options: [],
 							variant: 'default'
 						},
 						{
 							type: 'select',
-							label: 'Transistor',
+							label: 'Transistor DR',
 							options: [],
 							variant: 'default'
 						}
@@ -138,41 +139,40 @@
 				return;
 			} else if (services) {
 				for (const service of services) {
-
-                    if (service.service_type == "Discussion Room") {
-                        if (service.service.includes("Frequency")) {
-                            serviceOption[service.service_type][0].options.push(service)
-                        } else if (service.service.includes("Programming")) {
-                            serviceOption[service.service_type][1].options.push(service)
-                        } else if (service.service.includes("Signal")) {
-                            serviceOption[service.service_type][2].options.push(service)
-                        }else {
-                            serviceOption[service.service_type][3].options.push(service)
-                        }
-                    } else if (service.service_type == "Umbrella") {
-                        serviceInfo[service.service_type].available_number++;
-                        if (service.service.includes("Small Orange")) {
-                            serviceOption[service.service_type][0].options.push(service)
-                        } else if (service.service.includes("Small Black")) {
-                            serviceOption[service.service_type][1].options.push(service)
-                        } else {
-                            serviceOption[service.service_type][2].options.push(service)
-                        }
-                    } else {
-                        serviceInfo[service.service_type].available_number++;
-                        serviceOption[service.service_type][0].options.push(service)
-                    }
+					if (service.service_type == 'Discussion Room') {
+						if (service.service.includes('Frequency')) {
+							serviceOption[service.service_type][0].options.push(service);
+						} else if (service.service.includes('Programming')) {
+							serviceOption[service.service_type][1].options.push(service);
+						} else if (service.service.includes('Signal')) {
+							serviceOption[service.service_type][2].options.push(service);
+						} else {
+							serviceOption[service.service_type][3].options.push(service);
+						}
+					} else if (service.service_type == 'Umbrella') {
+						serviceInfo[service.service_type].available_number++;
+						if (service.service.includes('Small Orange')) {
+							serviceOption[service.service_type][0].options.push(service);
+						} else if (service.service.includes('Small Black')) {
+							serviceOption[service.service_type][1].options.push(service);
+						} else {
+							serviceOption[service.service_type][2].options.push(service);
+						}
+					} else {
+						serviceInfo[service.service_type].available_number++;
+						serviceOption[service.service_type][0].options.push(service);
+					}
 				}
 
-                for (const subset of serviceOption["Discussion Room"]) {
-                    if (subset.options.length == 10) {
-                        serviceInfo["Discussion Room"].available_number++;
-                    }
-                }
+				for (const subset of serviceOption['Discussion Room']) {
+					if (subset.options.length == 10) {
+						serviceInfo['Discussion Room'].available_number++;
+					}
+				}
 			}
 			$ServiceTypeStore = serviceTypes;
 			$ServiceInfoStore = serviceInfo;
-            console.log(serviceInfo)
+			$ServiceOptionStore = serviceOption;
 		}
 		return;
 	}
@@ -193,7 +193,7 @@
 		} else if (admins) {
 			$AdminStore.active_admin1 = admins[0];
 			$AdminStore.active_admin2 = admins[1];
-            $AdminStore = $AdminStore;
+			$AdminStore = $AdminStore;
 		}
 		return;
 	}
@@ -216,6 +216,7 @@
 		} else if (usagelogs != null) {
 			$ActiveUsageLogStore = usagelogs;
 		}
+        console.log(usagelogs)
 		return;
 	}
 
@@ -235,9 +236,10 @@
 		}
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
-		// getServices();
-		// selectedOption = null;
+		getServices();
+		selectedOption = null;
 		toast.success('Service availed!');
+        return;
 	}
 
 	async function endAndUpdateUsage(service_id: number) {
@@ -255,19 +257,18 @@
 		}
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
-		// getServices();
+		getServices();
 		toast.success('Service ended!');
 	}
 
 	// ----------------------------------------------------------------------------
 
-	// let selectedOption: any;
-	// let tabSelected: string;
-
-	// function getServiceImgSrc(serviceType: string) {
-	// 	const service = servicesInfo.find((s) => s.service_type === serviceType);
-	// 	return service ? service.service_img_src : '';
-	// }
+	let selectedOption: {
+		value: number;
+		label: string;
+		disabled: boolean;
+	} | null;
+	let tabSelected: string;
 
 	// ----------------------------------------------------------------------------
 
@@ -294,19 +295,142 @@
 				<div class="grid h-full grid-cols-4 gap-8">
 					<!-- SERVICES -->
 					{#each $ServiceTypeStore as serviceType}
-						{#if $ServiceInfoStore[serviceType.service_type].available_number}
-                            <Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
-                                <!-- Service Card -->
+						{#if $ActiveUsageLogStore.length}
+                        <p>Usage Log!</p>
+                            <!-- <Dialog.Root>
                                 <Dialog.Trigger class="m-0 h-full w-full p-0">
                                     <ServiceCard
-                                        selectService={() => selectService(serviceType.service_type)}
-                                        serviceName={serviceType.service_type}
-                                        serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
-                                        availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
+                                        selectService={() => selectService(activeUsageLog.service_type)}
+                                        serviceName={activeUsageLog.service_type}
+                                        serviceImgSrc={getServiceImgSrc(activeUsageLog.service_type)}
+                                        inUse={true}
+                                        dateStarted={activeUsageLog.start}
                                     />
                                 </Dialog.Trigger>
-                            </Dialog.Root>
-                        {/if}
+                                <Dialog.Content>
+                                    <Dialog.Header>
+                                        <Dialog.Title>End</Dialog.Title>
+                                        <Dialog.Description>Please select the correct details!</Dialog.Description>
+                                    </Dialog.Header>
+
+                                    <Dialog.Footer>
+                                        <Button
+                                            on:click={() => {
+                                                endAndUpdateUsage(activeUsageLog.service_id);
+                                            }}>End</Button
+                                        >
+                                    </Dialog.Footer>
+                                </Dialog.Content>
+                            </Dialog.Root> -->
+                        {:else if $ServiceInfoStore[serviceType.service_type].available_number}
+							<Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
+								<!-- Service Card -->
+								<Dialog.Trigger class="m-0 h-full w-full p-0">
+									<ServiceCard
+										selectService={() => selectService(serviceType.service_type)}
+										serviceName={serviceType.service_type}
+										serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+										availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
+									/>
+								</Dialog.Trigger>
+
+								<!-- Dialog Content of Service Card -->
+								<Dialog.Content class="min-w-fit">
+									<Dialog.Header>
+										<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
+										<Dialog.Description>Please select the correct details!</Dialog.Description>
+									</Dialog.Header>
+
+									<!-- Load Tabs -->
+									{#if $ServiceOptionStore[serviceType.service_type].length > 1}
+										<Tabs.Root class="w-full">
+											<!-- Tab headings -->
+											<Tabs.List class="w-full">
+												{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+													<Tabs.Trigger
+														on:click={() => {
+															tabSelected = serviceInput.label;
+															selectedOption = null;
+														}}
+														value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
+													>
+												{/each}
+											</Tabs.List>
+
+											<!-- Content of tabs -->
+											{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+												{#key tabSelected}
+													<Tabs.Content value={serviceInput.label}>
+														<Select.Root
+															portal={null}
+															onSelectedChange={(s) => {
+																if (s) {
+																	selectedOption = s as unknown as {
+                                                                        value: number;
+                                                                        label: string;
+                                                                        disabled: boolean;
+                                                                    };
+																}
+															}}
+														>
+															<Select.Trigger>
+																<Select.Value placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`} />
+															</Select.Trigger>
+															<Select.Content>
+																<Select.Group>
+																	{#each serviceInput.options as option}
+																		<Select.Item value={option.service_id} label={option.service}
+																			>{option.service}</Select.Item
+																		>
+																	{/each}
+																</Select.Group>
+															</Select.Content>
+															<Select.Input name={serviceInput.label} />
+														</Select.Root>
+													</Tabs.Content>
+												{/key}
+											{/each}
+										</Tabs.Root>
+									{:else}
+										{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+											{#if serviceInput.type == 'select'}
+												<Label for={serviceInput.label}>{serviceInput.label}</Label>
+												<Select.Root
+													portal={null}
+													onSelectedChange={(s) => {
+														if (s) {
+															selectedOption = s as unknown as {
+																value: number;
+																label: string;
+																disabled: boolean;
+															};
+														}
+													}}
+												>
+													<Select.Trigger>
+														<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+													</Select.Trigger>
+													<Select.Content>
+														<Select.Group>
+															{#each serviceInput.options as option}
+																<Select.Item value={option.service_id} label={option.service}
+																	>{option.service}</Select.Item
+																>
+															{/each}
+														</Select.Group>
+													</Select.Content>
+													<Select.Input name={serviceInput.label} />
+												</Select.Root>
+											{/if}
+										{/each}
+									{/if}
+
+									<Dialog.Footer>
+										<Button on:click={() => availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}>Avail</Button>
+									</Dialog.Footer>
+								</Dialog.Content>
+							</Dialog.Root>
+						{/if}
 					{/each}
 				</div>
 			{:else}
