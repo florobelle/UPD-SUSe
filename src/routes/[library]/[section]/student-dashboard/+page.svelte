@@ -23,6 +23,7 @@
 	import { readService } from '../../../supabase/Service';
 	import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 	import { page } from '$app/stores';
+	import { readAdmin } from '../../../supabase/Admin';
 
 	export let data: { libraryName: string };
 
@@ -82,6 +83,26 @@
 			}
 		}
 		return;
+	}
+
+	async function getActiveAdmins() {
+		// gets two active admins from database
+		const { admins, error } = await readAdmin({
+            email: '',
+			is_active: true,
+            is_approved: true,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading active admin information: ${error}`);
+			return false;
+		} else if (admins != null) {
+			$AdminStore.active_admin1 = admins[0];
+			$AdminStore.active_admin2 = admins[1];
+		}
+		return true;
 	}
 
 	async function getActiveUsageLogs() {

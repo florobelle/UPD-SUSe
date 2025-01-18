@@ -28,8 +28,8 @@
 	const section: string = routes[2]; // session
 
 	try {
-		deleteCookie('accessToken', `${library}/${section}`);
-		deleteCookie('refreshToken', `${library}/${section}`);
+		deleteCookie('accessTokenUser', `${library}/${section}`);
+		deleteCookie('refreshTokenUser', `${library}/${section}`);
 		deleteCookie('accessTokenAdmin', `${library}/${section}`);
 		deleteCookie('refreshTokenAdmin', `${library}/${section}`);
 	} catch {}

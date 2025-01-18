@@ -47,8 +47,6 @@
 
 	function getSessionData(admin: User | undefined) {
 		// gets user data and starts countdown if login is successfull
-		toast.success(`You're now logged in!`);
-
 		$AdminStore.authenticated = true;
 		$AdminStore.formData.email = admin?.email ? admin.email : '';
 
@@ -70,27 +68,27 @@
 		}
 
 		let admin = session?.user;
-		const accessToken: string = readCookie('accessTokenAdmin');
-		const refreshToken: string = readCookie('refreshTokenAdmin');
+		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
+		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session && !accessToken && !refreshToken) {
+		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is currently a session with no cookies, save tokens in cookies
 			createCookie('accessTokenAdmin', session.access_token, 1, `${library}/${section}`);
 			createCookie('refreshTokenAdmin', session.refresh_token, 1, `${library}/${section}`);
 			getSessionData(admin);
-		} else if (!session && !accessToken && !refreshToken) {
+		} else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
 			isLoggedOut = true;
 			goto(`/${library}/${section}/auth/login`);
-		} else if (accessToken && refreshToken) {
+		} else if (accessTokenAdmin && refreshTokenAdmin) {
 			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
 				error
 			} = await supabaseClient.auth.setSession({
-				access_token: accessToken,
-				refresh_token: refreshToken
+				access_token: accessTokenAdmin,
+				refresh_token: refreshTokenAdmin
 			});
 			admin = session?.user;
 
@@ -116,10 +114,7 @@
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
-		} else {
-			toast.success('Successfull end of session.');
 		}
-
 		return;
 	}
 
