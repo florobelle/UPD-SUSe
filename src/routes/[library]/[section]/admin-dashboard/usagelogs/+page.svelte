@@ -6,10 +6,10 @@
 	import CircleAlert from 'lucide-svelte/icons/circle-alert';
 
 	// Backend Imports
-	import { UserTableStore } from '$lib/stores/UserStore';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { page } from '$app/stores';
-	import { readUser } from '../../../../supabase/User';
+	import { readUsageLog } from '../../../../supabase/UsageLog';
+	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 
 	export let data: { libraryName: string };
 
@@ -21,23 +21,23 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-	async function getUserTable(): Promise<boolean> {
+    async function getUsageTable(): Promise<boolean> {
 		// gets user information from database
-		const { users, error } = await readUser({
-			lib_user_id: 0,
-			username: '',
-			is_enrolled: null,
-			is_active: null,
-			college: '',
-			program: '',
-			user_type: ''
+		const { usagelogs, error } = await readUsageLog({
+			usagelog_id: 0,
+            start: null,
+            end: null,
+            lib_user_id: 0,
+            service_type: '',
+            library,
+            section,  
 		});
 
 		if (error) {
-			toast.error(`Error with reading user table: ${error}`);
+			toast.error(`Error with reading usagelog table: ${error}`);
 			return false;
-		} else if (users != null) {
-			$UserTableStore = users;
+		} else if (usagelogs != null) {
+			$UsageLogTableStore = usagelogs;
 		}
 		return true;
 	}
@@ -46,7 +46,7 @@
 
 	$: {
         if ($AdminStore.authenticated) {
-            getUserTable();
+            getUsageTable();
         }
     }
 </script>
@@ -60,8 +60,8 @@
                 Welcome to {data.libraryName}, {$AdminStore.formData.nickname}!
             </h1>
             {#if $AdminStore.formData.is_approved}
-                {#each $UserTableStore as user}
-                    <p>{user.first_name}</p>
+                {#each $UsageLogTableStore as usagelog}
+                    <p>{usagelog.service}</p>
                 {/each}
             {:else}
                 <Alert.Root variant="destructive">

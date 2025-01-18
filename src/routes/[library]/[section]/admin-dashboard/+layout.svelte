@@ -180,6 +180,7 @@
 		const loadID: string = toast.loading('Logging you out...');
 		try {
 			isLoggedOut = true;
+            $AdminStore.toLogin = false;
 			await endAdminSession();
 			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
@@ -192,7 +193,7 @@
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url.pathname == `/${library}/${section}/admin-dashboard` || to == null) {
+		if (to?.url.pathname == `/${library}/${section}/admin-dashboard/users` || to == null) {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
