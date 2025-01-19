@@ -3,6 +3,7 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import { adminRoutes } from '../../../../lib/components/UIconfig/navConfig';
 	import toast from 'svelte-5-french-toast';
+	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 
 	// Backend Imports
 	import { page } from '$app/stores';
@@ -49,9 +50,9 @@
 		// gets user data and starts countdown if login is successfull
 		$AdminStore.authenticated = true;
 		$AdminStore.formData.email = admin?.email ? admin.email : '';
-        $AdminStore = $AdminStore;
+		$AdminStore = $AdminStore;
 
-        toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
+		toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
 		getAdmin();
@@ -59,10 +60,10 @@
 
 	async function startAdminSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
-        if ($AdminStore.authenticated) {
-            return;
-        }
-        
+		if ($AdminStore.authenticated) {
+			return;
+		}
+
 		if (!session) {
 			const sessionResponse = await supabaseClient.auth.getSession();
 			session = sessionResponse.data.session;
@@ -116,7 +117,7 @@
 
 		$AdminStore.authenticated = false;
 		$AdminStore.formData.email = '';
-        $AdminStore = $AdminStore;
+		$AdminStore = $AdminStore;
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
@@ -184,7 +185,7 @@
 		const loadID: string = toast.loading('Logging you out...');
 		try {
 			isLoggedOut = true;
-            $AdminStore.toLogin = false;
+			$AdminStore.toLogin = false;
 			await endAdminSession();
 			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
@@ -235,7 +236,7 @@
 			$AdminStore.formData.library = library; // NOTE: the admin's designation
 			$AdminStore.formData.section = section;
 
-            $AdminStore = $AdminStore;
+			$AdminStore = $AdminStore;
 		}
 		return true;
 	}
@@ -246,12 +247,12 @@
 	});
 </script>
 
-<div class="hidden h-full md:block">
+<div class=" h-full w-full md:block">
 	<Resizable.PaneGroup
 		on:mouseenter={resetTimer}
 		direction="horizontal"
 		{onLayoutChange}
-		class="items-stretch"
+		class="h-screen items-stretch"
 	>
 		<Resizable.Pane
 			defaultSize={defaultLayout[0]}
@@ -261,12 +262,15 @@
 			maxSize={20}
 			{onCollapse}
 			{onExpand}
+			class="fixed left-0 top-0 h-full"
 		>
 			<Nav logOutUser={logOutAdmin} {isCollapsed} routes={adminRoutes} />
 		</Resizable.Pane>
-		<Resizable.Handle withHandle />
-		<Resizable.Pane defaultSize={defaultLayout[2]}>
-			<slot></slot>
+		<Resizable.Handle withHandle class="fixed left-[15%] top-0 h-full" />
+		<Resizable.Pane defaultSize={defaultLayout[2]} class="ml-[15%]">
+			<ScrollArea>
+				<slot></slot>
+			</ScrollArea>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>
@@ -275,8 +279,8 @@
 	<Dialog.Content>
 		<Dialog.Header>
 			{#key remainingTime}
-                <Dialog.Title>You will be logged out in {remainingTime}...</Dialog.Title>
-            {/key}
+				<Dialog.Title>You will be logged out in {remainingTime}...</Dialog.Title>
+			{/key}
 			<Dialog.Description>Please move your mouse to stay logged in.</Dialog.Description>
 		</Dialog.Header>
 	</Dialog.Content>

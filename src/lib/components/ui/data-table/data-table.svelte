@@ -27,7 +27,7 @@
 		initialSort?: SortingState;
 	};
 	let { data, columns, initialSort = [] }: ExtendedDataTableProps<TData, TValue> = $props();
-	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
+	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 30 });
 	let sorting = $state<SortingState>(initialSort);
 	let columnFilters = $state<ColumnFiltersState>([]);
 	let globalFilter = $state<string>('');
@@ -183,7 +183,7 @@
 		onSelectedChange={(selected) => {
 			table.setPageSize(Number(selected?.value));
 		}}
-		selected={{ value: 10, label: '10' }}
+		selected={{ value: 30, label: '30' }}
 	>
 		<Select.Trigger class="h-8 w-[70px]">
 			<Select.Value placeholder="Select page size" />
