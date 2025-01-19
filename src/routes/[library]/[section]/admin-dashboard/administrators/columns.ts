@@ -38,6 +38,7 @@ export const columns: ColumnDef<AdminTable>[] = [
 		header: 'Is Active',
 		cell: ({ row }) => {
 			return renderComponent(DataTableActiveToggle, {
+				id: row.original.admin_id,
 				row: row.original,
 				isApproved: row.original.is_approved
 			});

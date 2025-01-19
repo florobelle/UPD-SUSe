@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Switch } from '$lib/components/ui/switch';
 
+	export let id: number;
 	export let row: any;
 	export let isApproved: boolean;
 	let isActive: boolean = false;
@@ -10,7 +11,7 @@
 
 		try {
 			// call the backend to update!
-			console.log(isActive, row.email);
+			console.log(isActive, id);
 		} catch (error) {
 			isActive = !isActive;
 		}
