@@ -50,6 +50,10 @@
 		// TODO: Implement delete logic
 		console.log('Deleting row:', id);
 	}
+
+	function approveUser() {
+		console.log(row.email);
+	}
 </script>
 
 {#if isEdit}
@@ -66,14 +70,25 @@
 {:else}
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
-			<Button
-				variant="ghost"
-				builders={[builder]}
-				class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-			>
-				<Ellipsis class="size-4" />
-				<span class="sr-only">Open Menu</span>
-			</Button>
+			<div class="flex flex-row">
+				<!-- Edit, delete -->
+				<Button
+					variant="ghost"
+					builders={[builder]}
+					class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+				>
+					<Ellipsis class="size-4" />
+					<span class="sr-only">Open Menu</span>
+				</Button>
+
+				<!-- Approve -->
+				{#if 'is_approved' in row && !row.is_approved}
+					<Button on:click={approveUser} variant="ghost" class="flex h-8 w-8 p-0">
+						<Check class="size-4" color="green" />
+						<span class="sr-only">Approve User</span>
+					</Button>
+				{/if}
+			</div>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
