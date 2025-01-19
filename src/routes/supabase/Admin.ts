@@ -33,7 +33,12 @@ export async function readEmail(rfid:string): Promise<Email> {
 
 export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
     // reads the admin information in the admin_engglib
-    let query = supabaseClient.from(`public_admin_${filter.library}`).select("*");
+    let table:string = `admin_engglib`
+    if (filter.library) {
+        table = `public_admin_${filter.library}`;
+    }
+    
+    let query = supabaseClient.from(table).select("*");
 
     if (filter.is_active != null) {
         query = query.eq('is_active', filter.is_active)

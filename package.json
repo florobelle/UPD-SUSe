@@ -48,6 +48,7 @@
 	"dependencies": {
 		"@supabase/supabase-js": "^2.47.6",
 		"@sveltejs/adapter-vercel": "^5.5.2",
+		"@tanstack/table-core": "^8.20.5",
 		"dotenv": "^16.4.7",
 		"svelte-5-french-toast": "^2.0.1"
 	}

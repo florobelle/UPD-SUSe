@@ -59,6 +59,10 @@
 
 	async function startAdminSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
+        if ($AdminStore.authenticated) {
+            return;
+        }
+        
 		if (!session) {
 			const sessionResponse = await supabaseClient.auth.getSession();
 			session = sessionResponse.data.session;
@@ -193,7 +197,7 @@
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url.pathname == `/${library}/${section}/admin-dashboard/users` || to == null) {
+		if (to?.url.pathname.includes(`/${library}/${section}/admin-dashboard`) || to == null) {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
@@ -215,8 +219,8 @@
 			email: $AdminStore.formData.email,
 			is_active: null,
 			is_approved: null,
-			library,
-			section
+			library: '',
+			section: ''
 		});
 
 		if (error) {
@@ -228,10 +232,11 @@
 			$AdminStore.formData.nickname = admins[0].nickname;
 			$AdminStore.formData.email = admins[0].email;
 			$AdminStore.formData.is_approved = admins[0].is_approved;
-			$AdminStore.formData.library = library;
+			$AdminStore.formData.library = library; // NOTE: the admin's designation
 			$AdminStore.formData.section = section;
 
             $AdminStore = $AdminStore;
+            console.log($AdminStore)
 		}
 		return true;
 	}

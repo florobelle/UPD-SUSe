@@ -19,7 +19,7 @@
 				<Tooltip.Root openDelay={0}>
 					<Tooltip.Trigger asChild let:builder>
 						<Button
-							href="#"
+							href={route.url}
 							builders={[builder]}
 							variant={route.variant}
 							size="icon"
@@ -44,7 +44,7 @@
 				</Tooltip.Root>
 			{:else}
 				<Button
-					href="#"
+                    href={route.url}
 					variant={route.variant}
 					size="sm"
 					class={cn('justify-start', {
@@ -70,6 +70,7 @@
 	<div class="mt-auto w-full p-2">
 		{#if isCollapsed}
 			<Button
+                on:click={logOutUser}
 				class="size-9 h-9 w-full justify-start pl-3 dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white"
 				href="#"
 				size="icon"

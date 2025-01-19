@@ -44,10 +44,10 @@ export type UsageLogView = {
     end: Date | null,
     service_id: number,
     service: string,
+    service_type: string,
     lib_user_id: number,
     first_name: string,
     last_name: string,
-    service_type: string,
     section: string,
     admin_id1: number,
     admin_id2: number
