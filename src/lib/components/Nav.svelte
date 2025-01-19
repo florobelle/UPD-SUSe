@@ -3,8 +3,14 @@
 	import { cn } from '$lib/utils.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index';
 	import { LogOut } from 'lucide-svelte';
+	import { page } from '$app/stores';
 
 	let { logOutUser, isCollapsed, routes } = $props();
+
+	export const getVariant = (pathname: string, match: string): 'default' | 'ghost' => {
+		console.log('Checking route:', pathname, 'against', match); // Debugging
+		return pathname.includes(match) ? 'default' : 'ghost';
+	};
 </script>
 
 <div
@@ -21,7 +27,7 @@
 						<Button
 							href={route.url}
 							builders={[builder]}
-							variant={route.variant}
+							variant={getVariant($page.url.pathname, route.id)}
 							size="icon"
 							class={cn(
 								'size-9',
@@ -44,8 +50,8 @@
 				</Tooltip.Root>
 			{:else}
 				<Button
-                    href={route.url}
-					variant={route.variant}
+					href={route.url}
+					variant={getVariant($page.url.pathname, route.id)}
 					size="sm"
 					class={cn('justify-start', {
 						'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white':
@@ -70,7 +76,7 @@
 	<div class="mt-auto w-full p-2">
 		{#if isCollapsed}
 			<Button
-                on:click={logOutUser}
+				on:click={logOutUser}
 				class="size-9 h-9 w-full justify-start pl-3 dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white"
 				href="#"
 				size="icon"
