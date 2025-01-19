@@ -61,7 +61,7 @@
 			let serviceOption: { [key: string]: Array<ServiceOption> } = {};
 
 			for (const serviceType of serviceTypes) {
-                // service info store
+				// service info store
 				serviceInfo[serviceType.service_type] = {
 					service_type: serviceType.service_type,
 					service_type_id: serviceType.service_type_id,
@@ -69,7 +69,7 @@
 					service_img_src: `../../../services/${serviceType.service_type}.png`
 				};
 
-                // service option store
+				// service option store
 				if (serviceType.service_type == 'Discussion Room') {
 					serviceOption[serviceType.service_type] = [
 						{
@@ -217,23 +217,23 @@
 			toast.error(`Error with getting usagelogs: ${error}`);
 			return;
 		} else if (usagelogs != null) {
-            let activeUsagelogs:{ [key: string]: UsageLogView } = {};
+			let activeUsagelogs: { [key: string]: UsageLogView } = {};
 			for (const usagelog of usagelogs) {
-                activeUsagelogs[usagelog.service_type] = usagelog;
-            }
+				activeUsagelogs[usagelog.service_type] = usagelog;
+			}
 
-            $ActiveUsageLogStore = activeUsagelogs;
+			$ActiveUsageLogStore = activeUsagelogs;
 		}
-        
+
 		return;
 	}
 
 	async function availAndUpdateUsage(service_id: number) {
 		// avails a given service and updates the active usage log store
-        if (!$AdminStore.active_admin1) {
-            toast.error(`Error with availing a usage log: No active admin. Please let the admin know.`)
+		if (!$AdminStore.active_admin1) {
+			toast.error(`Error with availing a usage log: No active admin. Please let the admin know.`);
 			return;
-        }
+		}
 		const loadID: string = toast.loading('Availing service...');
 		const { error } = await availService(
 			service_id,
@@ -244,7 +244,7 @@
 
 		if (error) {
 			toast.dismiss(loadID);
-            toast.error(`Error with availing a usage log: ${error}`)
+			toast.error(`Error with availing a usage log: ${error}`);
 			return;
 		}
 		toast.dismiss(loadID);
@@ -252,10 +252,10 @@
 		getServices();
 		selectedOption = null;
 		toast.success('Service availed!');
-        return;
+		return;
 	}
 
-	async function endAndUpdateUsage(service_type:string) {
+	async function endAndUpdateUsage(service_type: string) {
 		// ends a given usage log and service then updates the active usage log store
 		const loadID: string = toast.loading('Ending service...');
 		const { error } = await endService(
@@ -309,32 +309,34 @@
 					<!-- SERVICES -->
 					{#each $ServiceTypeStore as serviceType}
 						{#if $ActiveUsageLogStore[serviceType.service_type]}
-                            <Dialog.Root>
-                                <Dialog.Trigger class="m-0 h-full w-full p-0">
-                                    <ServiceCard
-                                        selectService={() => selectService(serviceType.service_type)}
-                                        serviceName={serviceType.service_type}
-                                        serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
-                                        inUse={true}
-                                        dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
-                                    />
-                                </Dialog.Trigger>
-                                <Dialog.Content>
-                                    <Dialog.Header>
-                                        <Dialog.Title>End</Dialog.Title>
-                                        <Dialog.Description>Please confirm to end using {serviceType.service_type}.</Dialog.Description>
-                                    </Dialog.Header>
+							<Dialog.Root>
+								<Dialog.Trigger class="m-0 h-full w-full p-0">
+									<ServiceCard
+										selectService={() => selectService(serviceType.service_type)}
+										serviceName={serviceType.service_type}
+										serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+										inUse={true}
+										dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
+									/>
+								</Dialog.Trigger>
+								<Dialog.Content>
+									<Dialog.Header>
+										<Dialog.Title>End</Dialog.Title>
+										<Dialog.Description
+											>Please confirm to end using {serviceType.service_type}.</Dialog.Description
+										>
+									</Dialog.Header>
 
-                                    <Dialog.Footer>
-                                        <Button
-                                            on:click={() => {
-                                                endAndUpdateUsage(serviceType.service_type);
-                                            }}>End</Button
-                                        >
-                                    </Dialog.Footer>
-                                </Dialog.Content>
-                            </Dialog.Root>
-                        {:else if $ServiceInfoStore[serviceType.service_type].available_number}
+									<Dialog.Footer>
+										<Button
+											on:click={() => {
+												endAndUpdateUsage(serviceType.service_type);
+											}}>End</Button
+										>
+									</Dialog.Footer>
+								</Dialog.Content>
+							</Dialog.Root>
+						{:else if $ServiceInfoStore[serviceType.service_type].available_number}
 							<Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
 								<!-- Service Card -->
 								<Dialog.Trigger class="m-0 h-full w-full p-0">
@@ -350,7 +352,9 @@
 								<Dialog.Content class="min-w-fit">
 									<Dialog.Header>
 										<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
-										<Dialog.Description>Please select the specific {serviceType.service_type} ID!</Dialog.Description>
+										<Dialog.Description
+											>Please select the specific {serviceType.service_type} ID!</Dialog.Description
+										>
 									</Dialog.Header>
 
 									<!-- Load Tabs -->
@@ -378,17 +382,19 @@
 															onSelectedChange={(s) => {
 																if (s) {
 																	selectedOption = s as unknown as {
-                                                                        value: number;
-                                                                        label: string;
-                                                                        disabled: boolean;
-                                                                    };
+																		value: number;
+																		label: string;
+																		disabled: boolean;
+																	};
 																}
 															}}
 														>
 															<Select.Trigger>
-																<Select.Value placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`} />
+																<Select.Value
+																	placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`}
+																/>
 															</Select.Trigger>
-															<Select.Content>
+															<Select.Content class="max-h-[10rem] overflow-y-auto">
 																<Select.Group>
 																	{#each serviceInput.options as option}
 																		<Select.Item value={option.service_id} label={option.service}
@@ -438,7 +444,11 @@
 									{/if}
 
 									<Dialog.Footer>
-										<Button on:click={() => availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}>Avail</Button>
+										<Button
+											on:click={() =>
+												availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
+											>Avail</Button
+										>
 									</Dialog.Footer>
 								</Dialog.Content>
 							</Dialog.Root>
