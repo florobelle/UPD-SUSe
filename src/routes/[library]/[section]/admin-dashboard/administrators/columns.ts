@@ -40,12 +40,13 @@ export const columns: ColumnDef<AdminTable>[] = [
 			return renderComponent(DataTableActiveToggle, {
 				id: row.original.admin_id,
 				row: row.original,
-				isApproved: row.original.is_approved
+				isActive: row.original.is_active
 			});
 		}
 	},
 	createSortableColumn('admin_id', 'ID', ''),
 	createSortableColumn('nickname', 'Nickname', 'text'),
+    createSortableColumn('email', 'Email', 'text'),
 	{
 		id: 'actions',
 		cell: ({ row }) => {

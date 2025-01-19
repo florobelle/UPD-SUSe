@@ -5,6 +5,10 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { rowChanges } from '$lib/stores/tableStore';
+	import toast from 'svelte-5-french-toast';
+	import { updateUser } from '../../../../routes/supabase/User';
+	import { updateAdmin } from '../../../../routes/supabase/Admin';
+	import { UserTableStore } from '$lib/stores/UserStore';
 
 	export let id: number;
 	export let row: any;
@@ -51,12 +55,34 @@
 		console.log('Deleting row:', id);
 	}
 
-	function approveUser() {
-		console.log(id);
-	}
+    async function approveUser() {
+        // approves an admin to access records
+        const loadID: string = toast.loading('Approving user...');
+        const { error } = await updateUser({ is_approved: true}, '', id);
 
-    function approveAdmin() {
-        console.log(id);
+        if (error) {
+            toast.dismiss(loadID);
+			toast.error(`Error with updating user with id ${id}: ${error}`);
+			return;
+        }
+        toast.dismiss(loadID);
+        toast.success("Successfully approved user!")
+        return;
+    }
+
+    async function approveAdmin() {
+        // approves an admin to access records
+        const loadID: string = toast.loading('Approving admin...');
+        const { error } = await updateAdmin({ is_approved: true}, '', id);
+
+        if (error) {
+            toast.dismiss(loadID);
+			toast.error(`Error with updating admin with id ${id}: ${error}`);
+			return;
+        }
+        toast.dismiss(loadID);
+        toast.success("Successfully approved admin!")
+        return;
     }
 </script>
 
