@@ -7,6 +7,7 @@ export type Route = {
 	label: string;
 	icon: ComponentType<Icon>;
 	variant: 'default' | 'ghost';
+    url: string;
 };
 
 export const studentRoutes: Route[] = [
@@ -14,25 +15,29 @@ export const studentRoutes: Route[] = [
 		title: 'Library Services',
 		label: '',
 		icon: Icons.PencilRuler,
-		variant: 'default'
+		variant: 'default',
+        url: ''
 	},
 	{
 		title: 'History',
 		label: '',
 		icon: Icons.Logs,
-		variant: 'ghost'
+		variant: 'ghost',
+        url: ''
 	},
 	{
-		title: 'About SUSe',
+		title: 'About SUSê',
 		label: '',
 		icon: Icons.Info,
-		variant: 'ghost'
+		variant: 'ghost',
+        url: ''
 	},
 	{
 		title: 'Send Feedback',
 		label: '',
 		icon: Icons.MessageCircleHeart,
-		variant: 'ghost'
+		variant: 'ghost',
+        url: ''
 	}
 ];
 
@@ -41,24 +46,28 @@ export const adminRoutes: Route[] = [
 		title: 'Library Users',
 		label: '',
 		icon: Icons.Users,
-		variant: 'default'
+		variant: 'default',
+        url: './users'
 	},
 	{
 		title: 'Services',
 		label: '',
 		icon: Icons.CircleAlert,
-		variant: 'ghost'
+		variant: 'ghost',
+        url: './services'
 	},
 	{
 		title: 'Usage Logs',
 		label: '',
 		icon: Icons.MessagesSquare,
-		variant: 'ghost'
+		variant: 'ghost',
+        url: './usagelogs'
 	},
 	{
 		title: 'Administrators',
 		label: '',
 		icon: Icons.ShoppingCart,
-		variant: 'ghost'
+		variant: 'ghost',
+        url: './administrators'
 	}
 ];

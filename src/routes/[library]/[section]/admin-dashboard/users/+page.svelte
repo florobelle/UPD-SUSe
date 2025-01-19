@@ -13,7 +13,6 @@
 	import { page } from '$app/stores';
 	import { readUser } from '../../../../supabase/User';
 
-	export let data: { libraryName: string };
 	export const initialSort = [
 		{ id: 'is_enrolled', desc: false },
 		{ id: 'is_active', desc: true }
