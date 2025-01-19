@@ -54,6 +54,10 @@
 	function approveUser() {
 		console.log(id);
 	}
+
+    function approveAdmin() {
+        console.log(id);
+    }
 </script>
 
 {#if isEdit}
@@ -82,11 +86,16 @@
 				</Button>
 
 				<!-- Approve -->
-				{#if 'is_approved' in row && !row.is_approved}
-					<Button on:click={approveUser} variant="ghost" class="flex h-8 w-8 p-0">
+				{#if 'is_approved' in row && 'admin_id' in row && !row.is_approved}
+					<Button on:click={approveAdmin} variant="ghost" class="flex h-8 w-8 p-0">
 						<Check class="size-4" color="green" />
 						<span class="sr-only">Approve User</span>
 					</Button>
+                {:else if 'is_approved' in row && 'lib_user_id' in row && !row.is_approved}
+                    <Button on:click={approveUser} variant="ghost" class="flex h-8 w-8 p-0">
+                        <Check class="size-4" color="green" />
+                        <span class="sr-only">Approve User</span>
+                    </Button>
 				{/if}
 			</div>
 		</DropdownMenu.Trigger>
