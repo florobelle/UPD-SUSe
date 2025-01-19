@@ -73,21 +73,21 @@ export const columns: ColumnDef<UserTable>[] = [
 			});
 		}
 	},
-	{
-		accessorKey: 'is_enrolled',
-		header: () => {
-			const activeHeaderSnippet = createRawSnippet(() => ({
-				render: () => `<div></div>`
-			}));
-			return renderSnippet(activeHeaderSnippet, '');
-		},
-		cell: () => {
-			const activeCellSnippet = createRawSnippet(() => ({
-				render: () => `<div></div>`
-			}));
-			return renderSnippet(activeCellSnippet, '');
-		}
-	},
+	// {
+	// 	accessorKey: 'is_enrolled',
+	// 	header: () => {
+	// 		const activeHeaderSnippet = createRawSnippet(() => ({
+	// 			render: () => `<div></div>`
+	// 		}));
+	// 		return renderSnippet(activeHeaderSnippet, '');
+	// 	},
+	// 	cell: () => {
+	// 		const activeCellSnippet = createRawSnippet(() => ({
+	// 			render: () => `<div></div>`
+	// 		}));
+	// 		return renderSnippet(activeCellSnippet, '');
+	// 	}
+	// },
 
 	createSortableColumn('lib_user_id', 'ID', ''),
 	createSortableColumn('username', 'Username', 'text'),
@@ -100,7 +100,10 @@ export const columns: ColumnDef<UserTable>[] = [
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			return renderComponent(DataTableActions, { id: row.original.lib_user_id, row: row.original });
+			return renderComponent(DataTableActions, {
+				id: row.original.lib_user_id,
+				row: row.original
+			});
 		}
 	}
 ];

@@ -52,7 +52,7 @@
 	}
 
 	function approveUser() {
-		console.log(row.email);
+		console.log(id);
 	}
 </script>
 
@@ -83,6 +83,12 @@
 
 				<!-- Approve -->
 				{#if 'is_approved' in row && !row.is_approved}
+					<Button on:click={approveUser} variant="ghost" class="flex h-8 w-8 p-0">
+						<Check class="size-4" color="green" />
+						<span class="sr-only">Approve User</span>
+					</Button>
+				{/if}
+				{#if 'is_enrolled' in row && row.is_enrolled}
 					<Button on:click={approveUser} variant="ghost" class="flex h-8 w-8 p-0">
 						<Check class="size-4" color="green" />
 						<span class="sr-only">Approve User</span>
