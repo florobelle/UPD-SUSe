@@ -7,6 +7,7 @@ import { renderComponent } from '$lib/components/ui/data-table/index.js';
 import DataTableHeaderButton from '$lib/components/ui/data-table/data-table-header-button.svelte';
 import DataTableEditableCell from '$lib/components/ui/data-table/data-table-editable-cell.svelte';
 import { type TableEditT } from '$lib/dataTypes/tableTypes';
+import DataTableActiveToggle from '$lib/components/ui/data-table/data-table-active-toggle.svelte';
 
 const createSortableColumn = (
 	accessorKey: string,
@@ -32,61 +33,16 @@ const createSortableColumn = (
 });
 
 export const columns: ColumnDef<AdminTable>[] = [
-	// {
-	// 	accessorKey: 'end',
-	// 	header: ({ column }) => {
-	// 		return renderComponent(DataTableHeaderButton, {
-	// 			header: 'Status',
-	// 			onclick: () => {
-	// 				const isSorted = column.getIsSorted();
-	// 				column.toggleSorting(isSorted === 'asc');
-	// 			}
-	// 		});
-	// 	},
-	// 	cell: ({ row }) => {
-	// 		const activeCellSnippet = createRawSnippet<[{ active: any; enrolled: any }]>((getData) => {
-	// 			const { active, enrolled } = getData();
-
-	// 			let dotColor = 'bg-gray-400';
-	// 			if (enrolled) {
-	// 				if (active) {
-	// 					dotColor = 'bg-green-500';
-	// 				}
-	// 			} else if (!enrolled) {
-	// 				dotColor = 'bg-yellow-400';
-	// 			}
-
-	// 			return {
-	// 				render: () => `
-	// 					<div class="flex justify-center">
-	// 						<div class="${dotColor} w-2 h-2 rounded-full"></div>
-	// 					</div>
-	// 					`
-	// 			};
-	// 		});
-
-	// 		return renderSnippet(activeCellSnippet, {
-	// 			active: row.getValue('is_active'),
-	// 			enrolled: row.getValue('is_enrolled')
-	// 		});
-	// 	}
-	// },
-	// {
-	// 	accessorKey: 'is_enrolled',
-	// 	header: () => {
-	// 		const activeHeaderSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeHeaderSnippet, '');
-	// 	},
-	// 	cell: () => {
-	// 		const activeCellSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeCellSnippet, '');
-	// 	}
-	// },
-
+	{
+		accessorKey: 'is_active',
+		header: 'Is Active',
+		cell: ({ row }) => {
+			return renderComponent(DataTableActiveToggle, {
+				row: row.original,
+				isApproved: row.original.is_approved
+			});
+		}
+	},
 	createSortableColumn('admin_id', 'ID', ''),
 	createSortableColumn('nickname', 'Nickname', 'text'),
 	{
