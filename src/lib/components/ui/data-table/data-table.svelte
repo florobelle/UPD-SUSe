@@ -17,6 +17,7 @@
 	} from '@tanstack/table-core';
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
+	import ScrollArea from '../scroll-area/scroll-area.svelte';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -142,7 +143,7 @@
 	/>
 </div>
 
-<div class="rounded-md border">
+<div class="w-full rounded-md border">
 	<Table.Root>
 		<Table.Header>
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
@@ -160,7 +161,7 @@
 				</Table.Row>
 			{/each}
 		</Table.Header>
-		<Table.Body>
+		<Table.Body class="w-full">
 			{#each table.getRowModel().rows as row (row.id)}
 				<Table.Row data-state={row.getIsSelected() && 'selected'}>
 					{#each row.getVisibleCells() as cell (cell.id)}

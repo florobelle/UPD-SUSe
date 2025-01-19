@@ -83,21 +83,11 @@ export const columns: ColumnDef<UserTable>[] = [
 	createSortableColumn('program', 'Program', 'program'),
 	createSortableColumn('user_type', 'User Type', 'user_type'),
 
-	// {
-	// 	accessorKey: 'is_active',
-	// 	header: () => {
-	// 		const activeHeaderSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div class="w-0"></div>`
-	// 		}));
-	// 		return renderSnippet(activeHeaderSnippet, '');
-	// 	},
-	// 	cell: () => {
-	// 		const activeCellSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div class="w-0"></div>`
-	// 		}));
-	// 		return renderSnippet(activeCellSnippet, '');
-	// 	}
-	// },
+	{
+		accessorKey: 'is_active',
+		header: () => {},
+		cell: () => {}
+	},
 	{
 		id: 'actions',
 		cell: ({ row }) => {
