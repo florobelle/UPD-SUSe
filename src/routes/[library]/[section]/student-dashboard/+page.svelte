@@ -298,7 +298,7 @@
 				Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
 			</h1>
 
-			{#if $UserStore.formData.is_enrolled}
+			{#if $UserStore.formData.is_approved}
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
 				<div class="grid h-full grid-cols-4 gap-8">
 					<!-- SERVICES -->

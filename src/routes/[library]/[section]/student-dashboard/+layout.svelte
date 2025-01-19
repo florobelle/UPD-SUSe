@@ -233,7 +233,7 @@
 		const { users, error } = await readUser({
 			lib_user_id: 0,
 			username: $UserStore.formData.username,
-			is_enrolled: null,
+			is_approved: null,
 			is_active: null,
 			college: '',
 			program: '',
@@ -252,7 +252,7 @@
 			$UserStore.formData.user_type = users[0].user_type;
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
-			$UserStore.formData.is_enrolled = users[0].is_enrolled;
+			$UserStore.formData.is_approved = users[0].is_approved;
             $UserStore = $UserStore;
 		}
 		return true;

@@ -1,7 +1,7 @@
 export type UserFilter = {
     lib_user_id: number,
     username: string,
-    is_enrolled: boolean | null,
+    is_approved: boolean | null,
     is_active: boolean | null,
     college: string,
     program: string,

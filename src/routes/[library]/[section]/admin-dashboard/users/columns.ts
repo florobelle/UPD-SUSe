@@ -69,7 +69,7 @@ export const columns: ColumnDef<UserTable>[] = [
 
 			return renderSnippet(activeCellSnippet, {
 				active: row.getValue('is_active'),
-				enrolled: row.getValue('is_enrolled')
+				enrolled: row.getValue('is_approved')
 			});
 		}
 	},

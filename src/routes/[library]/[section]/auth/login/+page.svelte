@@ -48,7 +48,7 @@
 			college: '',
 			program: '',
 			lib_user_id: '',
-			is_enrolled: false
+			is_approved: false
 		}
 	};
 

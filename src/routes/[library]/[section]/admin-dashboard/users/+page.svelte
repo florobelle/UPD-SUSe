@@ -14,7 +14,7 @@
 	import { readUser } from '../../../../supabase/User';
 
 	export const initialSort = [
-		{ id: 'is_enrolled', desc: false },
+		{ id: 'is_approved', desc: false },
 		{ id: 'is_active', desc: true }
 	];
 
@@ -31,7 +31,7 @@
 		const { users, error } = await readUser({
 			lib_user_id: 0,
 			username: '',
-			is_enrolled: null,
+			is_approved: null,
 			is_active: null,
 			college: '',
 			program: '',

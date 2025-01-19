@@ -4,7 +4,7 @@
 	import { users } from './data';
 
 	export const initialSort = [
-		{ id: 'is_enrolled', desc: false },
+		{ id: 'is_approved', desc: false },
 		{ id: 'is_active', desc: true }
 	];
 </script>
