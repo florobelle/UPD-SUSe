@@ -12,7 +12,7 @@ export type Route = {
 export const studentRoutes: Route[] = [
 	{
 		title: 'Library Services',
-		id: 'services',
+		id: 'student-dashboard',
 		icon: Icons.PencilRuler,
 		url: ''
 	},

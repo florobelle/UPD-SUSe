@@ -19,7 +19,7 @@
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
-	let defaultLayout = [100, 440, 655];
+	let defaultLayout = [20, 80];
 	let defaultCollapsed = false;
 	let navCollapsedSize: number = 4;
 	let isCollapsed = defaultCollapsed;
@@ -247,12 +247,12 @@
 	});
 </script>
 
-<div class="hidden h-full md:block">
+<div class="h-full">
 	<Resizable.PaneGroup
 		on:mouseenter={resetTimer}
 		direction="horizontal"
 		{onLayoutChange}
-		class="items-stretch"
+		class="w-full items-stretch"
 	>
 		<Resizable.Pane
 			defaultSize={defaultLayout[0]}
@@ -265,9 +265,9 @@
 		>
 			<Nav logOutUser={logOutAdmin} {isCollapsed} routes={adminRoutes} />
 		</Resizable.Pane>
-		<Resizable.Handle withHandle class="h-screen " />
+		<Resizable.Handle withHandle class="h-screen" />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
-			<ScrollArea class="h-screen">
+			<ScrollArea orientation="both" class="h-screen">
 				<slot></slot>
 			</ScrollArea>
 		</Resizable.Pane>
