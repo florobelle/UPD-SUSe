@@ -32,60 +32,40 @@ const createSortableColumn = (
 });
 
 export const columns: ColumnDef<ServiceView>[] = [
-	// {
-	// 	accessorKey: 'end',
-	// 	header: ({ column }) => {
-	// 		return renderComponent(DataTableHeaderButton, {
-	// 			header: 'Status',
-	// 			onclick: () => {
-	// 				const isSorted = column.getIsSorted();
-	// 				column.toggleSorting(isSorted === 'asc');
-	// 			}
-	// 		});
-	// 	},
-	// 	cell: ({ row }) => {
-	// 		const activeCellSnippet = createRawSnippet<[{ active: any; enrolled: any }]>((getData) => {
-	// 			const { active, enrolled } = getData();
+	{
+		accessorKey: 'in_use',
+		header: ({ column }) => {
+			return renderComponent(DataTableHeaderButton, {
+				header: 'In Use',
+				onclick: () => {
+					const isSorted = column.getIsSorted();
+					column.toggleSorting(isSorted === 'asc');
+				}
+			});
+		},
+		cell: ({ row }) => {
+			const activeCellSnippet = createRawSnippet<[{ in_use: any }]>((getData) => {
+				const { in_use } = getData();
 
-	// 			let dotColor = 'bg-gray-400';
-	// 			if (enrolled) {
-	// 				if (active) {
-	// 					dotColor = 'bg-green-500';
-	// 				}
-	// 			} else if (!enrolled) {
-	// 				dotColor = 'bg-yellow-400';
-	// 			}
+				let dotColor = 'bg-gray-400';
+				if (in_use) {
+					dotColor = 'bg-green-500';
+				}
 
-	// 			return {
-	// 				render: () => `
-	// 					<div class="flex justify-center">
-	// 						<div class="${dotColor} w-2 h-2 rounded-full"></div>
-	// 					</div>
-	// 					`
-	// 			};
-	// 		});
+				return {
+					render: () => `
+						<div class="flex px-8">
+							<div class="${dotColor} w-2 h-2 rounded-full"></div>
+						</div>
+					`
+				};
+			});
 
-	// 		return renderSnippet(activeCellSnippet, {
-	// 			active: row.getValue('is_active'),
-	// 			enrolled: row.getValue('is_approved')
-	// 		});
-	// 	}
-	// },
-	// {
-	// 	accessorKey: 'is_approved',
-	// 	header: () => {
-	// 		const activeHeaderSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeHeaderSnippet, '');
-	// 	},
-	// 	cell: () => {
-	// 		const activeCellSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeCellSnippet, '');
-	// 	}
-	// },
+			return renderSnippet(activeCellSnippet, {
+				in_use: row.original.in_use
+			});
+		}
+	},
 
 	createSortableColumn('service_id', 'ID', ''),
 	createSortableColumn('service_type', 'Service Type', 'text'),
