@@ -215,8 +215,8 @@
 			email: $AdminStore.formData.email,
 			is_active: null,
 			is_approved: null,
-			library,
-			section
+			library: '',
+			section: ''
 		});
 
 		if (error) {
@@ -228,10 +228,11 @@
 			$AdminStore.formData.nickname = admins[0].nickname;
 			$AdminStore.formData.email = admins[0].email;
 			$AdminStore.formData.is_approved = admins[0].is_approved;
-			$AdminStore.formData.library = library;
+			$AdminStore.formData.library = library; // NOTE: the admin's designation
 			$AdminStore.formData.section = section;
 
             $AdminStore = $AdminStore;
+            console.log($AdminStore)
 		}
 		return true;
 	}
