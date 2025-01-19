@@ -100,7 +100,7 @@ export const columns: ColumnDef<UsageLogView>[] = [
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			return renderComponent(DataTableActions, { id: row.original.usagelog_id, row: row.original });
+			return renderComponent(DataTableActions, { id: row.original.lib_user_id, row: row.original });
 		}
 	}
 ];

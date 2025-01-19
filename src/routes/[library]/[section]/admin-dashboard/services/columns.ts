@@ -1,4 +1,4 @@
-import type { UsageLogView } from '$lib/dataTypes/EntityTypes';
+import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 import type { ColumnDef } from '@tanstack/table-core';
 import { createRawSnippet } from 'svelte';
 import { renderSnippet } from '$lib/components/ui/data-table/index.js';
@@ -12,7 +12,7 @@ const createSortableColumn = (
 	accessorKey: string,
 	header: string,
 	editT: TableEditT
-): ColumnDef<UsageLogView> => ({
+): ColumnDef<ServiceView> => ({
 	accessorKey,
 	header: ({ column }) =>
 		renderComponent(DataTableHeaderButton, {
@@ -24,14 +24,14 @@ const createSortableColumn = (
 		}),
 	cell: ({ row }) =>
 		renderComponent(DataTableEditableCell, {
-			id: row.original.usagelog_id,
+			id: row.original.service_id,
 			colId: accessorKey,
 			editT,
 			initVal: row.getValue(accessorKey)
 		})
 });
 
-export const columns: ColumnDef<UsageLogView>[] = [
+export const columns: ColumnDef<ServiceView>[] = [
 	// {
 	// 	accessorKey: 'end',
 	// 	header: ({ column }) => {
@@ -87,20 +87,13 @@ export const columns: ColumnDef<UsageLogView>[] = [
 	// 	}
 	// },
 
-	createSortableColumn('usagelog_id', 'ID', ''),
-	createSortableColumn('start', 'Start Time', 'text'),
-	createSortableColumn('end', 'End Time', 'text'),
-	createSortableColumn('service', 'Service', 'text'),
+	createSortableColumn('service_id', 'ID', ''),
 	createSortableColumn('service_type', 'Service Type', 'text'),
-	createSortableColumn('lib_user_id', 'User ID', ''),
-	createSortableColumn('first_name', 'First Name', 'text'),
-	createSortableColumn('last_name', 'Last Name', 'text'),
-	createSortableColumn('admin_id1', 'Admin ID 1', ''),
-	createSortableColumn('admin_id2', 'Admin ID 2', ''),
+	createSortableColumn('service', 'Service', 'text'),
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			return renderComponent(DataTableActions, { id: row.original.usagelog_id, row: row.original });
+			return renderComponent(DataTableActions, { id: row.original.service_id, row: row.original });
 		}
 	}
 ];
