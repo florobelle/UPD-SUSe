@@ -144,7 +144,7 @@
 	// AUTO LOG OUT DIALOG
 	// ----------------------------------------------------------------------------
 
-	let maxSessionDuration = 600 * 1000; // 10 seconds for testing
+	let maxSessionDuration = 60 * 1000; // 10 seconds for testing
 	let remainingTime = Math.floor(maxSessionDuration / 1000);
 	let logOutTimer: NodeJS.Timeout;
 	let checkInterval: NodeJS.Timeout;
