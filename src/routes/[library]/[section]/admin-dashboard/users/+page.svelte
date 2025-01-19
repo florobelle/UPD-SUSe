@@ -14,7 +14,7 @@
 	import { readUser } from '../../../../supabase/User';
 
 	export const initialSort = [
-		{ id: 'is_enrolled', desc: false },
+		{ id: 'is_approved', desc: false },
 		{ id: 'is_active', desc: true }
 	];
 
@@ -31,7 +31,7 @@
 		const { users, error } = await readUser({
 			lib_user_id: 0,
 			username: '',
-			is_enrolled: null,
+			is_approved: null,
 			is_active: null,
 			college: '',
 			program: '',
@@ -62,10 +62,12 @@
 <div class="flex w-full justify-center">
 	{#if $AdminStore.formData.is_approved}
 		{#if $UserTableStore}
-            <div class="w-[95%]">
-                <DataTable data={$UserTableStore} {columns} {initialSort} />
-            </div>
-        {/if}
+			{#key $UserTableStore}
+                <div class="w-[95%]">
+                    <DataTable data={$UserTableStore} {columns} {initialSort} />
+                </div>
+            {/key}
+		{/if}
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">
 			<div class="flex w-full grow flex-col gap-4">

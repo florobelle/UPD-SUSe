@@ -17,6 +17,7 @@
 	} from '@tanstack/table-core';
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
+	import ScrollArea from '../scroll-area/scroll-area.svelte';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -27,7 +28,7 @@
 		initialSort?: SortingState;
 	};
 	let { data, columns, initialSort = [] }: ExtendedDataTableProps<TData, TValue> = $props();
-	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
+	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 30 });
 	let sorting = $state<SortingState>(initialSort);
 	let columnFilters = $state<ColumnFiltersState>([]);
 	let globalFilter = $state<string>('');
@@ -142,7 +143,7 @@
 	/>
 </div>
 
-<div class="rounded-md border">
+<div class="w-full rounded-md border">
 	<Table.Root>
 		<Table.Header>
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
@@ -160,7 +161,7 @@
 				</Table.Row>
 			{/each}
 		</Table.Header>
-		<Table.Body>
+		<Table.Body class="w-full">
 			{#each table.getRowModel().rows as row (row.id)}
 				<Table.Row data-state={row.getIsSelected() && 'selected'}>
 					{#each row.getVisibleCells() as cell (cell.id)}
@@ -183,7 +184,7 @@
 		onSelectedChange={(selected) => {
 			table.setPageSize(Number(selected?.value));
 		}}
-		selected={{ value: 10, label: '10' }}
+		selected={{ value: 30, label: '30' }}
 	>
 		<Select.Trigger class="h-8 w-[70px]">
 			<Select.Value placeholder="Select page size" />

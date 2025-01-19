@@ -4,70 +4,55 @@ import * as Icons from './icons';
 
 export type Route = {
 	title: string;
-	label: string;
+	id: string;
 	icon: ComponentType<Icon>;
-	variant: 'default' | 'ghost';
-    url: string;
+	url: string;
 };
 
 export const studentRoutes: Route[] = [
 	{
 		title: 'Library Services',
-		label: '',
+		id: 'student-dashboard',
 		icon: Icons.PencilRuler,
-		variant: 'default',
-        url: ''
-	},
-	{
-		title: 'History',
-		label: '',
-		icon: Icons.Logs,
-		variant: 'ghost',
-        url: ''
+		url: ''
 	},
 	{
 		title: 'About SUSê',
-		label: '',
+		id: 'about',
 		icon: Icons.Info,
-		variant: 'ghost',
-        url: ''
+		url: ''
 	},
 	{
 		title: 'Send Feedback',
-		label: '',
+		id: 'feedback',
 		icon: Icons.MessageCircleHeart,
-		variant: 'ghost',
-        url: ''
+		url: ''
 	}
 ];
 
 export const adminRoutes: Route[] = [
 	{
 		title: 'Library Users',
-		label: '',
+		id: 'users',
 		icon: Icons.Users,
-		variant: 'default',
-        url: './users'
+		url: './users'
 	},
 	{
 		title: 'Services',
-		label: '',
+		id: 'services',
 		icon: Icons.CircleAlert,
-		variant: 'ghost',
-        url: './services'
+		url: './services'
 	},
 	{
 		title: 'Usage Logs',
-		label: '',
+		id: 'usagelogs',
 		icon: Icons.MessagesSquare,
-		variant: 'ghost',
-        url: './usagelogs'
+		url: './usagelogs'
 	},
 	{
 		title: 'Administrators',
-		label: '',
+		id: 'administrators',
 		icon: Icons.ShoppingCart,
-		variant: 'ghost',
-        url: './administrators'
+		url: './administrators'
 	}
 ];

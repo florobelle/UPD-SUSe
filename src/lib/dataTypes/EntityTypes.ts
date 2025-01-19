@@ -6,7 +6,7 @@ export type UserTable = {
     middle_initial: string | null,
     last_name: string,
     phone_number: string,
-    is_enrolled: boolean,
+    is_approved: boolean,
     is_active: boolean,
     college: string,
     unit: string,

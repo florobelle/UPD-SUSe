@@ -5,6 +5,10 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { rowChanges } from '$lib/stores/tableStore';
+	import toast from 'svelte-5-french-toast';
+	import { updateUser } from '../../../../routes/supabase/User';
+	import { updateAdmin } from '../../../../routes/supabase/Admin';
+	import { UserTableStore } from '$lib/stores/UserStore';
 
 	export let id: number;
 	export let row: any;
@@ -50,6 +54,39 @@
 		// TODO: Implement delete logic
 		console.log('Deleting row:', id);
 	}
+
+    async function approveUser() {
+        // approves an admin to access records
+        const loadID: string = toast.loading('Approving user...');
+        const { error } = await updateUser({ is_approved: true}, '', id);
+
+        if (error) {
+            toast.dismiss(loadID);
+			toast.error(`Error with updating user with id ${id}: ${error}`);
+			return;
+        }
+        const user = $UserTableStore.filter((v) => v.lib_user_id == id )[0];
+        user.is_approved = true;
+        $UserTableStore = $UserTableStore;
+        toast.dismiss(loadID);
+        toast.success("Successfully approved user!")
+        return;
+    }
+
+    async function approveAdmin() {
+        // approves an admin to access records
+        const loadID: string = toast.loading('Approving admin...');
+        const { error } = await updateAdmin({ is_approved: true}, '', id);
+
+        if (error) {
+            toast.dismiss(loadID);
+			toast.error(`Error with updating admin with id ${id}: ${error}`);
+			return;
+        }
+        toast.dismiss(loadID);
+        toast.success("Successfully approved admin!")
+        return;
+    }
 </script>
 
 {#if isEdit}
@@ -66,14 +103,30 @@
 {:else}
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
-			<Button
-				variant="ghost"
-				builders={[builder]}
-				class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-			>
-				<Ellipsis class="size-4" />
-				<span class="sr-only">Open Menu</span>
-			</Button>
+			<div class="flex flex-row">
+				<!-- Edit, delete -->
+				<Button
+					variant="ghost"
+					builders={[builder]}
+					class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+				>
+					<Ellipsis class="size-4" />
+					<span class="sr-only">Open Menu</span>
+				</Button>
+
+				<!-- Approve -->
+				{#if 'is_approved' in row && 'admin_id' in row && !row.is_approved}
+					<Button on:click={approveAdmin} variant="ghost" class="flex h-8 w-8 p-0">
+						<Check class="size-4" color="green" />
+						<span class="sr-only">Approve User</span>
+					</Button>
+                {:else if 'is_approved' in row && 'lib_user_id' in row && !row.is_approved}
+                    <Button on:click={approveUser} variant="ghost" class="flex h-8 w-8 p-0">
+                        <Check class="size-4" color="green" />
+                        <span class="sr-only">Approve User</span>
+                    </Button>
+				{/if}
+			</div>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>

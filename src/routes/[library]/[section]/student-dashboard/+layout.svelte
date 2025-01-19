@@ -15,7 +15,7 @@
 	import { linkRfid } from '../../../supabase/LoginReg';
 	import { readUser } from '../../../supabase/User';
 
-    import * as Dialog from '$lib/components/ui/dialog';
+	import * as Dialog from '$lib/components/ui/dialog';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -47,17 +47,17 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-    function getSessionData(user: User | undefined) {
-        // gets user data and starts countdown if login is successfull
+	function getSessionData(user: User | undefined) {
+		// gets user data and starts countdown if login is successfull
 		$UserStore.authenticated = true;
 		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
-        $UserStore = $UserStore;
+		$UserStore = $UserStore;
 
 		toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
-        getUser();
-    }
+		getUser();
+	}
 
 	async function startUserSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -78,7 +78,7 @@
 			// if there is currently a session with no cookies, save tokens in cookies
 			createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
 			createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
-            getSessionData(user);
+			getSessionData(user);
 		} else if (!session && !accessTokenUser && !refreshTokenUser) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
@@ -100,7 +100,7 @@
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-                getSessionData(user);
+				getSessionData(user);
 			}
 		}
 		return;
@@ -114,7 +114,7 @@
 
 		$UserStore.authenticated = false;
 		$UserStore.formData.username = '';
-        $UserStore = $UserStore;
+		$UserStore = $UserStore;
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
@@ -144,7 +144,7 @@
 	// AUTO LOG OUT DIALOG
 	// ----------------------------------------------------------------------------
 
-	let maxSessionDuration = 600 * 1000; // 10 seconds for testing
+	let maxSessionDuration = 60 * 1000; // 10 seconds for testing
 	let remainingTime = Math.floor(maxSessionDuration / 1000);
 	let logOutTimer: NodeJS.Timeout;
 	let checkInterval: NodeJS.Timeout;
@@ -197,14 +197,14 @@
 
 	async function logOutUser() {
 		// Logs out the user without confirmation and goes to login page
-        const loadID: string = toast.loading('Logging you out...');
+		const loadID: string = toast.loading('Logging you out...');
 		try {
 			isLoggedOut = true;
 			await endUserSession();
-            toast.dismiss(loadID);
+			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-            toast.dismiss(loadID);
+			toast.dismiss(loadID);
 			toast.error('Logout error.');
 			return;
 		}
@@ -233,7 +233,7 @@
 		const { users, error } = await readUser({
 			lib_user_id: 0,
 			username: $UserStore.formData.username,
-			is_enrolled: null,
+			is_approved: null,
 			is_active: null,
 			college: '',
 			program: '',
@@ -252,14 +252,14 @@
 			$UserStore.formData.user_type = users[0].user_type;
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
-			$UserStore.formData.is_enrolled = users[0].is_enrolled;
+			$UserStore.formData.is_approved = users[0].is_approved;
             $UserStore = $UserStore;
 		}
 		return true;
 	}
 
 	// ----------------------------------------------------------------------------
-	
+
 	onMount(() => {
 		startUserSession();
 	});
@@ -301,8 +301,8 @@
 	<Dialog.Content>
 		<Dialog.Header>
 			{#key remainingTime}
-                <Dialog.Title>You will be logged out in {remainingTime}...</Dialog.Title>
-            {/key}
+				<Dialog.Title>You will be logged out in {remainingTime}...</Dialog.Title>
+			{/key}
 			<Dialog.Description>Please move your mouse to stay logged in.</Dialog.Description>
 		</Dialog.Header>
 	</Dialog.Content>

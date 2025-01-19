@@ -48,9 +48,26 @@
 			college: '',
 			program: '',
 			lib_user_id: '',
-			is_enrolled: false
+			is_approved: false
 		}
 	};
+
+    $AdminStore = {
+        toLogin: false,
+        authenticated: false,
+        toRegister: false,
+        active_admin1: null,
+        active_admin2: null,
+        formData: {
+            admin_id: 0,
+            rfid: '',
+            nickname: '',
+            email: '',
+            is_approved: false,
+            library: '',
+            section: ''
+        }
+    }
 
 	// ----------------------------------------------------------------------------
 

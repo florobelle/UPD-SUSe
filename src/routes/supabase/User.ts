@@ -43,8 +43,8 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     if (filter.username) {
         query = query.eq('username', filter.username)
     }
-    if (filter.is_enrolled != null) {
-        query = query.eq('is_enrolled', filter.is_enrolled)
+    if (filter.is_approved != null) {
+        query = query.eq('is_approved', filter.is_approved)
     }
     if (filter.is_active != null) {
         query = query.eq('is_active', filter.is_active)
@@ -85,7 +85,7 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
         middle_initial: userInfo.middle_name ? userInfo.middle_name : null,
         last_name: userInfo.last_name,
         phone_number: userInfo.phone_number,
-        is_enrolled: false,
+        is_approved: false,
         is_active: false,
         user_type_id: parseInt(userInfo.user_type),
         program_id: parseInt(userInfo.program),
@@ -105,10 +105,16 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     };
 }
 
-export async function updateUser(userInfo: object, username: string): Promise<UserResponse> {
+export async function updateUser(userInfo: object, username: string, lib_user_id:number=0): Promise<UserResponse> {
     // Updates user information in the lib_user table
-    
-    const { error } = await supabaseClient.from('lib_user').update(userInfo).eq('username', username)
+    let query = supabaseClient.from('lib_user').update(userInfo)
+
+    if (username) {
+        query = query.eq('username', username);
+    } else {
+        query = query.eq('lib_user_id', lib_user_id);
+    }
+    const { error } = await query
 
     if (error) {
         return {

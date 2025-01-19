@@ -91,10 +91,16 @@ export async function createAdmin(adminData:AdminFormData): Promise<AdminRespons
     };
 }
 
-export async function updateAdmin(adminInfo: object, email: string): Promise<AdminResponse> {
+export async function updateAdmin(adminInfo:object, email:string, admin_id:number=0): Promise<AdminResponse> {
     // Updates user information in the lib_user table
-    
-    const { error } = await supabaseClient.from('lib_user').update(adminInfo).eq('email', email)
+    let query = supabaseClient.from('admin_engglib').update(adminInfo)
+
+    if (email) {
+        query = query.eq('email', email);
+    } else {
+        query = query.eq('admin_id', admin_id);
+    }
+    const { error } = await query;
 
     if (error) {
         return {
