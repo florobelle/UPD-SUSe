@@ -16,12 +16,6 @@
 	import { readUser } from '../../../supabase/User';
 
     import * as Dialog from '$lib/components/ui/dialog';
-    import Button from '$lib/components/ui/button/button.svelte';
-	import { readAdmin } from '../../../supabase/Admin';
-	import { AdminStore } from '$lib/stores/AdminStore';
-	import { readService } from '../../../supabase/Service';
-	import { serviceForms, servicesInfo } from '$lib/components/UIconfig/serviceConfig';
-	import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -55,16 +49,14 @@
 
     function getSessionData(user: User | undefined) {
         // gets user data and starts countdown if login is successfull
-        toast.success(`You're now logged in!`);
-
 		$UserStore.authenticated = true;
 		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
+        $UserStore = $UserStore;
 
-		getUser();
-        getServices();
-        getActiveAdmins();
+		toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
+        getUser();
     }
 
 	async function startUserSession(session: Session | null = null) {
@@ -79,27 +71,27 @@
 		}
 
 		let user = session?.user;
-		const accessToken: string = readCookie('accessToken');
-		const refreshToken: string = readCookie('refreshToken');
+		const accessTokenUser: string = readCookie('accessTokenUser');
+		const refreshTokenUser: string = readCookie('refreshTokenUser');
 
-		if (session && !accessToken && !refreshToken) {
+		if (session && !accessTokenUser && !refreshTokenUser) {
 			// if there is currently a session with no cookies, save tokens in cookies
-			createCookie('accessToken', session.access_token, 1, `${library}/${section}`);
-			createCookie('refreshToken', session.refresh_token, 1, `${library}/${section}`);
+			createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
+			createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
             getSessionData(user);
-		} else if (!session && !accessToken && !refreshToken) {
+		} else if (!session && !accessTokenUser && !refreshTokenUser) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
 			isLoggedOut = true;
 			goto(`/${library}/${section}/auth/login`);
-		} else if (accessToken && refreshToken) {
+		} else if (accessTokenUser && refreshTokenUser) {
 			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
 				error
 			} = await supabaseClient.auth.setSession({
-				access_token: accessToken,
-				refresh_token: refreshToken
+				access_token: accessTokenUser,
+				refresh_token: refreshTokenUser
 			});
 			user = session?.user;
 
@@ -117,16 +109,15 @@
 	async function endUserSession() {
 		// Ends the user's current session if available.
 		const { error } = await supabaseClient.auth.signOut();
-		deleteCookie('accessToken', `${library}/${section}`);
-		deleteCookie('refreshToken', `${library}/${section}`);
+		deleteCookie('accessTokenUser', `${library}/${section}`);
+		deleteCookie('refreshTokenUser', `${library}/${section}`);
 
 		$UserStore.authenticated = false;
 		$UserStore.formData.username = '';
+        $UserStore = $UserStore;
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
-		} else {
-			toast.success('Successfull end of session.');
 		}
 
 		return;
@@ -153,7 +144,7 @@
 	// AUTO LOG OUT DIALOG
 	// ----------------------------------------------------------------------------
 
-	let maxSessionDuration = 60 * 1000; // 10 seconds for testing
+	let maxSessionDuration = 600 * 1000; // 10 seconds for testing
 	let remainingTime = Math.floor(maxSessionDuration / 1000);
 	let logOutTimer: NodeJS.Timeout;
 	let checkInterval: NodeJS.Timeout;
@@ -262,75 +253,13 @@
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
 			$UserStore.formData.is_enrolled = users[0].is_enrolled;
-		}
-		return true;
-	}
-
-	async function getServices() {
-		// Reads the service types and available services in the current library and section
-		// and puts the returned values in $ServiceStore
-		const { services, error } = await readService({
-			service_type: '',
-			in_use: false,
-			library,
-			section
-		});
-
-		if (error) {
-			toast.error(`Error with getting services: ${error}`);
-			return;
-		} else if (services != null) {
-			for (let card of servicesInfo) {
-				const specificServices: ServiceView[] = services.filter(
-					(value) => value.service_type == card.service_type
-				);
-				card.available_number = specificServices.length;
-
-				if (card.service_type == 'Umbrella') {
-					const smallOrange: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Small Orange')
-					);
-					const smallBlack: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Small Black')
-					);
-					const bigOrange: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Big Orange')
-					);
-
-					serviceForms[card.service_type_id - 1][0].options = smallOrange;
-					serviceForms[card.service_type_id - 1][1].options = smallBlack;
-					serviceForms[card.service_type_id - 1][2].options = bigOrange;
-				} else {
-					serviceForms[card.service_type_id - 1][0].options = specificServices;
-				}
-			}
-		}
-		return;
-	}
-
-	async function getActiveAdmins() {
-		// gets two active admins from database
-		const { admins, error } = await readAdmin({
-            email: '',
-			is_active: true,
-            is_approved: true,
-			library,
-			section
-		});
-
-		if (error) {
-			toast.error(`Error with reading active admin information: ${error}`);
-			return false;
-		} else if (admins != null) {
-			$AdminStore.active_admin1 = admins[0];
-			$AdminStore.active_admin2 = admins[1];
+            $UserStore = $UserStore;
 		}
 		return true;
 	}
 
 	// ----------------------------------------------------------------------------
-	toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
-
+	
 	onMount(() => {
 		startUserSession();
 	});
@@ -371,15 +300,10 @@
 <Dialog.Root bind:open={openLogoutDialog}>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>You will be logged out!</Dialog.Title>
-			<Dialog.Description>Please select stay to prevent being logged out</Dialog.Description>
-		</Dialog.Header>
-
-		<Dialog.Footer>
 			{#key remainingTime}
-				<Button on:click={resetTimer}>Stay {remainingTime}</Button>
-			{/key}
-			<Button on:click={logOutUser}>Logout</Button>
-		</Dialog.Footer>
+                <Dialog.Title>You will be logged out in {remainingTime}...</Dialog.Title>
+            {/key}
+			<Dialog.Description>Please move your mouse to stay logged in.</Dialog.Description>
+		</Dialog.Header>
 	</Dialog.Content>
 </Dialog.Root>

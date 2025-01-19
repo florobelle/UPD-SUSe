@@ -30,6 +30,7 @@
 		type College
 	} from '$lib/stores/CollegeProgramStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
+	import { page } from '$app/stores';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)
@@ -111,43 +112,49 @@
 		dataType: 'json'
 	});
 
-	const { form: formData, enhance } = form;
+	const { form: formData, enhance, validateForm } = form;
 
 	// ----------------------------------------------------------------------------
 	// BACKEND
 	// ----------------------------------------------------------------------------
 	$formData.username = $UserStore.formData.username ? $UserStore.formData.username : ''; // Auto-inputs the username if user picked Login with UP Mail
 
+	const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1];
+	const section: string = routes[2];
+
 	// Returns to Login if both username and rfid are lost after page refresh
 	if (browser && !$UserStore.formData.rfid && !$UserStore.formData.username) {
-		goto('./login');
+		goto(`/${library}/${section}/auth/login`);
 	}
 
 	async function saveFormData() {
 		// Saves user data in the User Store for inserting in the database once user has been authenticated
-		const loadID: string = toast.loading('Registering...');
-		$UserStore.toRegister = true;
-		$UserStore.formData = {
-			rfid: $UserStore.formData.rfid,
-            is_enrolled: false,
-			username: $formData.username,
-			first_name: $formData.first_name,
-			middle_name: $formData.middle_name,
-			last_name: $formData.last_name,
-			phone_number: $formData.phone_number,
-			user_type: $formData.user_type,
-			college: $formData.college,
-			program: $formData.program,
-			lib_user_id: $formData.id
-		};
+		if ((await validateForm()).valid) {
+			const loadID: string = toast.loading('Registering...');
+			$UserStore.toRegister = true;
+			$UserStore.formData = {
+				rfid: $UserStore.formData.rfid,
+				is_enrolled: false,
+				username: $formData.username,
+				first_name: $formData.first_name,
+				middle_name: $formData.middle_name,
+				last_name: $formData.last_name,
+				phone_number: `0${$formData.phone_number}`,
+				user_type: $formData.user_type,
+				college: $formData.college,
+				program: $formData.program,
+				lib_user_id: $formData.id
+			};
 
-		const { error } = await sendOtp($formData.username);
-		if (error) {
-			toast.dismiss(loadID);
-			toast.error(`Error with sending OTP: ${error}`);
-		} else {
-			toast.dismiss(loadID);
-			goto('./verify-otp');
+			const { error } = await sendOtp($formData.username);
+			if (error) {
+				toast.dismiss(loadID);
+				toast.error(`Error with sending OTP: ${error}`);
+			} else {
+				toast.dismiss(loadID);
+				goto(`/${library}/${section}/auth/verify-otp`);
+			}
 		}
 		return;
 	}
@@ -242,7 +249,7 @@
 
 							<PopoverContent>
 								<Command.Root shouldFilter={false}>
-									<Command.Empty>No program found.</Command.Empty>
+									<Command.Empty>No user found.</Command.Empty>
 									<Command.List>
 										<Command.Group>
 											{#each userTypes as userType}
@@ -303,7 +310,7 @@
 										bind:value={searchCollege}
 										placeholder="Search college"
 									/>
-									<Command.Empty>No program found.</Command.Empty>
+									<Command.Empty>No college found.</Command.Empty>
 									<Command.List>
 										<Command.Group>
 											{#each filteredColleges as college}

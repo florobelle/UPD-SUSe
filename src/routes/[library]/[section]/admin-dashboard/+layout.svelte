@@ -12,8 +12,7 @@
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { Session, User } from '@supabase/supabase-js';
 
-    import * as Dialog from '$lib/components/ui/dialog';
-    import Button from '$lib/components/ui/button/button.svelte';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { readAdmin } from '../../../supabase/Admin';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	// ----------------------------------------------------------------------------
@@ -46,17 +45,17 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-    function getSessionData(admin: User | undefined) {
-        // gets user data and starts countdown if login is successfull
-        toast.success(`You're now logged in!`);
-
+	function getSessionData(admin: User | undefined) {
+		// gets user data and starts countdown if login is successfull
 		$AdminStore.authenticated = true;
 		$AdminStore.formData.email = admin?.email ? admin.email : '';
+        $AdminStore = $AdminStore;
 
+        toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
-        getAdmin()
-    }
+		getAdmin();
+	}
 
 	async function startAdminSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -70,27 +69,27 @@
 		}
 
 		let admin = session?.user;
-		const accessToken: string = readCookie('accessTokenAdmin');
-		const refreshToken: string = readCookie('refreshTokenAdmin');
+		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
+		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session && !accessToken && !refreshToken) {
+		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is currently a session with no cookies, save tokens in cookies
 			createCookie('accessTokenAdmin', session.access_token, 1, `${library}/${section}`);
 			createCookie('refreshTokenAdmin', session.refresh_token, 1, `${library}/${section}`);
-            getSessionData(admin);
-		} else if (!session && !accessToken && !refreshToken) {
+			getSessionData(admin);
+		} else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
 			isLoggedOut = true;
 			goto(`/${library}/${section}/auth/login`);
-		} else if (accessToken && refreshToken) {
+		} else if (accessTokenAdmin && refreshTokenAdmin) {
 			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
 				error
 			} = await supabaseClient.auth.setSession({
-				access_token: accessToken,
-				refresh_token: refreshToken
+				access_token: accessTokenAdmin,
+				refresh_token: refreshTokenAdmin
 			});
 			admin = session?.user;
 
@@ -99,7 +98,7 @@
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-                getSessionData(admin);
+				getSessionData(admin);
 			}
 		}
 		return;
@@ -113,13 +112,11 @@
 
 		$AdminStore.authenticated = false;
 		$AdminStore.formData.email = '';
+        $AdminStore = $AdminStore;
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
-		} else {
-			toast.success('Successfull end of session.');
 		}
-
 		return;
 	}
 
@@ -180,14 +177,15 @@
 
 	async function logOutAdmin() {
 		// Logs out the user without confirmation and goes to login page
-        const loadID: string = toast.loading('Logging you out...');
+		const loadID: string = toast.loading('Logging you out...');
 		try {
 			isLoggedOut = true;
+            $AdminStore.toLogin = false;
 			await endAdminSession();
-            toast.dismiss(loadID);
+			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-            toast.dismiss(loadID);
+			toast.dismiss(loadID);
 			toast.error('Logout error.');
 			return;
 		}
@@ -195,7 +193,7 @@
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url.pathname == `/${library}/${section}/admin-dashboard` || to == null) {
+		if (to?.url.pathname == `/${library}/${section}/admin-dashboard/users` || to == null) {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
@@ -207,18 +205,18 @@
 		return;
 	});
 
-    // ----------------------------------------------------------------------------
-    // GET ADMIN DATA
-    // ----------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------
+	// GET ADMIN DATA
+	// ----------------------------------------------------------------------------
 
-    async function getAdmin(): Promise<boolean> {
+	async function getAdmin(): Promise<boolean> {
 		// gets user information from database
 		const { admins, error } = await readAdmin({
 			email: $AdminStore.formData.email,
 			is_active: null,
-            is_approved: null,
-            library,
-            section,
+			is_approved: null,
+			library,
+			section
 		});
 
 		if (error) {
@@ -226,19 +224,19 @@
 			return false;
 		} else if (admins != null) {
 			$AdminStore.formData.admin_id = admins[0].admin_id;
-            $AdminStore.formData.rfid = admins[0].rfid;
-            $AdminStore.formData.nickname = admins[0].nickname;
-            $AdminStore.formData.email = admins[0].email;
-            $AdminStore.formData.is_approved = admins[0].is_approved;
-            $AdminStore.formData.library = library;
-            $AdminStore.formData.section = section;
+			$AdminStore.formData.rfid = admins[0].rfid;
+			$AdminStore.formData.nickname = admins[0].nickname;
+			$AdminStore.formData.email = admins[0].email;
+			$AdminStore.formData.is_approved = admins[0].is_approved;
+			$AdminStore.formData.library = library;
+			$AdminStore.formData.section = section;
+
+            $AdminStore = $AdminStore;
 		}
 		return true;
 	}
 
 	// ----------------------------------------------------------------------------
-	toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
-
 	onMount(() => {
 		startAdminSession();
 	});
@@ -272,15 +270,10 @@
 <Dialog.Root bind:open={openLogoutDialog}>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>You will be logged out!</Dialog.Title>
-			<Dialog.Description>Please select stay to prevent being logged out</Dialog.Description>
-		</Dialog.Header>
-
-		<Dialog.Footer>
 			{#key remainingTime}
-				<Button on:click={resetTimer}>Stay {remainingTime}</Button>
-			{/key}
-			<Button on:click={logOutAdmin}>Logout</Button>
-		</Dialog.Footer>
+                <Dialog.Title>You will be logged out in {remainingTime}...</Dialog.Title>
+            {/key}
+			<Dialog.Description>Please move your mouse to stay logged in.</Dialog.Description>
+		</Dialog.Header>
 	</Dialog.Content>
 </Dialog.Root>

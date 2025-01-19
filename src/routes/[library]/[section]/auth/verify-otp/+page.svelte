@@ -8,14 +8,18 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 
 	let otp: string = '';
 
 	// ----------------------------------------------------------------------------
+    const routes: Array<string> = $page.url.pathname.split('/');
+	const library: string = routes[1];
+	const section: string = routes[2]; 
 
 	// Returns to Login if both username and rfid are lost after page refresh
 	if (browser && !$UserStore.formData.username) {
-		goto('./login');
+		goto(`/${library}/${section}/auth/login`);
 	}
 
 	async function checkOtpEnter() {
@@ -31,10 +35,10 @@
 			if (error) {
 				toast.dismiss(loadID);
 				toast.error(`Error with verifying OTP: ${error}`);
-				goto('./login');
+				goto(`/${library}/${section}/auth/login`);
 			} else {
 				toast.dismiss(loadID);
-				goto('../student-dashboard');
+				goto(`/${library}/${section}/student-dashboard`);
 			}
 		}
 

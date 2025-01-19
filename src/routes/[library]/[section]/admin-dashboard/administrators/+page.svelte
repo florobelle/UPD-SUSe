@@ -6,10 +6,9 @@
 	import CircleAlert from 'lucide-svelte/icons/circle-alert';
 
 	// Backend Imports
-	import { UserTableStore } from '$lib/stores/UserStore';
-	import { AdminStore } from '$lib/stores/AdminStore';
+	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
 	import { page } from '$app/stores';
-	import { readUser } from '../../../../supabase/User';
+	import { readAdmin } from '../../../../supabase/Admin';
 
 	export let data: { libraryName: string };
 
@@ -21,23 +20,21 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-	async function getUserTable(): Promise<boolean> {
+    async function getAdminTable(): Promise<boolean> {
 		// gets user information from database
-		const { users, error } = await readUser({
-			lib_user_id: 0,
-			username: '',
-			is_enrolled: null,
-			is_active: null,
-			college: '',
-			program: '',
-			user_type: ''
+		const { admins, error } = await readAdmin({
+			email: '',
+            is_active: null,
+            is_approved: null,
+            library,
+            section,
 		});
 
 		if (error) {
-			toast.error(`Error with reading user table: ${error}`);
+			toast.error(`Error with reading admin table: ${error}`);
 			return false;
-		} else if (users != null) {
-			$UserTableStore = users;
+		} else if (admins != null) {
+			$AdminTableStore = admins;
 		}
 		return true;
 	}
@@ -46,7 +43,7 @@
 
 	$: {
         if ($AdminStore.authenticated) {
-            getUserTable();
+            getAdminTable();
         }
     }
 </script>
@@ -60,8 +57,8 @@
                 Welcome to {data.libraryName}, {$AdminStore.formData.nickname}!
             </h1>
             {#if $AdminStore.formData.is_approved}
-                {#each $UserTableStore as user}
-                    <p>{user.first_name}</p>
+                {#each $AdminTableStore as admin}
+                    <p>{admin.nickname}</p>
                 {/each}
             {:else}
                 <Alert.Root variant="destructive">

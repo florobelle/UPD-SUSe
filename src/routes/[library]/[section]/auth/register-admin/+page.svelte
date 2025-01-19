@@ -33,14 +33,14 @@
 	// BACKEND
 	// ----------------------------------------------------------------------------
 
-	// Returns to Login if both email and rfid are lost after page refresh
-	if (browser && !$AdminStore.formData.rfid && !$AdminStore.formData.email) {
-		goto('./login');
-	}
-
     const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
+
+	// Returns to Login if both email and rfid are lost after page refresh
+	if (browser && !$AdminStore.formData.rfid && !$AdminStore.formData.email) {
+		goto(`/${library}/${section}/auth/login`);
+	}
 
 	async function saveFormData() {
 		// Saves user data in the User Store for inserting in the database once user has been authenticated
@@ -50,6 +50,7 @@
             admin_id: 0,
             rfid: $AdminStore.formData.rfid,
             nickname: $formData.nickname,
+            is_approved: false,
             email: $formData.email,
             library: library == 'engglib1' ? '1' : '2',
             section: '1'
@@ -61,7 +62,7 @@
 			toast.error(`Error with sending OTP: ${error}`);
 		} else {
 			toast.dismiss(loadID);
-			goto('./verify-otp-admin');
+			goto(`/${library}/${section}/auth/verify-otp-admin`);
 		}
 		return;
 	}
