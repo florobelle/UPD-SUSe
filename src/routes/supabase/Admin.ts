@@ -33,13 +33,16 @@ export async function readEmail(rfid:string): Promise<Email> {
 
 export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
     // reads the admin information in the admin_engglib
-    let query = supabaseClient.from(`public_admin_${filter.library}`).select("*").limit(2);
+    let query = supabaseClient.from(`public_admin_${filter.library}`).select("*");
 
     if (filter.is_active != null) {
         query = query.eq('is_active', filter.is_active)
     }
     if (filter.section) {
         query = query.eq('section', filter.section)
+    }
+    if (filter.is_approved != null) {
+        query = query.eq('is_approved', filter.is_approved)
     }
 
     const { data, error } = await query;
@@ -61,11 +64,11 @@ export async function createAdmin(adminData:AdminFormData): Promise<AdminRespons
     // Creates admin information in the admin_engglib table.
 
     const { error } = await supabaseClient.from('admin_engglib').insert({
-        admin_id: adminData.admin_id,
         rfid: adminData.rfid,
         nickname: adminData.nickname,
         email: adminData.email,
         is_active: false,
+        is_approved: false,
         library_id: parseInt(adminData.library),
         section_id: parseInt(adminData.section),
     })

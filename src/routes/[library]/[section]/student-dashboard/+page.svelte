@@ -5,8 +5,6 @@
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import * as Select from '$lib/components/ui/select/index';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { servicesInfo } from '$lib/components/UIconfig/serviceConfig';
-	import { serviceForms } from '$lib/components/UIconfig/serviceConfig';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index';
 	import * as Alert from '$lib/components/ui/alert';
@@ -19,10 +17,18 @@
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { availService, endService } from '../../../supabase/AvailEndService';
-	import { onMount } from 'svelte';
-	import { readService } from '../../../supabase/Service';
-	import type { ServiceView } from '$lib/dataTypes/EntityTypes';
 	import { page } from '$app/stores';
+	import { readAdmin } from '../../../supabase/Admin';
+	import { readServiceType } from '../../../supabase/ServiceType';
+	import {
+		ServiceInfoStore,
+		ServiceOptionStore,
+		ServiceTypeStore,
+		type ServiceInfo,
+		type ServiceOption
+	} from '$lib/stores/ServiceStore';
+	import { readService } from '../../../supabase/Service';
+	import type { UsageLogView } from '$lib/dataTypes/EntityTypes';
 
 	export let data: { libraryName: string };
 
@@ -45,41 +51,152 @@
 	async function getServices() {
 		// Reads the service types and available services in the current library and section
 		// and puts the returned values in $ServiceStore
-		const { services, error } = await readService({
-			service_type: '',
-			in_use: false,
+
+		const { serviceTypes, error } = await readServiceType();
+
+		if (error) {
+			toast.error(`Error with reading service types: ${error}`);
+		} else if (serviceTypes) {
+			let serviceInfo: { [key: string]: ServiceInfo } = {};
+			let serviceOption: { [key: string]: Array<ServiceOption> } = {};
+
+			for (const serviceType of serviceTypes) {
+                // service info store
+				serviceInfo[serviceType.service_type] = {
+					service_type: serviceType.service_type,
+					service_type_id: serviceType.service_type_id,
+					available_number: 0,
+					service_img_src: `../../../services/${serviceType.service_type}.png`
+				};
+
+                // service option store
+				if (serviceType.service_type == 'Discussion Room') {
+					serviceOption[serviceType.service_type] = [
+						{
+							type: 'select',
+							label: 'Frequency DR',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Programming DR',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Signal DR',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Transistor DR',
+							options: [],
+							variant: 'default'
+						}
+					];
+				} else if (serviceType.service_type == 'Umbrella') {
+					serviceOption[serviceType.service_type] = [
+						{
+							type: 'select',
+							label: 'Small Orange Umbrella',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Small Black Umbrella',
+							options: [],
+							variant: 'default'
+						},
+						{
+							type: 'select',
+							label: 'Big Orange Umbrella',
+							options: [],
+							variant: 'default'
+						}
+					];
+				} else {
+					serviceOption[serviceType.service_type] = [
+						{
+							type: 'select',
+							label: serviceType.service_type,
+							options: [],
+							variant: 'default'
+						}
+					];
+				}
+			}
+
+			const { services, error } = await readService({
+				service_type: '',
+				in_use: false,
+				library,
+				section
+			});
+
+			if (error) {
+				toast.error(`Error with getting services: ${error}`);
+				return;
+			} else if (services) {
+				for (const service of services) {
+					if (service.service_type == 'Discussion Room') {
+						if (service.service.includes('Frequency')) {
+							serviceOption[service.service_type][0].options.push(service);
+						} else if (service.service.includes('Programming')) {
+							serviceOption[service.service_type][1].options.push(service);
+						} else if (service.service.includes('Signal')) {
+							serviceOption[service.service_type][2].options.push(service);
+						} else {
+							serviceOption[service.service_type][3].options.push(service);
+						}
+					} else if (service.service_type == 'Umbrella') {
+						serviceInfo[service.service_type].available_number++;
+						if (service.service.includes('Small Orange')) {
+							serviceOption[service.service_type][0].options.push(service);
+						} else if (service.service.includes('Small Black')) {
+							serviceOption[service.service_type][1].options.push(service);
+						} else {
+							serviceOption[service.service_type][2].options.push(service);
+						}
+					} else {
+						serviceInfo[service.service_type].available_number++;
+						serviceOption[service.service_type][0].options.push(service);
+					}
+				}
+
+				for (const subset of serviceOption['Discussion Room']) {
+					if (subset.options.length == 10) {
+						serviceInfo['Discussion Room'].available_number++;
+					}
+				}
+			}
+			$ServiceTypeStore = serviceTypes;
+			$ServiceInfoStore = serviceInfo;
+			$ServiceOptionStore = serviceOption;
+		}
+		return;
+	}
+
+	async function getActiveAdmins() {
+		// gets two active admins from database
+		const { admins, error } = await readAdmin({
+			email: '',
+			is_active: true,
+			is_approved: true,
 			library,
 			section
 		});
 
 		if (error) {
-			toast.error(`Error with getting services: ${error}`);
+			toast.error(`Error with reading active admin information: ${error}`);
 			return;
-		} else if (services != null) {
-			for (let card of servicesInfo) {
-				const specificServices: ServiceView[] = services.filter(
-					(value) => value.service_type == card.service_type
-				);
-				card.available_number = specificServices.length;
-
-				if (card.service_type == 'Umbrella') {
-					const smallOrange: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Small Orange')
-					);
-					const smallBlack: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Small Black')
-					);
-					const bigOrange: ServiceView[] = specificServices.filter((value) =>
-						value.service.includes('Big Orange')
-					);
-
-					serviceForms[card.service_type_id - 1][0].options = smallOrange;
-					serviceForms[card.service_type_id - 1][1].options = smallBlack;
-					serviceForms[card.service_type_id - 1][2].options = bigOrange;
-				} else {
-					serviceForms[card.service_type_id - 1][0].options = specificServices;
-				}
-			}
+		} else if (admins) {
+			$AdminStore.active_admin1 = admins[0];
+			$AdminStore.active_admin2 = admins[1];
+			$AdminStore = $AdminStore;
 		}
 		return;
 	}
@@ -100,8 +217,14 @@
 			toast.error(`Error with getting usagelogs: ${error}`);
 			return;
 		} else if (usagelogs != null) {
-			$ActiveUsageLogStore = usagelogs;
+            let activeUsagelogs:{ [key: string]: UsageLogView } = {};
+			for (const usagelog of usagelogs) {
+                activeUsagelogs[usagelog.service_type] = usagelog;
+            }
+
+            $ActiveUsageLogStore = activeUsagelogs;
 		}
+        
 		return;
 	}
 
@@ -122,41 +245,47 @@
 		toast.dismiss(loadID);
 		getActiveUsageLogs();
 		getServices();
-        selectedOption = null;
+		selectedOption = null;
 		toast.success('Service availed!');
+        return;
 	}
 
-	async function endAndUpdateUsage(service_id: number) {
+	async function endAndUpdateUsage(service_type:string) {
 		// ends a given usage log and service then updates the active usage log store
 		const loadID: string = toast.loading('Ending service...');
 		const { error } = await endService(
-			$ActiveUsageLogStore[0].usagelog_id,
-			service_id,
+			$ActiveUsageLogStore[service_type].usagelog_id,
+			$ActiveUsageLogStore[service_type].service_id,
 			$UserStore.formData.username,
-			$ActiveUsageLogStore.length == 1 ? false : true
+			Object.keys($ActiveUsageLogStore).length == 1 ? false : true
 		);
 		if (error) {
 			toast.dismiss(loadID);
 			return;
 		}
 		toast.dismiss(loadID);
-		getActiveUsageLogs();
 		getServices();
+		getActiveUsageLogs();
 		toast.success('Service ended!');
 	}
 
 	// ----------------------------------------------------------------------------
 
-	let selectedOption: any;
+	let selectedOption: {
+		value: number;
+		label: string;
+		disabled: boolean;
+	} | null;
 	let tabSelected: string;
 
-	onMount(() => {
-		getActiveUsageLogs();
-	});
+	// ----------------------------------------------------------------------------
 
-	function getServiceImgSrc(serviceType: string) {
-		const service = servicesInfo.find((s) => s.service_type === serviceType);
-		return service ? service.service_img_src : '';
+	$: {
+		if ($UserStore.authenticated) {
+			getServices();
+			getActiveUsageLogs();
+			getActiveAdmins();
+		}
 	}
 </script>
 
@@ -164,76 +293,71 @@
 
 <ScrollArea class="h-screen">
 	<div class="flex h-full w-full flex-col gap-10 p-20">
-		<div class="flex w-full flex-col gap-4 grow">
+		<div class="flex w-full grow flex-col gap-4">
 			<h1 class="text-3xl font-medium">
 				Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
 			</h1>
 
 			{#if $UserStore.formData.is_enrolled}
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
-
 				<div class="grid h-full grid-cols-4 gap-8">
-					<!-- ACTIVE SERVICES -->
-					{#each Object.values($ActiveUsageLogStore) as activeUsageLog}
-						<Dialog.Root>
-							<Dialog.Trigger class="m-0 h-full w-full p-0">
-								<ServiceCard
-									selectService={() => selectService(activeUsageLog.service_type)}
-									serviceName={activeUsageLog.service_type}
-									serviceImgSrc={getServiceImgSrc(activeUsageLog.service_type)}
-									inUse={true}
-									dateStarted={activeUsageLog.start}
-								/>
-							</Dialog.Trigger>
-							<Dialog.Content>
-								<Dialog.Header>
-									<Dialog.Title>End</Dialog.Title>
-									<Dialog.Description>Please select the correct details!</Dialog.Description>
-								</Dialog.Header>
+					<!-- SERVICES -->
+					{#each $ServiceTypeStore as serviceType}
+						{#if $ActiveUsageLogStore[serviceType.service_type]}
+                            <Dialog.Root>
+                                <Dialog.Trigger class="m-0 h-full w-full p-0">
+                                    <ServiceCard
+                                        selectService={() => selectService(serviceType.service_type)}
+                                        serviceName={serviceType.service_type}
+                                        serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+                                        inUse={true}
+                                        dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
+                                    />
+                                </Dialog.Trigger>
+                                <Dialog.Content>
+                                    <Dialog.Header>
+                                        <Dialog.Title>End</Dialog.Title>
+                                        <Dialog.Description>Please confirm to end using {serviceType.service_type}.</Dialog.Description>
+                                    </Dialog.Header>
 
-								<Dialog.Footer>
-									<Button
-										on:click={() => {
-											endAndUpdateUsage(activeUsageLog.service_id);
-										}}>End</Button
-									>
-								</Dialog.Footer>
-							</Dialog.Content>
-						</Dialog.Root>
-					{/each}
-
-					<!-- INACTIVE SERVICES -->
-					{#each servicesInfo as service}
-						{#if !$ActiveUsageLogStore.some((log) => log.service_type === service.service_type)
-                        && service.available_number}
-							<Dialog.Root bind:open={dialogOpen[service.service_type_id]}>
+                                    <Dialog.Footer>
+                                        <Button
+                                            on:click={() => {
+                                                endAndUpdateUsage(serviceType.service_type);
+                                            }}>End</Button
+                                        >
+                                    </Dialog.Footer>
+                                </Dialog.Content>
+                            </Dialog.Root>
+                        {:else if $ServiceInfoStore[serviceType.service_type].available_number}
+							<Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
 								<!-- Service Card -->
 								<Dialog.Trigger class="m-0 h-full w-full p-0">
 									<ServiceCard
-										selectService={() => selectService(service.service_type)}
-										serviceName={service.service_type}
-										serviceImgSrc={service.service_img_src}
-										availableNum={service.available_number}
+										selectService={() => selectService(serviceType.service_type)}
+										serviceName={serviceType.service_type}
+										serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+										availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
 									/>
 								</Dialog.Trigger>
 
 								<!-- Dialog Content of Service Card -->
 								<Dialog.Content class="min-w-fit">
 									<Dialog.Header>
-										<Dialog.Title>Avail {service.service_type}</Dialog.Title>
-										<Dialog.Description>Please select the correct details!</Dialog.Description>
+										<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
+										<Dialog.Description>Please select the specific {serviceType.service_type} ID!</Dialog.Description>
 									</Dialog.Header>
 
 									<!-- Load Tabs -->
-									{#if serviceForms[service.service_type_id - 1].length > 1}
+									{#if $ServiceOptionStore[serviceType.service_type].length > 1}
 										<Tabs.Root class="w-full">
 											<!-- Tab headings -->
 											<Tabs.List class="w-full">
-												{#each serviceForms[service.service_type_id - 1] as serviceInput}
+												{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
 													<Tabs.Trigger
 														on:click={() => {
 															tabSelected = serviceInput.label;
-															selectedOption = undefined;
+															selectedOption = null;
 														}}
 														value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
 													>
@@ -241,7 +365,7 @@
 											</Tabs.List>
 
 											<!-- Content of tabs -->
-											{#each serviceForms[service.service_type_id - 1] as serviceInput}
+											{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
 												{#key tabSelected}
 													<Tabs.Content value={serviceInput.label}>
 														<Select.Root
@@ -249,15 +373,15 @@
 															onSelectedChange={(s) => {
 																if (s) {
 																	selectedOption = s as unknown as {
-																		value: number;
-																		label: string;
-																		disabled: boolean;
-																	};
+                                                                        value: number;
+                                                                        label: string;
+                                                                        disabled: boolean;
+                                                                    };
 																}
 															}}
 														>
 															<Select.Trigger>
-																<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+																<Select.Value placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`} />
 															</Select.Trigger>
 															<Select.Content>
 																<Select.Group>
@@ -275,7 +399,7 @@
 											{/each}
 										</Tabs.Root>
 									{:else}
-										{#each serviceForms[service.service_type_id - 1] as serviceInput}
+										{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
 											{#if serviceInput.type == 'select'}
 												<Label for={serviceInput.label}>{serviceInput.label}</Label>
 												<Select.Root
@@ -309,8 +433,7 @@
 									{/if}
 
 									<Dialog.Footer>
-										<Button on:click={() => availAndUpdateUsage(selectedOption.value)}>Avail</Button
-										>
+										<Button on:click={() => availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}>Avail</Button>
 									</Dialog.Footer>
 								</Dialog.Content>
 							</Dialog.Root>
@@ -322,7 +445,8 @@
 					<CircleAlert class="h-4 w-4" />
 					<Alert.Title>Heads up!</Alert.Title>
 					<Alert.Description>
-						Please show your Form 5 to the library admin to have your account approved.
+						Please show your Form 5 to the library admin to have your account approved and soon
+						avail {data.libraryName} miscellaneous services.
 					</Alert.Description>
 				</Alert.Root>
 			{/if}

@@ -16,8 +16,6 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
 
     if (filter.end != null) {
         query = query.lte('end', filter.end);
-    } else {
-        query = query.is('end', null)
     }
 
     if (filter.lib_user_id) {

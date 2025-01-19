@@ -20,6 +20,7 @@ export type AdminTable = {
     nickname: string,
     email: string,
     is_active: boolean,
+    is_approved: boolean,
     library: string,
     section: string,
 }

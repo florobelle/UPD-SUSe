@@ -38,10 +38,10 @@ export const studentRoutes: Route[] = [
 
 export const adminRoutes: Route[] = [
 	{
-		title: 'Students',
+		title: 'Library Users',
 		label: '',
 		icon: Icons.Users,
-		variant: 'ghost'
+		variant: 'default'
 	},
 	{
 		title: 'Services',
@@ -56,7 +56,7 @@ export const adminRoutes: Route[] = [
 		variant: 'ghost'
 	},
 	{
-		title: 'Admin',
+		title: 'Administrators',
 		label: '',
 		icon: Icons.ShoppingCart,
 		variant: 'ghost'

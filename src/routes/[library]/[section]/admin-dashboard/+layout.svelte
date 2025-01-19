@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Resizable from '$lib/components/ui/resizable/index';
 	import Nav from '$lib/components/Nav.svelte';
-	import { studentRoutes } from '../../../../lib/components/UIconfig/navConfig';
+	import { adminRoutes } from '../../../../lib/components/UIconfig/navConfig';
 	import toast from 'svelte-5-french-toast';
 
 	// Backend Imports
@@ -11,11 +11,10 @@
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { Session, User } from '@supabase/supabase-js';
-	import { UserStore } from '$lib/stores/UserStore';
-	import { linkRfid } from '../../../supabase/LoginReg';
-	import { readUser } from '../../../supabase/User';
 
-    import * as Dialog from '$lib/components/ui/dialog';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { readAdmin } from '../../../supabase/Admin';
+	import { AdminStore } from '$lib/stores/AdminStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -42,24 +41,23 @@
 	// SESSION FUNCTIONS
 	// ----------------------------------------------------------------------------
 
-	let rfid: string = ''; // rfid linking
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-    function getSessionData(user: User | undefined) {
-        // gets user data and starts countdown if login is successfull
-		$UserStore.authenticated = true;
-		$UserStore.formData.username = user?.email ? user?.email.split('@')[0] : '';
-        $UserStore = $UserStore;
+	function getSessionData(admin: User | undefined) {
+		// gets user data and starts countdown if login is successfull
+		$AdminStore.authenticated = true;
+		$AdminStore.formData.email = admin?.email ? admin.email : '';
+        $AdminStore = $AdminStore;
 
-		toast(`You will be logged out after 60 seconds of inactivity.`, { icon: '⏳' });
+        toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
-        getUser();
-    }
+		getAdmin();
+	}
 
-	async function startUserSession(session: Session | null = null) {
+	async function startAdminSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
 		if (!session) {
 			const sessionResponse = await supabaseClient.auth.getSession();
@@ -70,72 +68,54 @@
 			}
 		}
 
-		let user = session?.user;
-		const accessTokenUser: string = readCookie('accessTokenUser');
-		const refreshTokenUser: string = readCookie('refreshTokenUser');
+		let admin = session?.user;
+		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
+		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session && !accessTokenUser && !refreshTokenUser) {
+		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is currently a session with no cookies, save tokens in cookies
-			createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
-			createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
-            getSessionData(user);
-		} else if (!session && !accessTokenUser && !refreshTokenUser) {
+			createCookie('accessTokenAdmin', session.access_token, 1, `${library}/${section}`);
+			createCookie('refreshTokenAdmin', session.refresh_token, 1, `${library}/${section}`);
+			getSessionData(admin);
+		} else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is no session or tokens saved, go back to login
 			toast.error('Please login first.');
 			isLoggedOut = true;
 			goto(`/${library}/${section}/auth/login`);
-		} else if (accessTokenUser && refreshTokenUser) {
+		} else if (accessTokenAdmin && refreshTokenAdmin) {
 			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
 				error
 			} = await supabaseClient.auth.setSession({
-				access_token: accessTokenUser,
-				refresh_token: refreshTokenUser
+				access_token: accessTokenAdmin,
+				refresh_token: refreshTokenAdmin
 			});
-			user = session?.user;
+			admin = session?.user;
 
 			if (error) {
 				toast.error(`Error with creating session: ${error}`);
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-                getSessionData(user);
+				getSessionData(admin);
 			}
 		}
 		return;
 	}
 
-	async function endUserSession() {
+	async function endAdminSession() {
 		// Ends the user's current session if available.
 		const { error } = await supabaseClient.auth.signOut();
-		deleteCookie('accessTokenUser', `${library}/${section}`);
-		deleteCookie('refreshTokenUser', `${library}/${section}`);
+		deleteCookie('accessTokenAdmin', `${library}/${section}`);
+		deleteCookie('refreshTokenAdmin', `${library}/${section}`);
 
-		$UserStore.authenticated = false;
-		$UserStore.formData.username = '';
-        $UserStore = $UserStore;
+		$AdminStore.authenticated = false;
+		$AdminStore.formData.email = '';
+        $AdminStore = $AdminStore;
 
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
-		}
-
-		return;
-	}
-
-	// ----------------------------------------------------------------------------
-	// RFID LINKING
-	// ----------------------------------------------------------------------------
-
-	async function checkRfidEnter(event: KeyboardEvent) {
-		// checks once RFID has been entered
-		if (event.key == 'Enter') {
-			const { error } = await linkRfid(rfid, $UserStore.formData.username);
-			if (error) {
-				toast.error(`Error with linking RFID: ${error}`);
-			} else {
-				toast.success('Successful RFID linking!');
-			}
 		}
 		return;
 	}
@@ -144,7 +124,7 @@
 	// AUTO LOG OUT DIALOG
 	// ----------------------------------------------------------------------------
 
-	let maxSessionDuration = 600 * 1000; // 10 seconds for testing
+	let maxSessionDuration = 900 * 1000; // 10 seconds for testing
 	let remainingTime = Math.floor(maxSessionDuration / 1000);
 	let logOutTimer: NodeJS.Timeout;
 	let checkInterval: NodeJS.Timeout;
@@ -156,7 +136,7 @@
 		startTime = Date.now();
 		remainingTime = Math.floor(maxSessionDuration / 1000);
 		openLogoutDialog = false;
-		logOutTimer = setTimeout(logOutUser, maxSessionDuration);
+		logOutTimer = setTimeout(logOutAdmin, maxSessionDuration);
 		clearInterval(checkInterval);
 
 		checkInterval = setInterval(() => {
@@ -195,16 +175,17 @@
 
 	let isLoggedOut: boolean = false;
 
-	async function logOutUser() {
+	async function logOutAdmin() {
 		// Logs out the user without confirmation and goes to login page
-        const loadID: string = toast.loading('Logging you out...');
+		const loadID: string = toast.loading('Logging you out...');
 		try {
 			isLoggedOut = true;
-			await endUserSession();
-            toast.dismiss(loadID);
+            $AdminStore.toLogin = false;
+			await endAdminSession();
+			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-            toast.dismiss(loadID);
+			toast.dismiss(loadID);
 			toast.error('Logout error.');
 			return;
 		}
@@ -212,65 +193,54 @@
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url.pathname == `/${library}/${section}/student-dashboard` || to == null) {
+		if (to?.url.pathname == `/${library}/${section}/admin-dashboard/users` || to == null) {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
 				cancel();
 			} else {
-				logOutUser();
+				logOutAdmin();
 			}
 		}
 		return;
 	});
 
 	// ----------------------------------------------------------------------------
-	// READ USER INFO
+	// GET ADMIN DATA
 	// ----------------------------------------------------------------------------
 
-	async function getUser(): Promise<boolean> {
+	async function getAdmin(): Promise<boolean> {
 		// gets user information from database
-		const { users, error } = await readUser({
-			lib_user_id: 0,
-			username: $UserStore.formData.username,
-			is_enrolled: null,
+		const { admins, error } = await readAdmin({
+			email: $AdminStore.formData.email,
 			is_active: null,
-			college: '',
-			program: '',
-			user_type: ''
+			is_approved: null,
+			library,
+			section
 		});
 
 		if (error) {
-			toast.error(`Error with reading user information: ${error}`);
+			toast.error(`Error with reading admin information: ${error}`);
 			return false;
-		} else if (users != null) {
-			$UserStore.formData.lib_user_id = users[0].lib_user_id.toString();
-			$UserStore.formData.college = users[0].college;
-			$UserStore.formData.first_name = users[0].first_name;
-			$UserStore.formData.middle_name = users[0].middle_initial ? users[0].middle_initial : '';
-			$UserStore.formData.last_name = users[0].last_name;
-			$UserStore.formData.user_type = users[0].user_type;
-			$UserStore.formData.college = users[0].college;
-			$UserStore.formData.program = users[0].program ? users[0].program : '';
-			$UserStore.formData.is_enrolled = users[0].is_enrolled;
-            $UserStore = $UserStore;
+		} else if (admins != null) {
+			$AdminStore.formData.admin_id = admins[0].admin_id;
+			$AdminStore.formData.rfid = admins[0].rfid;
+			$AdminStore.formData.nickname = admins[0].nickname;
+			$AdminStore.formData.email = admins[0].email;
+			$AdminStore.formData.is_approved = admins[0].is_approved;
+			$AdminStore.formData.library = library;
+			$AdminStore.formData.section = section;
+
+            $AdminStore = $AdminStore;
 		}
 		return true;
 	}
 
 	// ----------------------------------------------------------------------------
-	
 	onMount(() => {
-		startUserSession();
+		startAdminSession();
 	});
 </script>
-
-<!-- <Input
-	type="text"
-	bind:value={rfid}
-	placeholder="••••••••••"
-	class="max-w-full text-center text-base"
-/> -->
 
 <div class="hidden h-full md:block">
 	<Resizable.PaneGroup
@@ -288,7 +258,7 @@
 			{onCollapse}
 			{onExpand}
 		>
-			<Nav {logOutUser} {isCollapsed} routes={studentRoutes} />
+			<Nav logOutUser={logOutAdmin} {isCollapsed} routes={adminRoutes} />
 		</Resizable.Pane>
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>

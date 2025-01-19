@@ -4,8 +4,8 @@
 
 	// Backend Imports
 	import toast, { Toaster } from 'svelte-5-french-toast';
-	import { loginOtp } from '../../../../supabase/LoginReg';
-	import { UserStore } from '$lib/stores/UserStore';
+	import { verifyAdmin } from '../../../../supabase/LoginReg';
+	import { AdminStore } from '$lib/stores/AdminStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -18,7 +18,7 @@
 	const section: string = routes[2]; 
 
 	// Returns to Login if both username and rfid are lost after page refresh
-	if (browser && !$UserStore.formData.username) {
+	if (browser && !$AdminStore.formData.email) {
 		goto(`/${library}/${section}/auth/login`);
 	}
 
@@ -26,11 +26,11 @@
 		// Listens to input in the OTP field
 		if (otp.length == 6) {
             const loadID: string = toast.loading('Verifying OTP...');
-			const { error } = await loginOtp(
+			const { error } = await verifyAdmin(
 				otp,
-				$UserStore.formData.username,
-				$UserStore.toRegister,
-				$UserStore.formData
+				$AdminStore.formData.email,
+				$AdminStore.toRegister,
+				$AdminStore.formData
 			);
 			if (error) {
 				toast.dismiss(loadID);
@@ -38,7 +38,7 @@
 				goto(`/${library}/${section}/auth/login`);
 			} else {
 				toast.dismiss(loadID);
-				goto(`/${library}/${section}/student-dashboard`);
+				goto(`/${library}/${section}/admin-dashboard`);
 			}
 		}
 
@@ -56,7 +56,7 @@
 			<div class="flex w-full flex-col gap-4 text-center">
 				<h1 class="text-5xl font-medium">Enter the OTP sent to your UP Mail</h1>
 				<h2 class="text-lg font-normal">
-					The One-Time Password has been sent to your UP Mail! Please check the spam folder if it
+					The One-Time Password has been sent to your email! Please check the spam folder if it
 					doesn't appear in your inbox.
 				</h2>
 			</div>
