@@ -59,20 +59,24 @@
 <Toaster />
 
 <!-- <ScrollArea class="h-screen"> -->
-	<div class="flex w-full justify-center">
-		{#if $AdminStore.formData.is_approved}
-			<div class="w-[95%]">
-				<DataTable data={$UserTableStore} {columns} {initialSort} />
+<div class="flex w-full justify-center">
+	{#if $AdminStore.formData.is_approved}
+		<div class="w-[95%]">
+			<DataTable data={$UserTableStore} {columns} {initialSort} />
+		</div>
+	{:else}
+		<div class="flex h-full w-full flex-col gap-10 p-20">
+			<div class="flex w-full grow flex-col gap-4">
+				<Alert.Root variant="destructive">
+					<CircleAlert class="h-4 w-4" />
+					<Alert.Title>Heads up!</Alert.Title>
+					<Alert.Description>
+						Please contact another library admin to have your account approved and soon view library
+						records.
+					</Alert.Description>
+				</Alert.Root>
 			</div>
-		{:else}
-			<Alert.Root variant="destructive">
-				<CircleAlert class="h-4 w-4" />
-				<Alert.Title>Heads up!</Alert.Title>
-				<Alert.Description>
-					Please contact another library admin to have your account approved and soon view library
-					records.
-				</Alert.Description>
-			</Alert.Root>
-		{/if}
-	</div>
+		</div>
+	{/if}
+</div>
 <!-- </ScrollArea> -->
