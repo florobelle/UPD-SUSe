@@ -13,8 +13,8 @@
 	import { readAdmin } from '../../../../supabase/Admin';
 
 export const initialSort = [
-    { id: 'is_enrolled', desc: false },
-    { id: 'is_active', desc: true }
+    { id: 'admin_id', desc: true },
+    // { id: 'is_active', desc: true }
 ];
 
 	// ----------------------------------------------------------------------------
@@ -40,7 +40,6 @@ export const initialSort = [
 			return false;
 		} else if (admins != null) {
 			$AdminTableStore = admins;
-            console.log(admins)
 		}
 		return true;
 	}
@@ -59,9 +58,11 @@ export const initialSort = [
 <!-- <ScrollArea class="h-screen"> -->
     <div class="flex w-full justify-center">
         {#if $AdminStore.formData.is_approved}
-            <div class="w-[95%]">
-                <DataTable data={$AdminTableStore} {columns} {initialSort} />
-            </div>
+            {#if $AdminTableStore}
+                <div class="w-[95%]">
+                    <DataTable data={$AdminTableStore} {columns} {initialSort} />
+                </div>
+            {/if}
         {:else}
             <div class="flex h-full w-full flex-col gap-10 p-20">
                 <div class="flex w-full grow flex-col gap-4">

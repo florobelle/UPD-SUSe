@@ -10,11 +10,13 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
         query = query.eq('usagelog_id', filter.usagelog_id);
     }
 
-    if (filter.start != null) {
+    if (filter.start) {
         query = query.gte('start', filter.start);
     }
 
-    if (filter.end != null) {
+    if (filter.end == null) {
+        query = query.is('end', null);
+    } else if (filter.end != "all") {
         query = query.lte('end', filter.end);
     }
 

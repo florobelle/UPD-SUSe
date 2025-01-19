@@ -14,8 +14,8 @@
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
 
     export const initialSort = [
-        { id: 'is_enrolled', desc: false },
-        { id: 'is_active', desc: true }
+        { id: 'service_id', desc: false },
+        // { id: 'is_active', desc: true }
     ];
 
 	// ----------------------------------------------------------------------------
@@ -58,9 +58,11 @@
 <!-- <ScrollArea class="h-screen"> -->
     <div class="flex w-full justify-center">
         {#if $AdminStore.formData.is_approved}
-            <div class="w-[95%]">
-                <DataTable data={$ServiceTableStore} {columns} {initialSort} />
-            </div>
+            {#if $ServiceTableStore}
+                <div class="w-[95%]">
+                    <DataTable data={$ServiceTableStore} {columns} {initialSort} />
+                </div>
+            {/if}
         {:else}
             <div class="flex h-full w-full flex-col gap-10 p-20">
                 <div class="flex w-full grow flex-col gap-4">

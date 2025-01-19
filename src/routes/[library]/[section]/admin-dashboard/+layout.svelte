@@ -236,7 +236,6 @@
 			$AdminStore.formData.section = section;
 
             $AdminStore = $AdminStore;
-            console.log($AdminStore)
 		}
 		return true;
 	}
