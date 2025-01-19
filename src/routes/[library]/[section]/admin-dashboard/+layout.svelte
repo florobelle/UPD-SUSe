@@ -247,12 +247,12 @@
 	});
 </script>
 
-<div class=" h-full w-full md:block">
+<div class="hidden h-full md:block">
 	<Resizable.PaneGroup
 		on:mouseenter={resetTimer}
 		direction="horizontal"
 		{onLayoutChange}
-		class="h-screen items-stretch"
+		class="items-stretch"
 	>
 		<Resizable.Pane
 			defaultSize={defaultLayout[0]}
@@ -262,13 +262,12 @@
 			maxSize={20}
 			{onCollapse}
 			{onExpand}
-			class="fixed left-0 top-0 h-full"
 		>
 			<Nav logOutUser={logOutAdmin} {isCollapsed} routes={adminRoutes} />
 		</Resizable.Pane>
-		<Resizable.Handle withHandle class="fixed left-[15%] top-0 h-full" />
-		<Resizable.Pane defaultSize={defaultLayout[2]} class="ml-[15%]">
-			<ScrollArea>
+		<Resizable.Handle withHandle class="h-screen " />
+		<Resizable.Pane defaultSize={defaultLayout[2]}>
+			<ScrollArea class="h-screen">
 				<slot></slot>
 			</ScrollArea>
 		</Resizable.Pane>
