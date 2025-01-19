@@ -39,7 +39,11 @@
 </script>
 
 {#if !rInEdit}
-	<span>{initVal}</span>
+	{#if editT === 'datetime'}
+		<p>{new Date(initVal).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</p>
+	{:else}
+		<span>{initVal}</span>
+	{/if}
 {:else if editT === 'text'}
 	<input
 		type="text"
@@ -60,6 +64,8 @@
 	<ProgramCombobox selectedProgram={initVal} onChange={(e) => handleInput(e, false)} />
 {:else if editT === 'user_type'}
 	<UserTypeCombobox selectedUserType={initVal} onChange={(e) => handleInput(e, false)} />
+{:else if editT === 'datetime'}
+	<p>{new Date(initVal).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</p>
 {:else}
 	<span>{initVal}</span>
 {/if}
