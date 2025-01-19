@@ -33,7 +33,7 @@ const createSortableColumn = (
 
 export const columns: ColumnDef<UserTable>[] = [
 	{
-		accessorKey: 'is_active',
+		accessorKey: 'is_approved',
 		header: ({ column }) => {
 			return renderComponent(DataTableHeaderButton, {
 				header: 'Status',
@@ -44,17 +44,17 @@ export const columns: ColumnDef<UserTable>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const activeCellSnippet = createRawSnippet<[{ active: any; enrolled: any }]>((getData) => {
-				const { active, enrolled } = getData();
+			const activeCellSnippet = createRawSnippet<[{ active: any; approved: any }]>((getData) => {
+				const { active, approved } = getData();
 
-				// console.log('enrolled', enrolled);
+				// console.log('approved', approved);
 
 				let dotColor = 'bg-gray-400';
-				if (enrolled) {
+				if (approved) {
 					if (active) {
 						dotColor = 'bg-green-500';
 					}
-				} else if (!enrolled) {
+				} else if (!approved) {
 					dotColor = 'bg-yellow-400';
 				}
 
@@ -69,25 +69,10 @@ export const columns: ColumnDef<UserTable>[] = [
 
 			return renderSnippet(activeCellSnippet, {
 				active: row.getValue('is_active'),
-				enrolled: row.getValue('is_approved')
+				approved: row.getValue('is_approved')
 			});
 		}
 	},
-	// {
-	// 	accessorKey: 'is_enrolled',
-	// 	header: () => {
-	// 		const activeHeaderSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeHeaderSnippet, '');
-	// 	},
-	// 	cell: () => {
-	// 		const activeCellSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeCellSnippet, '');
-	// 	}
-	// },
 
 	createSortableColumn('lib_user_id', 'ID', ''),
 	createSortableColumn('username', 'Username', 'text'),
@@ -97,6 +82,22 @@ export const columns: ColumnDef<UserTable>[] = [
 	createSortableColumn('college', 'College', 'college'),
 	createSortableColumn('program', 'Program', 'program'),
 	createSortableColumn('user_type', 'User Type', 'user_type'),
+
+	// {
+	// 	accessorKey: 'is_active',
+	// 	header: () => {
+	// 		const activeHeaderSnippet = createRawSnippet(() => ({
+	// 			render: () => `<div class="w-0"></div>`
+	// 		}));
+	// 		return renderSnippet(activeHeaderSnippet, '');
+	// 	},
+	// 	cell: () => {
+	// 		const activeCellSnippet = createRawSnippet(() => ({
+	// 			render: () => `<div class="w-0"></div>`
+	// 		}));
+	// 		return renderSnippet(activeCellSnippet, '');
+	// 	}
+	// },
 	{
 		id: 'actions',
 		cell: ({ row }) => {

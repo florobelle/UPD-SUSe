@@ -230,6 +230,10 @@
 
 	async function availAndUpdateUsage(service_id: number) {
 		// avails a given service and updates the active usage log store
+        if (!$AdminStore.active_admin1) {
+            toast.error(`Error with availing a usage log: No active admin. Please let the admin know.`)
+			return;
+        }
 		const loadID: string = toast.loading('Availing service...');
 		const { error } = await availService(
 			service_id,
@@ -240,6 +244,7 @@
 
 		if (error) {
 			toast.dismiss(loadID);
+            toast.error(`Error with availing a usage log: ${error}`)
 			return;
 		}
 		toast.dismiss(loadID);
