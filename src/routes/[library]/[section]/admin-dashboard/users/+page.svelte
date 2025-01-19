@@ -62,9 +62,11 @@
 <div class="flex w-full justify-center">
 	{#if $AdminStore.formData.is_approved}
 		{#if $UserTableStore}
-			<div class="w-[95%]">
-				<DataTable data={$UserTableStore} {columns} {initialSort} />
-			</div>
+			{#key $UserTableStore}
+                <div class="w-[95%]">
+                    <DataTable data={$UserTableStore} {columns} {initialSort} />
+                </div>
+            {/key}
 		{/if}
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">

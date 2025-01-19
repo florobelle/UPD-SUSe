@@ -65,6 +65,9 @@
 			toast.error(`Error with updating user with id ${id}: ${error}`);
 			return;
         }
+        const user = $UserTableStore.filter((v) => v.lib_user_id == id )[0];
+        user.is_approved = true;
+        $UserTableStore = $UserTableStore;
         toast.dismiss(loadID);
         toast.success("Successfully approved user!")
         return;
