@@ -89,7 +89,7 @@
 		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
 		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
+		if (session) {
 			// if there is currently a session with no cookies, save tokens in cookies
             createNewCookies(session);
 			getSessionData(admin);

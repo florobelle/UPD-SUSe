@@ -83,7 +83,7 @@
 		const accessTokenUser: string = readCookie('accessTokenUser');
 		const refreshTokenUser: string = readCookie('refreshTokenUser');
 
-		if (session && !accessTokenUser && !refreshTokenUser) {
+		if (session) {
 			// if there is currently a session with no cookies, save tokens in cookies
             createNewCookies(session);
 			getSessionData(user);
