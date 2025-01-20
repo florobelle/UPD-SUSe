@@ -62,6 +62,8 @@ export const initialSort = [
                 <div class="w-[95%]">
                     <DataTable data={$AdminTableStore} {columns} {initialSort} />
                 </div>
+            {:else}
+                <p>Retrieving data...</p>
             {/if}
         {:else}
             <div class="flex h-full w-full flex-col gap-10 p-20">

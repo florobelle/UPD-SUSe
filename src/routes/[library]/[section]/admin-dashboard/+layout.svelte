@@ -6,7 +6,7 @@
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 
 	// Backend Imports
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
@@ -283,7 +283,11 @@
 		<Resizable.Handle withHandle class="h-screen" />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<ScrollArea orientation="both" class="h-screen">
-				<slot></slot>
+				{#if $navigating}
+                    <p>Loading...</p>
+                {:else}
+                    <slot></slot>
+                {/if}
 			</ScrollArea>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>

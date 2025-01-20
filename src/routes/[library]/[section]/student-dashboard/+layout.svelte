@@ -5,7 +5,7 @@
 	import toast from 'svelte-5-french-toast';
 
 	// Backend Imports
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
@@ -279,7 +279,11 @@
 		</Resizable.Pane>
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
-			<slot></slot>
+			{#if $navigating}
+                <p>Loading...</p>
+            {:else}
+                <slot></slot>
+            {/if}
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>

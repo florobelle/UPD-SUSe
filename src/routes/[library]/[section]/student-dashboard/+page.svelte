@@ -321,173 +321,177 @@
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
 				<div class="grid h-full grid-cols-4 gap-8">
 					<!-- SERVICES -->
-					{#each $ServiceTypeStore as serviceType}
-						<!-- ACTIVE SERVICES -->
-						{#if $ActiveUsageLogStore[serviceType.service_type]}
-							<Dialog.Root
-								open={dialogStates[serviceType.service_type_id]?.isOpen &&
-									dialogStates[serviceType.service_type_id]?.type === 'end'}
-								onOpenChange={(isOpen) => {
-									if (!isOpen) handleDialogClose(serviceType.service_type_id);
-								}}
-							>
-								<Dialog.Trigger
-									class="m-0 h-full w-full p-0"
-									on:click={() => handleDialogOpen(serviceType.service_type_id, 'end')}
-								>
-									<ServiceCard
-										selectService={() => selectService(serviceType.service_type)}
-										serviceName={serviceType.service_type}
-										serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
-										inUse={true}
-										dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
-									/>
-								</Dialog.Trigger>
-								<Dialog.Content>
-									<Dialog.Header>
-										<Dialog.Title>End</Dialog.Title>
-										<Dialog.Description>
-											Please confirm to end using {serviceType.service_type}.
-										</Dialog.Description>
-									</Dialog.Header>
-									<Dialog.Footer>
-										<Button
-											on:click={() => {
-												endAndUpdateUsage(serviceType.service_type);
-												handleDialogClose(serviceType.service_type_id);
-											}}
-										>
-											End
-										</Button>
-									</Dialog.Footer>
-								</Dialog.Content>
-							</Dialog.Root>
-
-							<!-- INACTIVE SERVICES -->
-						{:else if $ServiceInfoStore[serviceType.service_type].available_number}
-							<Dialog.Root
-								open={dialogStates[serviceType.service_type_id]?.isOpen &&
-									dialogStates[serviceType.service_type_id]?.type === 'avail'}
-								onOpenChange={(isOpen) => {
-									if (!isOpen) handleDialogClose(serviceType.service_type_id);
-								}}
-							>
-								<!-- Service Card -->
-								<Dialog.Trigger class="m-0 h-full w-full p-0">
-									<ServiceCard
-										selectService={() => selectService(serviceType.service_type)}
-										serviceName={serviceType.service_type}
-										serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
-										availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
-									/>
-								</Dialog.Trigger>
-
-								<!-- Dialog Content of Service Card -->
-								<Dialog.Content class="min-w-fit">
-									<Dialog.Header>
-										<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
-										<Dialog.Description
-											>Please select the specific {serviceType.service_type} ID!</Dialog.Description
-										>
-									</Dialog.Header>
-
-									<!-- Load Tabs -->
-									{#if $ServiceOptionStore[serviceType.service_type].length > 1}
-										<Tabs.Root class="w-full">
-											<!-- Tab headings -->
-											<Tabs.List class="w-full">
-												{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-													<Tabs.Trigger
-														on:click={() => {
-															tabSelected = serviceInput.label;
-															selectedOption = null;
-														}}
-														value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
-													>
-												{/each}
-											</Tabs.List>
-
-											<!-- Content of tabs -->
-											{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-												{#key tabSelected}
-													<Tabs.Content value={serviceInput.label}>
-														<Select.Root
-															portal={null}
-															onSelectedChange={(s) => {
-																if (s) {
-																	selectedOption = s as unknown as {
-																		value: number;
-																		label: string;
-																		disabled: boolean;
-																	};
-																}
-															}}
-														>
-															<Select.Trigger>
-																<Select.Value
-																	placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`}
-																/>
-															</Select.Trigger>
-															<Select.Content class="max-h-[10rem] overflow-y-auto">
-																<Select.Group>
-																	{#each serviceInput.options as option}
-																		<Select.Item value={option.service_id} label={option.service}
-																			>{option.service}</Select.Item
-																		>
-																	{/each}
-																</Select.Group>
-															</Select.Content>
-															<Select.Input name={serviceInput.label} />
-														</Select.Root>
-													</Tabs.Content>
-												{/key}
-											{/each}
-										</Tabs.Root>
-									{:else}
-										{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-											{#if serviceInput.type == 'select'}
-												<Label for={serviceInput.label}>{serviceInput.label}</Label>
-												<Select.Root
-													portal={null}
-													onSelectedChange={(s) => {
-														if (s) {
-															selectedOption = s as unknown as {
-																value: number;
-																label: string;
-																disabled: boolean;
-															};
-														}
-													}}
-												>
-													<Select.Trigger>
-														<Select.Value placeholder={`Select a ${serviceInput.label}`} />
-													</Select.Trigger>
-													<Select.Content>
-														<Select.Group>
-															{#each serviceInput.options as option}
-																<Select.Item value={option.service_id} label={option.service}
-																	>{option.service}</Select.Item
-																>
-															{/each}
-														</Select.Group>
-													</Select.Content>
-													<Select.Input name={serviceInput.label} />
-												</Select.Root>
-											{/if}
-										{/each}
-									{/if}
-
-									<Dialog.Footer>
-										<Button
-											on:click={() =>
-												availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
-											>Avail</Button
-										>
-									</Dialog.Footer>
-								</Dialog.Content>
-							</Dialog.Root>
-						{/if}
-					{/each}
+                     {#if $ServiceTypeStore.length}
+                        {#each $ServiceTypeStore as serviceType}
+                            <!-- ACTIVE SERVICES -->
+                            {#if $ActiveUsageLogStore[serviceType.service_type]}
+                                <Dialog.Root
+                                    open={dialogStates[serviceType.service_type_id]?.isOpen &&
+                                        dialogStates[serviceType.service_type_id]?.type === 'end'}
+                                    onOpenChange={(isOpen) => {
+                                        if (!isOpen) handleDialogClose(serviceType.service_type_id);
+                                    }}
+                                >
+                                    <Dialog.Trigger
+                                        class="m-0 h-full w-full p-0"
+                                        on:click={() => handleDialogOpen(serviceType.service_type_id, 'end')}
+                                    >
+                                        <ServiceCard
+                                            selectService={() => selectService(serviceType.service_type)}
+                                            serviceName={serviceType.service_type}
+                                            serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+                                            inUse={true}
+                                            dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
+                                        />
+                                    </Dialog.Trigger>
+                                    <Dialog.Content>
+                                        <Dialog.Header>
+                                            <Dialog.Title>End</Dialog.Title>
+                                            <Dialog.Description>
+                                                Please confirm to end using {serviceType.service_type}.
+                                            </Dialog.Description>
+                                        </Dialog.Header>
+                                        <Dialog.Footer>
+                                            <Button
+                                                on:click={() => {
+                                                    endAndUpdateUsage(serviceType.service_type);
+                                                    handleDialogClose(serviceType.service_type_id);
+                                                }}
+                                            >
+                                                End
+                                            </Button>
+                                        </Dialog.Footer>
+                                    </Dialog.Content>
+                                </Dialog.Root>
+    
+                                <!-- INACTIVE SERVICES -->
+                            {:else if $ServiceInfoStore[serviceType.service_type].available_number}
+                                <Dialog.Root
+                                    open={dialogStates[serviceType.service_type_id]?.isOpen &&
+                                        dialogStates[serviceType.service_type_id]?.type === 'avail'}
+                                    onOpenChange={(isOpen) => {
+                                        if (!isOpen) handleDialogClose(serviceType.service_type_id);
+                                    }}
+                                >
+                                    <!-- Service Card -->
+                                    <Dialog.Trigger class="m-0 h-full w-full p-0">
+                                        <ServiceCard
+                                            selectService={() => selectService(serviceType.service_type)}
+                                            serviceName={serviceType.service_type}
+                                            serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+                                            availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
+                                        />
+                                    </Dialog.Trigger>
+    
+                                    <!-- Dialog Content of Service Card -->
+                                    <Dialog.Content class="min-w-fit">
+                                        <Dialog.Header>
+                                            <Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
+                                            <Dialog.Description
+                                                >Please select the specific {serviceType.service_type} ID!</Dialog.Description
+                                            >
+                                        </Dialog.Header>
+    
+                                        <!-- Load Tabs -->
+                                        {#if $ServiceOptionStore[serviceType.service_type].length > 1}
+                                            <Tabs.Root class="w-full">
+                                                <!-- Tab headings -->
+                                                <Tabs.List class="w-full">
+                                                    {#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+                                                        <Tabs.Trigger
+                                                            on:click={() => {
+                                                                tabSelected = serviceInput.label;
+                                                                selectedOption = null;
+                                                            }}
+                                                            value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
+                                                        >
+                                                    {/each}
+                                                </Tabs.List>
+    
+                                                <!-- Content of tabs -->
+                                                {#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+                                                    {#key tabSelected}
+                                                        <Tabs.Content value={serviceInput.label}>
+                                                            <Select.Root
+                                                                portal={null}
+                                                                onSelectedChange={(s) => {
+                                                                    if (s) {
+                                                                        selectedOption = s as unknown as {
+                                                                            value: number;
+                                                                            label: string;
+                                                                            disabled: boolean;
+                                                                        };
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Select.Trigger>
+                                                                    <Select.Value
+                                                                        placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`}
+                                                                    />
+                                                                </Select.Trigger>
+                                                                <Select.Content class="max-h-[10rem] overflow-y-auto">
+                                                                    <Select.Group>
+                                                                        {#each serviceInput.options as option}
+                                                                            <Select.Item value={option.service_id} label={option.service}
+                                                                                >{option.service}</Select.Item
+                                                                            >
+                                                                        {/each}
+                                                                    </Select.Group>
+                                                                </Select.Content>
+                                                                <Select.Input name={serviceInput.label} />
+                                                            </Select.Root>
+                                                        </Tabs.Content>
+                                                    {/key}
+                                                {/each}
+                                            </Tabs.Root>
+                                        {:else}
+                                            {#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+                                                {#if serviceInput.type == 'select'}
+                                                    <Label for={serviceInput.label}>{serviceInput.label}</Label>
+                                                    <Select.Root
+                                                        portal={null}
+                                                        onSelectedChange={(s) => {
+                                                            if (s) {
+                                                                selectedOption = s as unknown as {
+                                                                    value: number;
+                                                                    label: string;
+                                                                    disabled: boolean;
+                                                                };
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Select.Trigger>
+                                                            <Select.Value placeholder={`Select a ${serviceInput.label}`} />
+                                                        </Select.Trigger>
+                                                        <Select.Content>
+                                                            <Select.Group>
+                                                                {#each serviceInput.options as option}
+                                                                    <Select.Item value={option.service_id} label={option.service}
+                                                                        >{option.service}</Select.Item
+                                                                    >
+                                                                {/each}
+                                                            </Select.Group>
+                                                        </Select.Content>
+                                                        <Select.Input name={serviceInput.label} />
+                                                    </Select.Root>
+                                                {/if}
+                                            {/each}
+                                        {/if}
+    
+                                        <Dialog.Footer>
+                                            <Button
+                                                on:click={() =>
+                                                    availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
+                                                >Avail</Button
+                                            >
+                                        </Dialog.Footer>
+                                    </Dialog.Content>
+                                </Dialog.Root>
+                            {/if}
+                        {/each}
+                    {:else}
+                        <p>Retrieving data...</p>
+                     {/if}
 				</div>
 			{:else}
 				<Alert.Root variant="destructive">

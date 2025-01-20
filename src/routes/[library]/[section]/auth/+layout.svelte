@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { navigating } from '$app/stores';
+
 	// UI Component Imports
 	import PhotoCard from '$lib/components/PhotoCard.svelte';
 	import { AdminStore } from '$lib/stores/AdminStore.js';
@@ -50,7 +52,11 @@
 
 		<!-- Register/Login -->
 		<div class="flex h-[90%] w-[80%] items-center justify-center">
-			<slot></slot>
+			{#if $navigating}
+                <p>Loading...</p>
+            {:else}
+                <slot></slot>
+            {/if}
 		</div>
 	</div>
 </section>
