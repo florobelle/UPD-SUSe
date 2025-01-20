@@ -44,17 +44,11 @@ export const columns: ColumnDef<UsageLogView>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const activeCellSnippet = createRawSnippet<[{ start: any; end: any }]>((getData) => {
-				const { start, end } = getData();
-
-				const startDate = new Date(start);
-				const endDate = new Date(end);
-
-				const timeDifference = Math.abs(endDate.getTime() - startDate.getTime());
-				const isWithin3Seconds = timeDifference <= 5000;
+			const activeCellSnippet = createRawSnippet<[{ end: any }]>((getData) => {
+				const { end } = getData();
 
 				let dotColor = 'bg-gray-400';
-				if (isWithin3Seconds) {
+				if (end == null) {
 					dotColor = 'bg-green-500';
 				}
 
@@ -68,7 +62,6 @@ export const columns: ColumnDef<UsageLogView>[] = [
 			});
 
 			return renderSnippet(activeCellSnippet, {
-				start: row.original.start,
 				end: row.original.end
 			});
 		}

@@ -14,10 +14,12 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
         query = query.gte('start', filter.start);
     }
 
-    if (filter.end == null) {
-        query = query.is('end', null);
-    } else if (filter.end != "all") {
+    if (filter.end) {
         query = query.lte('end', filter.end);
+    }
+
+    if (filter.is_active != null) {
+        query = query.eq('is_active', filter.is_active);
     }
 
     if (filter.lib_user_id) {

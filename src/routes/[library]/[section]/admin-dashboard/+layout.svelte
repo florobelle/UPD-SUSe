@@ -89,7 +89,7 @@
 		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
 		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
+		if (session) {
 			// if there is currently a session with no cookies, save tokens in cookies
             createNewCookies(session);
 			getSessionData(admin);
@@ -110,7 +110,7 @@
 			admin = session?.user;
 
 			if (error) {
-				toast.error(`Error with creating session: ${error}`);
+				toast.error(`Error with creating admin session: ${error}`);
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {

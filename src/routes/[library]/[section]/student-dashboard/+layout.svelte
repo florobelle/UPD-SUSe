@@ -83,7 +83,7 @@
 		const accessTokenUser: string = readCookie('accessTokenUser');
 		const refreshTokenUser: string = readCookie('refreshTokenUser');
 
-		if (session && !accessTokenUser && !refreshTokenUser) {
+		if (session) {
 			// if there is currently a session with no cookies, save tokens in cookies
             createNewCookies(session);
 			getSessionData(user);
@@ -104,7 +104,7 @@
 			user = session?.user;
 
 			if (error) {
-				toast.error(`Error with creating session: ${error}`);
+				toast.error(`Error with creating user session: ${error}`);
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {

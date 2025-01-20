@@ -26,7 +26,8 @@ export type ServiceFilter = {
 export type UsageLogFilter = {
     usagelog_id: number,
     start: Date | null,
-    end: Date | null | 'all',
+    end: Date | null,
+    is_active: boolean | null,
     lib_user_id: number,
     service_type: string,
     library: string,

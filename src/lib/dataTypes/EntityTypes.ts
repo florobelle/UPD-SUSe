@@ -42,6 +42,7 @@ export type UsageLogView = {
     usagelog_id: number,
     start: Date | null,
     end: Date | null,
+    is_active: boolean,
     service_id: number,
     service: string,
     service_type: string,
