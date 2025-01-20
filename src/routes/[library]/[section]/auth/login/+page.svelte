@@ -87,8 +87,9 @@
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
 			}
-			$AdminStore.formData.rfid = rfidConverted;
 			if (email) {
+                $AdminStore.formData.rfid = rfidConverted;
+                $AdminStore.formData.email = email;
 				const { error } = await loginAdmin(rfidConverted, email);
 				if (error) {
 					toast.dismiss(loadID);

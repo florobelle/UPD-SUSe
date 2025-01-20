@@ -49,6 +49,9 @@ export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
     if (filter.is_approved != null) {
         query = query.eq('is_approved', filter.is_approved)
     }
+    if (filter.email) {
+        query = query.eq('email', filter.email)
+    }
 
     const { data, error } = await query;
 
