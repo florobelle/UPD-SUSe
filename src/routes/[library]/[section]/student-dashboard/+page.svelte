@@ -220,6 +220,7 @@
 			usagelog_id: 0,
 			start: null,
 			end: null,
+            is_active: true,
 			lib_user_id: parseInt($UserStore.formData.lib_user_id),
 			service_type: '',
 			library,

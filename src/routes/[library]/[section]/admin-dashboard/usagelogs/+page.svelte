@@ -31,7 +31,8 @@
 		const { usagelogs, error } = await readUsageLog({
 			usagelog_id: 0,
             start: null,
-            end: "all",
+            end: null,
+            is_active: null,
             lib_user_id: 0,
             service_type: '',
             library,
