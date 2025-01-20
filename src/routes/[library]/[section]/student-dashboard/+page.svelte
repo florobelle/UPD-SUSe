@@ -299,7 +299,7 @@
 	// ----------------------------------------------------------------------------
 
 	$: {
-		if ($UserStore.authenticated) {
+		if ($UserStore.authenticated && $UserStore.formData.lib_user_id) {
 			getServices();
 			getActiveUsageLogs();
 			getActiveAdmins();
