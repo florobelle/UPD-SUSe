@@ -293,7 +293,7 @@
 			<!-- Login with RFID User -->
 			<div class="flex w-full flex-col gap-8">
 				<div class="flex w-full flex-col gap-4 text-center">
-					<h1 class="text-5xl font-medium">Tap your UP ID to begin</h1>
+					<h1 class="text-5xl font-medium">Tap your UP ID to<br>login or register</h1>
 					<h2 class="text-lg font-normal">
 						Avail EnggLib services using SUSê by tapping your RFID!
 					</h2>
@@ -335,7 +335,7 @@
 			<!-- Login with RFID Admin -->
 			<div class="flex w-full flex-col gap-8">
 				<div class="flex w-full flex-col gap-4 text-center">
-					<h1 class="text-5xl font-medium">Tap your UP ID to begin</h1>
+					<h1 class="text-5xl font-medium">Tap your UP ID to<br>login or register</h1>
 					<h2 class="text-lg font-normal">Login as an admin in SUSê by tapping your RFID!</h2>
 				</div>
 				<div class="flex flex-col gap-2">
