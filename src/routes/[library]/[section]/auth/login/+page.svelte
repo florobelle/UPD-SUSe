@@ -304,6 +304,7 @@
 						type="password"
 						placeholder="••••••••••"
 						pattern="[0-9a-fA-F]+"
+                        maxlength={10}
 						bind:value={rfidGlobal}
 						on:keyup={handleKeydownRfid}
 						class="max-w-full text-center text-base"
