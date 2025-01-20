@@ -12,10 +12,10 @@
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { Session, User } from '@supabase/supabase-js';
 	import { UserStore } from '$lib/stores/UserStore';
-	import { linkRfid } from '../../../supabase/LoginReg';
 	import { readUser } from '../../../supabase/User';
 
 	import * as Dialog from '$lib/components/ui/dialog';
+	import { browser } from '$app/environment';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -41,8 +41,6 @@
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
 	// ----------------------------------------------------------------------------
-
-	let rfid: string = ''; // rfid linking
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
@@ -58,6 +56,17 @@
 		startLogOutTimer();
 		getUser();
 	}
+
+    function createNewCookies(session: Session | null) {
+        // creates new access and refresh tokens
+        if (session) {
+            createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
+            createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
+        } else {
+            toast.error(`Error with saving auth tokens. No available session.`)
+        }
+        return;
+    }
 
 	async function startUserSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -76,8 +85,7 @@
 
 		if (session && !accessTokenUser && !refreshTokenUser) {
 			// if there is currently a session with no cookies, save tokens in cookies
-			createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
-			createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
+            createNewCookies(session);
 			getSessionData(user);
 		} else if (!session && !accessTokenUser && !refreshTokenUser) {
 			// if there is no session or tokens saved, go back to login
@@ -100,6 +108,7 @@
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
+                createNewCookies(session)
 				getSessionData(user);
 			}
 		}
@@ -120,23 +129,6 @@
 			toast.error(`Error with ending session: ${error}`);
 		}
 
-		return;
-	}
-
-	// ----------------------------------------------------------------------------
-	// RFID LINKING
-	// ----------------------------------------------------------------------------
-
-	async function checkRfidEnter(event: KeyboardEvent) {
-		// checks once RFID has been entered
-		if (event.key == 'Enter') {
-			const { error } = await linkRfid(rfid, $UserStore.formData.username);
-			if (error) {
-				toast.error(`Error with linking RFID: ${error}`);
-			} else {
-				toast.success('Successful RFID linking!');
-			}
-		}
 		return;
 	}
 
@@ -260,17 +252,12 @@
 
 	// ----------------------------------------------------------------------------
 
-	onMount(() => {
-		startUserSession();
-	});
+    $: {
+        if (browser && document) {
+            startUserSession();
+        }
+    }
 </script>
-
-<!-- <Input
-	type="text"
-	bind:value={rfid}
-	placeholder="••••••••••"
-	class="max-w-full text-center text-base"
-/> -->
 
 <div class="hidden h-full md:block">
 	<Resizable.PaneGroup

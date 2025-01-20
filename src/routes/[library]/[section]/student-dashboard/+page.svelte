@@ -33,8 +33,21 @@
 	export let data: { libraryName: string };
 
 	let serviceSelected = '';
-	let dialogOpen: Record<number, boolean> = {};
 
+	interface DialogState {
+		isOpen: boolean;
+		type: 'avail' | 'end' | null;
+	}
+
+	let dialogStates: Record<number, DialogState> = {};
+
+	function handleDialogOpen(serviceTypeId: number, type: 'avail' | 'end') {
+		dialogStates[serviceTypeId] = { isOpen: true, type: type };
+	}
+
+	function handleDialogClose(serviceTypeId: number) {
+		dialogStates[serviceTypeId] = { isOpen: false, type: null };
+	}
 	function selectService(serviceName: string) {
 		serviceSelected = serviceName;
 		return;
@@ -286,7 +299,7 @@
 	// ----------------------------------------------------------------------------
 
 	$: {
-		if ($UserStore.authenticated) {
+		if ($UserStore.authenticated && $UserStore.formData.lib_user_id) {
 			getServices();
 			getActiveUsageLogs();
 			getActiveAdmins();
@@ -308,9 +321,19 @@
 				<div class="grid h-full grid-cols-4 gap-8">
 					<!-- SERVICES -->
 					{#each $ServiceTypeStore as serviceType}
+						<!-- ACTIVE SERVICES -->
 						{#if $ActiveUsageLogStore[serviceType.service_type]}
-							<Dialog.Root>
-								<Dialog.Trigger class="m-0 h-full w-full p-0">
+							<Dialog.Root
+								open={dialogStates[serviceType.service_type_id]?.isOpen &&
+									dialogStates[serviceType.service_type_id]?.type === 'end'}
+								onOpenChange={(isOpen) => {
+									if (!isOpen) handleDialogClose(serviceType.service_type_id);
+								}}
+							>
+								<Dialog.Trigger
+									class="m-0 h-full w-full p-0"
+									on:click={() => handleDialogOpen(serviceType.service_type_id, 'end')}
+								>
 									<ServiceCard
 										selectService={() => selectService(serviceType.service_type)}
 										serviceName={serviceType.service_type}
@@ -322,22 +345,32 @@
 								<Dialog.Content>
 									<Dialog.Header>
 										<Dialog.Title>End</Dialog.Title>
-										<Dialog.Description
-											>Please confirm to end using {serviceType.service_type}.</Dialog.Description
-										>
+										<Dialog.Description>
+											Please confirm to end using {serviceType.service_type}.
+										</Dialog.Description>
 									</Dialog.Header>
-
 									<Dialog.Footer>
 										<Button
 											on:click={() => {
 												endAndUpdateUsage(serviceType.service_type);
-											}}>End</Button
+												handleDialogClose(serviceType.service_type_id);
+											}}
 										>
+											End
+										</Button>
 									</Dialog.Footer>
 								</Dialog.Content>
 							</Dialog.Root>
+
+							<!-- INACTIVE SERVICES -->
 						{:else if $ServiceInfoStore[serviceType.service_type].available_number}
-							<Dialog.Root bind:open={dialogOpen[serviceType.service_type_id]}>
+							<Dialog.Root
+								open={dialogStates[serviceType.service_type_id]?.isOpen &&
+									dialogStates[serviceType.service_type_id]?.type === 'avail'}
+								onOpenChange={(isOpen) => {
+									if (!isOpen) handleDialogClose(serviceType.service_type_id);
+								}}
+							>
 								<!-- Service Card -->
 								<Dialog.Trigger class="m-0 h-full w-full p-0">
 									<ServiceCard

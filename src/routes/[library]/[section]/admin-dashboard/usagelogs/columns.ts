@@ -32,64 +32,50 @@ const createSortableColumn = (
 });
 
 export const columns: ColumnDef<UsageLogView>[] = [
-	// {
-	// 	accessorKey: 'end',
-	// 	header: ({ column }) => {
-	// 		return renderComponent(DataTableHeaderButton, {
-	// 			header: 'Status',
-	// 			onclick: () => {
-	// 				const isSorted = column.getIsSorted();
-	// 				column.toggleSorting(isSorted === 'asc');
-	// 			}
-	// 		});
-	// 	},
-	// 	cell: ({ row }) => {
-	// 		const activeCellSnippet = createRawSnippet<[{ active: any; enrolled: any }]>((getData) => {
-	// 			const { active, enrolled } = getData();
+	{
+		id: 'is_active',
+		header: ({ column }) => {
+			return renderComponent(DataTableHeaderButton, {
+				header: 'Is Active',
+				onclick: () => {
+					const isSorted = column.getIsSorted();
+					column.toggleSorting(isSorted === 'asc');
+				}
+			});
+		},
+		cell: ({ row }) => {
+			const activeCellSnippet = createRawSnippet<[{ start: any; end: any }]>((getData) => {
+				const { start, end } = getData();
 
-	// 			let dotColor = 'bg-gray-400';
-	// 			if (enrolled) {
-	// 				if (active) {
-	// 					dotColor = 'bg-green-500';
-	// 				}
-	// 			} else if (!enrolled) {
-	// 				dotColor = 'bg-yellow-400';
-	// 			}
+				const startDate = new Date(start);
+				const endDate = new Date(end);
 
-	// 			return {
-	// 				render: () => `
-	// 					<div class="flex justify-center">
-	// 						<div class="${dotColor} w-2 h-2 rounded-full"></div>
-	// 					</div>
-	// 					`
-	// 			};
-	// 		});
+				const timeDifference = Math.abs(endDate.getTime() - startDate.getTime());
+				const isWithin3Seconds = timeDifference <= 5000;
 
-	// 		return renderSnippet(activeCellSnippet, {
-	// 			active: row.getValue('is_active'),
-	// 			enrolled: row.getValue('is_approved')
-	// 		});
-	// 	}
-	// },
-	// {
-	// 	accessorKey: 'is_approved',
-	// 	header: () => {
-	// 		const activeHeaderSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeHeaderSnippet, '');
-	// 	},
-	// 	cell: () => {
-	// 		const activeCellSnippet = createRawSnippet(() => ({
-	// 			render: () => `<div></div>`
-	// 		}));
-	// 		return renderSnippet(activeCellSnippet, '');
-	// 	}
-	// },
+				let dotColor = 'bg-gray-400';
+				if (isWithin3Seconds) {
+					dotColor = 'bg-green-500';
+				}
 
+				return {
+					render: () => `
+						<div class="flex justify-center">
+							<div class="${dotColor} w-2 h-2 rounded-full"></div>
+						</div>
+						`
+				};
+			});
+
+			return renderSnippet(activeCellSnippet, {
+				start: row.original.start,
+				end: row.original.end
+			});
+		}
+	},
 	createSortableColumn('usagelog_id', 'ID', ''),
-	createSortableColumn('start', 'Start Time', 'text'),
-	createSortableColumn('end', 'End Time', 'text'),
+	createSortableColumn('start', 'Start Time', 'datetime'),
+	createSortableColumn('end', 'End Time', 'datetime'),
 	createSortableColumn('service', 'Service', 'text'),
 	createSortableColumn('service_type', 'Service Type', 'text'),
 	createSortableColumn('lib_user_id', 'User ID', ''),

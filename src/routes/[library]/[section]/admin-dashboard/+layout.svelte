@@ -16,6 +16,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { readAdmin } from '../../../supabase/Admin';
 	import { AdminStore } from '$lib/stores/AdminStore';
+	import { browser } from '$app/environment';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -58,6 +59,17 @@
 		getAdmin();
 	}
 
+    function createNewCookies(session: Session | null) {
+        // creates new access and refresh tokens
+        if (session) {
+			createCookie('accessTokenAdmin', session.access_token, 1, `${library}/${section}`);
+			createCookie('refreshTokenAdmin', session.refresh_token, 1, `${library}/${section}`);
+        } else {
+            toast.error(`Error with saving auth tokens. No available session.`)
+        }
+        return;
+    }
+
 	async function startAdminSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
 		if ($AdminStore.authenticated) {
@@ -79,8 +91,7 @@
 
 		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is currently a session with no cookies, save tokens in cookies
-			createCookie('accessTokenAdmin', session.access_token, 1, `${library}/${section}`);
-			createCookie('refreshTokenAdmin', session.refresh_token, 1, `${library}/${section}`);
+            createNewCookies(session);
 			getSessionData(admin);
 		} else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is no session or tokens saved, go back to login
@@ -103,6 +114,7 @@
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
+                createNewCookies(session);
 				getSessionData(admin);
 			}
 		}
@@ -242,9 +254,12 @@
 	}
 
 	// ----------------------------------------------------------------------------
-	onMount(() => {
-		startAdminSession();
-	});
+	
+    $: {
+        if (browser && document) {
+            startAdminSession();
+        }
+    }
 </script>
 
 <div class="h-full">
