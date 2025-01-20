@@ -12,7 +12,6 @@
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { Session, User } from '@supabase/supabase-js';
 	import { UserStore } from '$lib/stores/UserStore';
-	import { linkRfid } from '../../../supabase/LoginReg';
 	import { readUser } from '../../../supabase/User';
 
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -41,8 +40,6 @@
 	// ----------------------------------------------------------------------------
 	// SESSION FUNCTIONS
 	// ----------------------------------------------------------------------------
-
-	let rfid: string = ''; // rfid linking
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
@@ -120,23 +117,6 @@
 			toast.error(`Error with ending session: ${error}`);
 		}
 
-		return;
-	}
-
-	// ----------------------------------------------------------------------------
-	// RFID LINKING
-	// ----------------------------------------------------------------------------
-
-	async function checkRfidEnter(event: KeyboardEvent) {
-		// checks once RFID has been entered
-		if (event.key == 'Enter') {
-			const { error } = await linkRfid(rfid, $UserStore.formData.username);
-			if (error) {
-				toast.error(`Error with linking RFID: ${error}`);
-			} else {
-				toast.success('Successful RFID linking!');
-			}
-		}
 		return;
 	}
 
@@ -264,13 +244,6 @@
 		startUserSession();
 	});
 </script>
-
-<!-- <Input
-	type="text"
-	bind:value={rfid}
-	placeholder="••••••••••"
-	class="max-w-full text-center text-base"
-/> -->
 
 <div class="hidden h-full md:block">
 	<Resizable.PaneGroup
