@@ -110,7 +110,7 @@
 			admin = session?.user;
 
 			if (error) {
-				toast.error(`Error with creating session: ${error}`);
+				toast.error(`Error with creating admin session: ${error}`);
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {

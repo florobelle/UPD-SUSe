@@ -104,7 +104,7 @@
 			user = session?.user;
 
 			if (error) {
-				toast.error(`Error with creating session: ${error}`);
+				toast.error(`Error with creating user session: ${error}`);
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
