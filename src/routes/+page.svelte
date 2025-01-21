@@ -4,9 +4,9 @@
 </script>
 
 <div
-	class="via relative flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#fefaf7]"
+	class="via flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#fefaf7]"
 >
-	<div class="flex h-screen w-[80%] justify-center pt-32">
+	<div class="flex h-screen w-[80%] flex-col items-center justify-center pt-32">
 		<!-- Go to specific library -->
 		<div class="flex w-3/5 flex-col gap-8">
 			<div class="flex w-full flex-col gap-4 text-center">
@@ -30,10 +30,10 @@
 				>
 			</div>
 		</div>
+		<img
+			src="../../photos/landingpage.png"
+			class="m-auto mt-20 h-auto w-[90%] rounded-xl border border-slate-100 shadow-2xl xl:w-[68%]"
+			alt="service"
+		/>
 	</div>
-	<img
-		src="../../photos/landingpage.png"
-		class="absolute -bottom-60 m-auto h-auto w-[68%] rounded-xl border border-slate-100 shadow-2xl"
-		alt="service"
-	/>
 </div>
