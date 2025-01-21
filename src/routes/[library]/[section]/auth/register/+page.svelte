@@ -415,7 +415,7 @@
 					<!-- ID Number -->
 					<Form.Field {form} class="col-span-1" name="id">
 						<Form.Control let:attrs>
-							<Form.Label>ID Number</Form.Label>
+							<Form.Label>ID/Student Number</Form.Label>
 							<Input placeholder="202012345" {...attrs} bind:value={$formData.id} />
 						</Form.Control>
 						<Form.FieldErrors />

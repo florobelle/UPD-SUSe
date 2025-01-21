@@ -18,7 +18,7 @@
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
-    let rfidConverted: string = '';
+	let rfidConverted: string = '';
 	let usernameGlobal: string = '';
 	let rfidError: boolean = false;
 	let UPMailError: boolean = false;
@@ -52,29 +52,32 @@
 		}
 	};
 
-    $AdminStore = {
-        toLogin: false,
-        authenticated: false,
-        toRegister: false,
-        active_admin1: null,
-        active_admin2: null,
-        formData: {
-            admin_id: 0,
-            rfid: '',
-            nickname: '',
-            email: '',
-            is_approved: false,
-            library: '',
-            section: ''
-        }
-    }
+	$AdminStore = {
+		toLogin: false,
+		authenticated: false,
+		toRegister: false,
+		active_admin1: null,
+		active_admin2: null,
+		formData: {
+			admin_id: 0,
+			rfid: '',
+			nickname: '',
+			email: '',
+			is_approved: false,
+			library: '',
+			section: ''
+		}
+	};
 
 	// ----------------------------------------------------------------------------
 
-    function convertRfidInt(hex: string) {
-        const reverseHex = hex.match(/.{1,2}/g)?.reverse().join("")
-        return reverseHex ? parseInt(reverseHex, 16).toString() : "0"
-    }
+	function convertRfidInt(hex: string) {
+		const reverseHex = hex
+			.match(/.{1,2}/g)
+			?.reverse()
+			.join('');
+		return reverseHex ? parseInt(reverseHex, 16).toString() : '0';
+	}
 
 	async function checkAdminRfid() {
 		// Check if admin is already registered
@@ -88,8 +91,8 @@
 				return;
 			}
 			if (email) {
-                $AdminStore.formData.rfid = rfidConverted;
-                $AdminStore.formData.email = email;
+				$AdminStore.formData.rfid = rfidConverted;
+				$AdminStore.formData.email = email;
 				const { error } = await loginAdmin(rfidConverted, email);
 				if (error) {
 					toast.dismiss(loadID);
@@ -180,11 +183,11 @@
 	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key === 'Enter' || rfidGlobal.length == 10) {
-            if (rfidGlobal.match(/[a-fA-F]+/i)) {
-                rfidConverted = convertRfidInt(rfidGlobal);
-            } else {
-                rfidConverted = rfidGlobal;
-            }
+			if (rfidGlobal.match(/[a-fA-F]+/i)) {
+				rfidConverted = convertRfidInt(rfidGlobal);
+			} else {
+				rfidConverted = rfidGlobal;
+			}
 
 			if ($AdminStore.toLogin) {
 				checkAdminRfid();
@@ -263,7 +266,7 @@
 	async function selectLoginWithUserRfid() {
 		loginWithRfid = true;
 		$AdminStore.toLogin = false;
-        $AdminStore = $AdminStore;
+		$AdminStore = $AdminStore;
 		await tick(); // Ensure DOM updates before interacting
 		deselectText('UPmail');
 		deselectText('adminRfid');
@@ -386,7 +389,7 @@
 							placeholder="jddelacruz"
 							bind:value={usernameGlobal}
 							on:keyup={handleKeydownUsername}
-							pattern="^[A-Za-z]+[0-9]*"
+							pattern="^[a-z]+[0-9]*"
 							class="max-w-full rounded-r-none text-center text-base"
 						/>
 						<div class="px-2">
@@ -395,7 +398,7 @@
 					</div>
 					{#if UPMailError}
 						<p class="text-sm font-semibold text-muted-foreground text-red-500">
-							Please use your UP Mail!
+							Please use your UP Mail in lowercase!
 						</p>
 					{/if}
 				</div>
