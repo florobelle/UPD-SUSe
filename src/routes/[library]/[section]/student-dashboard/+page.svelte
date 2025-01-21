@@ -318,7 +318,7 @@
 
 			{#if $UserStore.formData.is_approved}
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
-				<div class="grid h-full grid-cols-4 gap-8">
+				<div class="grid h-full grid-cols-2 gap-8 xl:grid-cols-4">
 					<!-- SERVICES -->
 					{#each $ServiceTypeStore as serviceType}
 						<!-- ACTIVE SERVICES -->
@@ -331,7 +331,7 @@
 								}}
 							>
 								<Dialog.Trigger
-									class="m-0 h-full w-full p-0"
+									class="m-0 h-full min-h-[250px] w-full p-0 xl:min-h-[0px]"
 									on:click={() => handleDialogOpen(serviceType.service_type_id, 'end')}
 								>
 									<ServiceCard
@@ -372,7 +372,7 @@
 								}}
 							>
 								<!-- Service Card -->
-								<Dialog.Trigger class="m-0 h-full w-full p-0">
+								<Dialog.Trigger class="m-0 h-full min-h-[250px] w-full p-0 xl:min-h-[0px]">
 									<ServiceCard
 										selectService={() => selectService(serviceType.service_type)}
 										serviceName={serviceType.service_type}
