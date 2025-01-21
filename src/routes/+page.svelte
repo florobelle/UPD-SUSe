@@ -6,7 +6,7 @@
 <div
 	class="via flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#fefaf7]"
 >
-	<div class="flex h-screen w-[80%] flex-col items-center justify-center pt-32">
+	<div class="flex h-screen flex-col items-center justify-center pt-32 xl:w-[80%]">
 		<!-- Go to specific library -->
 		<div class="flex w-3/5 flex-col gap-8">
 			<div class="flex w-full flex-col gap-4 text-center">
