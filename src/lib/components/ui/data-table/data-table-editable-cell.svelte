@@ -40,7 +40,7 @@
 
 {#if !rInEdit}
 	{#if editT === 'datetime'}
-		<p>{new Date(initVal).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</p>
+		<p>{initVal ? new Date(initVal).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : "unfinished"}</p>
 	{:else}
 		<span>{initVal}</span>
 	{/if}
