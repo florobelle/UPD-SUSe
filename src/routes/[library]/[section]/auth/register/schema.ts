@@ -8,7 +8,7 @@ export const formSchema = z.object({
 		.min(2)
 		.max(50)
 		.regex(
-			/^[A-Z][a-z]*(?:\s[A-Z][a-z]*)*(?:\s(?:II|III|IV|V|VI|VII|VIII|IX|X))?$/,
+			/^[A-Z][a-z]*(?:[-'\s][A-Z][a-z]*)*(?:\s(?:II|III|IV|V|VI|VII|VIII|IX|X))?$/,
 			'Start with a capital letter and the rest should be lowercase'
 		),
 	middle_name: z

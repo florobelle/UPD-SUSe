@@ -38,8 +38,7 @@ export const columns: ColumnDef<ServiceView>[] = [
 			return renderComponent(DataTableHeaderButton, {
 				header: 'In Use',
 				onclick: () => {
-					const isSorted = column.getIsSorted();
-					column.toggleSorting(isSorted === 'asc');
+					column.toggleSorting(column.getIsSorted() === 'asc');
 				}
 			});
 		},

@@ -13,10 +13,10 @@
 	import { readUsageLog } from '../../../../supabase/UsageLog';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 
-    export const initialSort = [
-        { id: 'usagelog_id', desc: false },
-        // { id: 'is_active', desc: true }
-    ];
+	export const initialSort = [
+		{ id: 'end', desc: false },
+		{ id: 'usagelog_id', desc: false }
+	];
 
 	// ----------------------------------------------------------------------------
 	// READ ADMIN TABLES
@@ -26,17 +26,17 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-    async function getUsageTable(): Promise<boolean> {
+	async function getUsageTable(): Promise<boolean> {
 		// gets user information from database
 		const { usagelogs, error } = await readUsageLog({
 			usagelog_id: 0,
-            start: null,
-            end: null,
-            is_active: null,
-            lib_user_id: 0,
-            service_type: '',
-            library,
-            section,  
+			start: null,
+			end: null,
+			is_active: null,
+			lib_user_id: 0,
+			service_type: '',
+			library,
+			section
 		});
 
 		if (error) {
@@ -51,35 +51,36 @@
 	// ----------------------------------------------------------------------------
 
 	$: {
-        if ($AdminStore.authenticated) {
-            getUsageTable();
-        }
-    }
+		if ($AdminStore.authenticated) {
+			getUsageTable();
+		}
+	}
 </script>
 
 <Toaster />
 
 <!-- <ScrollArea class="h-screen"> -->
-    <div class="flex w-full justify-center">
-        {#if $AdminStore.formData.is_approved}
-            {#if $UsageLogTableStore}
-                <div class="w-[95%]">
-                    <DataTable data={$UsageLogTableStore} {columns} {initialSort} />
-                </div>
-            {/if}
-        {:else}
-            <div class="flex h-full w-full flex-col gap-10 p-20">
-                <div class="flex w-full grow flex-col gap-4">
-                    <Alert.Root variant="destructive">
-                        <CircleAlert class="h-4 w-4" />
-                        <Alert.Title>Heads up!</Alert.Title>
-                        <Alert.Description>
-                            Please contact another library admin to have your account approved and soon view library
-                            records.
-                        </Alert.Description>
-                    </Alert.Root>
-                </div>
-            </div>
-        {/if}
-    </div>
+<div class="flex w-full justify-center">
+	{#if $AdminStore.formData.is_approved}
+		{#if $UsageLogTableStore}
+			<div class="w-[95%]">
+				<h1 class="pt-10 text-3xl font-medium">Usage Logs</h1>
+				<DataTable data={$UsageLogTableStore} {columns} {initialSort} />
+			</div>
+		{/if}
+	{:else}
+		<div class="flex h-full w-full flex-col gap-10 p-20">
+			<div class="flex w-full grow flex-col gap-4">
+				<Alert.Root variant="destructive">
+					<CircleAlert class="h-4 w-4" />
+					<Alert.Title>Heads up!</Alert.Title>
+					<Alert.Description>
+						Please contact another library admin to have your account approved and soon view library
+						records.
+					</Alert.Description>
+				</Alert.Root>
+			</div>
+		</div>
+	{/if}
+</div>
 <!-- </ScrollArea> -->
