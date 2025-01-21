@@ -188,21 +188,21 @@
 					<Form.Field {form} class="col-span-3" name="first_name">
 						<Form.Control let:attrs>
 							<Form.Label>First Name</Form.Label>
-							<Input {...attrs} bind:value={$formData.first_name} />
+							<Input placeholder="Juan Pedro III" {...attrs} bind:value={$formData.first_name} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
 					<Form.Field {form} class="col-span-1" name="middle_name">
 						<Form.Control let:attrs>
 							<Form.Label>M.I.</Form.Label>
-							<Input {...attrs} bind:value={$formData.middle_name} />
+							<Input placeholder="D" {...attrs} bind:value={$formData.middle_name} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
 					<Form.Field {form} class="col-span-2" name="last_name">
 						<Form.Control let:attrs>
 							<Form.Label>Last Name</Form.Label>
-							<Input {...attrs} bind:value={$formData.last_name} />
+							<Input placeholder="Cruz" {...attrs} bind:value={$formData.last_name} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
@@ -218,7 +218,12 @@
 								<div class="px-2">
 									<p class="text-sm">+63</p>
 								</div>
-								<Input {...attrs} class="rounded-l-none" bind:value={$formData.phone_number} />
+								<Input
+									placeholder="9999999999"
+									{...attrs}
+									class="rounded-l-none"
+									bind:value={$formData.phone_number}
+								/>
 							</div>
 						</Form.Control>
 						<Form.FieldErrors />
@@ -411,7 +416,7 @@
 					<Form.Field {form} class="col-span-1" name="id">
 						<Form.Control let:attrs>
 							<Form.Label>ID Number</Form.Label>
-							<Input {...attrs} bind:value={$formData.id} />
+							<Input placeholder="202012345" {...attrs} bind:value={$formData.id} />
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
@@ -421,7 +426,12 @@
 						<Form.Control let:attrs>
 							<Form.Label>Email</Form.Label>
 							<div class="flex items-center rounded-r-md bg-zinc-100">
-								<Input {...attrs} class="rounded-r-none" bind:value={$formData.username} />
+								<Input
+									placeholder="jdcruz"
+									{...attrs}
+									class="rounded-r-none"
+									bind:value={$formData.username}
+								/>
 								<div class="px-2">
 									<p class="text-sm">@up.edu.ph</p>
 								</div>
