@@ -4,6 +4,9 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index';
 	import { LogOut } from 'lucide-svelte';
 	import { page } from '$app/stores';
+	import { UserStore } from '$lib/stores/UserStore';
+	import { AdminStore } from '$lib/stores/AdminStore';
+	import Separator from './ui/separator/separator.svelte';
 
 	let { logOutUser, isCollapsed, routes } = $props();
 
@@ -19,6 +22,23 @@
 	<nav
 		class="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
 	>
+		{#if $UserStore.formData.first_name !== ''}
+			<div class="mb-2 flex flex-col gap-2 p-2">
+				<div>
+					<h1 class="text-sm">Welcome,</h1>
+					<h2 class="text-lg font-medium">{$UserStore.formData.first_name}</h2>
+				</div>
+				<Separator />
+			</div>
+		{:else}
+			<div class="mb-2 flex flex-col gap-2 p-2">
+				<div>
+					<h1 class="text-sm">Welcome,</h1>
+					<h2 class="text-lg font-medium">{$AdminStore.formData.nickname}</h2>
+				</div>
+				<Separator />
+			</div>
+		{/if}
 		{#each routes as route}
 			{#if isCollapsed}
 				<Tooltip.Root openDelay={0}>

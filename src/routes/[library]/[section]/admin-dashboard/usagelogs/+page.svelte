@@ -14,7 +14,7 @@
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 
 	export const initialSort = [
-		{ id: 'end', desc: false },
+		{ id: 'is_active', desc: false },
 		{ id: 'usagelog_id', desc: false }
 	];
 
