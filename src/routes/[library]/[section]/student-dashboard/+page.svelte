@@ -258,9 +258,9 @@
                 getActiveUsageLogs();
                 getServices();
                 selectedOption = null;
-                toast.dismiss(loadID);
                 toast.success('Service availed!');
             }
+            toast.dismiss(loadID);
         }
 		return;
 	}
@@ -275,13 +275,14 @@
 			Object.keys($ActiveUsageLogStore).length == 1 ? false : true
 		);
 		if (error) {
-			toast.dismiss(loadID);
-			return;
-		}
-		toast.dismiss(loadID);
-		getServices();
-		getActiveUsageLogs();
-		toast.success('Service ended!');
+			toast.error(`Error with ending service: ${error}`);
+		} else {
+            getServices();
+            getActiveUsageLogs();
+            toast.success('Service ended!');
+        }
+        toast.dismiss(loadID);
+        return;
 	}
 
 	// ----------------------------------------------------------------------------
