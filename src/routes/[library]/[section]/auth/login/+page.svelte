@@ -400,7 +400,7 @@
 					</div>
 					{#if UPMailError}
 						<p class="text-sm font-semibold text-muted-foreground text-red-500">
-							Please use your UP Mail in lowercase!
+							Please use all lowercase for your UP Mail!
 						</p>
 					{/if}
 				</div>
