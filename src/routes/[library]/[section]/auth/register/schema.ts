@@ -9,7 +9,7 @@ export const formSchema = z.object({
 		.max(50)
 		.regex(
 			/^[A-Z][a-z]*(?:[-'\s][A-Z][a-z]*)*(?:\s(?:II|III|IV|V|VI|VII|VIII|IX|X))?$/,
-			'Please use sentence case'
+			'Please use sentence case letters only'
 		),
 	middle_name: z
 		.string()
