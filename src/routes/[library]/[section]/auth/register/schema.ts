@@ -13,9 +13,9 @@ export const formSchema = z.object({
 		),
 	middle_name: z
 		.string()
-		.min(1)
+		.min(0)
 		.max(5)
-		.regex(/^[A-Z]+$/, 'Capital letters only'),
+		.regex(/(^[A-Z]+$)*/, 'Capital letters only'),
 	last_name: z
 		.string()
 		.min(2)
