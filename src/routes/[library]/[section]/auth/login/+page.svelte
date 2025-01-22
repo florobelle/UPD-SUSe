@@ -79,31 +79,26 @@
 			const { email, error } = await readEmail(rfidConverted);
 
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
-			}
-			if (email) {
+			} else if (email) {
                 $AdminStore.formData.rfid = rfidConverted;
                 $AdminStore.formData.email = email;
 				const { error } = await loginAdmin(rfidConverted, email);
 				if (error) {
-					toast.dismiss(loadID);
 					toast.error(`Error with logging in with RFID: ${error}`);
 					goto(`/${library}/${section}/auth/login`);
 				} else {
-					toast.dismiss(loadID);
 					$AdminStore.formData.email = email;
 					goto(`/${library}/${section}/admin-dashboard/users`);
 				}
 			} else {
-				toast.dismiss(loadID);
 				goto(`/${library}/${section}/auth/register-admin`);
 			}
+            toast.dismiss(loadID);
 		} else {
 			rfidError = true;
 		}
-
 		return;
 	}
 
@@ -114,30 +109,27 @@
 			const { username, error } = await readUsername(rfidConverted, '');
 
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
 				return;
-			}
-			$UserStore.formData.rfid = rfidConverted;
-			if (username) {
-				const { error } = await loginRfid(rfidConverted, username);
-				if (error) {
-					toast.dismiss(loadID);
-					toast.error(`Error with logging in with RFID: ${error}`);
-					goto(`/${library}/${section}/auth/login`);
-				} else {
-					toast.dismiss(loadID);
-					$UserStore.formData.username = username;
-					goto(`/${library}/${section}/student-dashboard`);
-				}
 			} else {
-				toast.dismiss(loadID);
-				goto(`/${library}/${section}/auth/register`);
-			}
+                $UserStore.formData.rfid = rfidConverted;
+                if (username) {
+                    const { error } = await loginRfid(rfidConverted, username);
+                    if (error) {
+                        toast.error(`Error with logging in with RFID: ${error}`);
+                        goto(`/${library}/${section}/auth/login`);
+                    } else {
+                        $UserStore.formData.username = username;
+                        goto(`/${library}/${section}/student-dashboard`);
+                    }
+                } else {
+                    goto(`/${library}/${section}/auth/register`);
+                }
+            }
+            toast.dismiss(loadID);
 		} else {
 			rfidError = true;
 		}
-
 		return;
 	}
 
@@ -148,28 +140,28 @@
 			const { username, error } = await readUsername('', usernameGlobal);
 
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with looking for a username: ${error}`);
-			}
-			$UserStore.formData.username = usernameGlobal;
-			if (username) {
-				const { error } = await sendOtp(username);
-				if (error) {
-					toast.dismiss(loadID);
-					toast.error(`Error with sending OTP: ${error}`);
-					goto(`/${library}/${section}/auth/login`);
-				} else {
-					toast.dismiss(loadID);
-					goto(`/${library}/${section}/auth/verify-otp`);
-				}
 			} else {
-				toast.dismiss(loadID);
-				goto(`/${library}/${section}/auth/register`);
-			}
+                $UserStore.formData.username = usernameGlobal;
+                if (username) {
+                    const { error } = await sendOtp(username);
+                    if (error) {
+                        toast.dismiss(loadID);
+                        toast.error(`Error with sending OTP: ${error}`);
+                        goto(`/${library}/${section}/auth/login`);
+                    } else {
+                        toast.dismiss(loadID);
+                        goto(`/${library}/${section}/auth/verify-otp`);
+                    }
+                } else {
+                    toast.dismiss(loadID);
+                    goto(`/${library}/${section}/auth/register`);
+                }
+            }
+            toast.dismiss(loadID);
 		} else {
 			UPMailError = true;
 		}
-
 		return;
 	}
 

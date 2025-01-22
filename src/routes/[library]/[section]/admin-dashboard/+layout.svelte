@@ -82,42 +82,44 @@
 
 			if (sessionResponse.error) {
 				toast.error(`Error with getting session: ${sessionResponse.error}`);
+                return;
 			}
 		}
 
-		let admin = session?.user;
-		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
-		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
+        let admin = session?.user;
+        const accessTokenAdmin: string = readCookie('accessTokenAdmin');
+        const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session) {
-			// if there is currently a session with no cookies, save tokens in cookies
+        if (session) {
+            // if there is currently a session with no cookies, save tokens in cookies
             createNewCookies(session);
-			getSessionData(admin);
-		} else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
-			// if there is no session or tokens saved, go back to login
-			toast.error('Please login first.');
-			isLoggedOut = true;
-			goto(`/${library}/${section}/auth/login`);
-		} else if (accessTokenAdmin && refreshTokenAdmin) {
-			// if there is no current session, start one with the saved tokens
-			const {
-				data: { session },
-				error
-			} = await supabaseClient.auth.setSession({
-				access_token: accessTokenAdmin,
-				refresh_token: refreshTokenAdmin
-			});
-			admin = session?.user;
+            getSessionData(admin);
+        } else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
+            // if there is no session or tokens saved, go back to login
+            toast.error('Please login first.');
+            isLoggedOut = true;
+            goto(`/${library}/${section}/auth/login`);
+        } else if (accessTokenAdmin && refreshTokenAdmin) {
+            // if there is no current session, start one with the saved tokens
+            const {
+                data: { session },
+                error
+            } = await supabaseClient.auth.setSession({
+                access_token: accessTokenAdmin,
+                refresh_token: refreshTokenAdmin
+            });
 
-			if (error) {
-				toast.error(`Error with creating admin session: ${error}`);
-				isLoggedOut = true;
-				goto(`/${library}/${section}/auth/login`);
-			} else {
+            if (error) {
+                toast.error(`Error with creating admin session: ${error}`);
+                isLoggedOut = true;
+                goto(`/${library}/${section}/auth/login`);
+            } else if (session) {
+                admin = session?.user;
                 createNewCookies(session);
-				getSessionData(admin);
-			}
-		}
+                getSessionData(admin);
+            }
+        }
+
 		return;
 	}
 
@@ -199,13 +201,12 @@
 			isLoggedOut = true;
 			$AdminStore.toLogin = false;
 			await endAdminSession();
-			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-			toast.dismiss(loadID);
 			toast.error('Logout error.');
-			return;
 		}
+        toast.dismiss(loadID);
+        return;
 	}
 
 	beforeNavigate(({ to, cancel }) => {
@@ -226,7 +227,7 @@
 	// GET ADMIN DATA
 	// ----------------------------------------------------------------------------
 
-	async function getAdmin(): Promise<boolean> {
+	async function getAdmin() {
 		// gets user information from database
 		const { admins, error } = await readAdmin({
 			email: $AdminStore.formData.email,
@@ -238,7 +239,6 @@
 
 		if (error) {
 			toast.error(`Error with reading admin information: ${error}`);
-			return false;
 		} else if (admins != null) {
 			$AdminStore.formData.admin_id = admins[0].admin_id;
 			$AdminStore.formData.rfid = admins[0].rfid;
@@ -250,7 +250,7 @@
 
 			$AdminStore = $AdminStore;
 		}
-		return true;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------

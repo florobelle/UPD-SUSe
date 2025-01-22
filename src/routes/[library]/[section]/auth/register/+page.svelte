@@ -149,12 +149,11 @@
 
 			const { error } = await sendOtp($formData.username);
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with sending OTP: ${error}`);
 			} else {
-				toast.dismiss(loadID);
 				goto(`/${library}/${section}/auth/verify-otp`);
 			}
+            toast.dismiss(loadID);
 		}
 		return;
 	}

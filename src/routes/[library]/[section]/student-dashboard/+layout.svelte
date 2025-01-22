@@ -70,7 +70,11 @@
 
 	async function startUserSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
-		if (!session) {
+		if ($UserStore.authenticated) {
+			return;
+		}
+        
+        if (!session) {
 			const sessionResponse = await supabaseClient.auth.getSession();
 			session = sessionResponse.data.session;
 
@@ -128,7 +132,6 @@
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
 		}
-
 		return;
 	}
 
@@ -193,13 +196,12 @@
 		try {
 			isLoggedOut = true;
 			await endUserSession();
-			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-			toast.dismiss(loadID);
 			toast.error('Logout error.');
-			return;
 		}
+        toast.dismiss(loadID);
+        return;
 	}
 
 	beforeNavigate(({ to, cancel }) => {
@@ -220,7 +222,7 @@
 	// READ USER INFO
 	// ----------------------------------------------------------------------------
 
-	async function getUser(): Promise<boolean> {
+	async function getUser() {
 		// gets user information from database
 		const { users, error } = await readUser({
 			lib_user_id: 0,
@@ -234,7 +236,6 @@
 
 		if (error) {
 			toast.error(`Error with reading user information: ${error}`);
-			return false;
 		} else if (users != null) {
 			$UserStore.formData.lib_user_id = users[0].lib_user_id.toString();
 			$UserStore.formData.college = users[0].college;
@@ -247,7 +248,7 @@
 			$UserStore.formData.is_approved = users[0].is_approved;
             $UserStore = $UserStore;
 		}
-		return true;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------

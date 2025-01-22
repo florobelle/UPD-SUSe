@@ -58,12 +58,11 @@
 
 		const { error } = await signUpAdmin($formData.email);
 		if (error) {
-			toast.dismiss(loadID);
 			toast.error(`Error with sending OTP: ${error}`);
 		} else {
-			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/verify-otp-admin`);
 		}
+        toast.dismiss(loadID);
 		return;
 	}
 </script>

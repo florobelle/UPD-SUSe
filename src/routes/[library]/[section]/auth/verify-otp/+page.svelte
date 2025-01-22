@@ -33,15 +33,13 @@
 				$UserStore.formData
 			);
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with verifying OTP: ${error}`);
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-				toast.dismiss(loadID);
 				goto(`/${library}/${section}/student-dashboard`);
 			}
+            toast.dismiss(loadID);
 		}
-
 		return;
 	}
 </script>
@@ -63,6 +61,7 @@
 			<Input
 				type="text"
 				placeholder="123456"
+                maxlength={6}
 				bind:value={otp}
 				on:keyup={checkOtpEnter}
 				class="max-w-full text-center text-base"
