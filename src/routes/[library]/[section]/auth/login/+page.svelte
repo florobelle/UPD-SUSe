@@ -15,6 +15,7 @@
 	import { deleteCookie } from '$lib/client/Cookie';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { readEmail } from '../../../../supabase/Admin';
+	import { convertRfidInt } from '$lib/utilsBack';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
@@ -70,11 +71,6 @@
     }
 
 	// ----------------------------------------------------------------------------
-
-    function convertRfidInt(hex: string) {
-        const reverseHex = hex.match(/.{1,2}/g)?.reverse().join("")
-        return reverseHex ? parseInt(reverseHex, 16).toString() : "0"
-    }
 
 	async function checkAdminRfid() {
 		// Check if admin is already registered

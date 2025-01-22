@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from './ui/button/button.svelte';
-	import { cn } from '$lib/utils.js';
+	import { cn } from '$lib/utilsFront.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index';
 	import { LogOut } from 'lucide-svelte';
 	import { page } from '$app/stores';
