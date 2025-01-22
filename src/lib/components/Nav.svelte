@@ -76,7 +76,7 @@
 		{#if isCollapsed}
 			<Button
 				on:click={logOutUser}
-				class="size-9 h-9 w-full justify-start pl-3 dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white"
+				class="size-9 h-9 w-8 rounded-none p-1 -m-2 justify-start dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white"
 				href="#"
 				size="icon"
 			>
