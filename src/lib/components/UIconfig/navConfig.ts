@@ -17,7 +17,7 @@ export const studentRoutes: Route[] = [
 		url: './'
 	},
 	{
-		title: 'Link RFID',
+		title: 'Link UP ID',
 		id: 'link-rfid',
 		icon: Icons.IDCard,
 		url: './student-dashboard/link-rfid'
