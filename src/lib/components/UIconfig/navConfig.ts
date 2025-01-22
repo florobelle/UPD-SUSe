@@ -14,7 +14,13 @@ export const studentRoutes: Route[] = [
 		title: 'Library Services',
 		id: 'student-dashboard',
 		icon: Icons.PencilRuler,
-		url: ''
+		url: './'
+	},
+	{
+		title: 'Link RFID',
+		id: 'link-rfid',
+		icon: Icons.IDCard,
+		url: './student-dashboard/link-rfid'
 	},
 	{
 		title: 'About SUSê',

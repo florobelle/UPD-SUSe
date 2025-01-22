@@ -9,9 +9,9 @@
 	// ----------------------------------------------------------------------------
 	let rfid: string = ''; // rfid linking
 
-	async function checkRfidEnter(event: KeyboardEvent) {
+	async function checkRfidEnter() {
 		// checks once RFID has been entered
-		if (event.key == 'Enter') {
+		if (rfid.length == 10) {
 			const { error } = await linkRfid(rfid, $UserStore.formData.username);
 			if (error) {
 				toast.error(`Error with linking RFID: ${error}`);
@@ -23,10 +23,16 @@
 	}
 </script>
 
+
+<h1 class="text-3xl font-medium">
+    Please tap your UP ID to link it to your account!
+</h1>
+
 <Input
 	type="text"
 	bind:value={rfid}
     on:keyup={checkRfidEnter}
+    maxlength={10}
 	placeholder="••••••••••"
 	class="max-w-full text-center text-base"
 />
