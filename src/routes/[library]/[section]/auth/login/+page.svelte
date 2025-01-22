@@ -83,7 +83,8 @@
 		// Check if admin is already registered
 		if (checkInputValidity('adminRfid')) {
 			const loadID: string = toast.loading('Logging you in...');
-			const { email, error } = await readEmail(rfidConverted);
+            $AdminStore.formData.rfid = rfidConverted;
+			const { email, error } = await readEmail(rfidConverted, library, section);
 
 			if (error) {
 				toast.dismiss(loadID);
@@ -91,7 +92,6 @@
 				return;
 			}
 			if (email) {
-				$AdminStore.formData.rfid = rfidConverted;
 				$AdminStore.formData.email = email;
 				const { error } = await loginAdmin(rfidConverted, email);
 				if (error) {
@@ -104,6 +104,7 @@
 					goto(`/${library}/${section}/admin-dashboard/users`);
 				}
 			} else {
+                console.log("no email, register")
 				toast.dismiss(loadID);
 				goto(`/${library}/${section}/auth/register-admin`);
 			}
