@@ -9,23 +9,23 @@ export const formSchema = z.object({
 		.max(50)
 		.regex(
 			/^[A-Z][a-z]*(?:[-'\s][A-Z][a-z]*)*(?:\s(?:II|III|IV|V|VI|VII|VIII|IX|X))?$/,
-			'Start with a capital letter and the rest should be lowercase'
+			'Please use sentence case'
 		),
 	middle_name: z
 		.string()
 		.min(1)
 		.max(5)
-		.regex(/^[A-Z]+$/, 'Only capital letters'),
+		.regex(/^[A-Z]+$/, 'Capital letters only'),
 	last_name: z
 		.string()
 		.min(2)
 		.max(50)
 		.regex(
 			/^[A-Z][a-z]*(?:\s[A-Z][a-z]*)*$/,
-			'Start with a capital letter and the rest should be lowercase'
+			'Please use sentence case'
 		),
 	username: z.string().regex(/^[a-z]+[0-9]*/, {
-		message: 'Only lowercase letters (a-z) and numbers'
+		message: 'Lowercase letters (a-z) and numbers only'
 	}),
 	id: z.string().regex(/^\d{9}$/, {
 		message: 'Exactly 9 digits'

@@ -236,9 +236,11 @@
 
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (target.tagName !== 'BUTTON') {
+		if (target.tagName == 'BUTTON' || target.tagName == 'INPUT') {
+            return;
+		} else {
 			event.preventDefault();
-		}
+        }
 	}
 
 	// Lifecycle management
