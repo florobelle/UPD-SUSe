@@ -57,16 +57,16 @@
 		getUser();
 	}
 
-    function createNewCookies(session: Session | null) {
-        // creates new access and refresh tokens
-        if (session) {
-            createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
-            createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
-        } else {
-            toast.error(`Error with saving auth tokens. No available session.`)
-        }
-        return;
-    }
+	function createNewCookies(session: Session | null) {
+		// creates new access and refresh tokens
+		if (session) {
+			createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
+			createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
+		} else {
+			toast.error(`Error with saving auth tokens. No available session.`);
+		}
+		return;
+	}
 
 	async function startUserSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -89,7 +89,7 @@
 
 		if (session) {
 			// if there is currently a session with no cookies, save tokens in cookies
-            createNewCookies(session);
+			createNewCookies(session);
 			getSessionData(user);
 		} else if (!session && !accessTokenUser && !refreshTokenUser) {
 			// if there is no session or tokens saved, go back to login
@@ -112,7 +112,7 @@
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-                createNewCookies(session)
+				createNewCookies(session);
 				getSessionData(user);
 			}
 		}
@@ -246,21 +246,21 @@
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
 			$UserStore.formData.is_approved = users[0].is_approved;
-            $UserStore = $UserStore;
+			$UserStore = $UserStore;
 		}
 		return;
 	}
 
 	// ----------------------------------------------------------------------------
 
-    $: {
-        if (browser && document) {
-            startUserSession();
-        }
-    }
+	$: {
+		if (browser && document) {
+			startUserSession();
+		}
+	}
 </script>
 
-<div class="hidden h-full md:block">
+<div class="h-full">
 	<Resizable.PaneGroup
 		on:mouseenter={resetTimer}
 		direction="horizontal"

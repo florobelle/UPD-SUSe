@@ -5,19 +5,19 @@
 	import PhotoCard from '$lib/components/PhotoCard.svelte';
 	import { AdminStore } from '$lib/stores/AdminStore.js';
 	export let data;
-    let clickCount = 0;
+	let clickCount = 0;
 
-    function checkAdminLogin() {
-        // Enables Admins to log in after 5 clicks
-        clickCount++;
-        if (clickCount == 5) {
-            $AdminStore.toLogin = true;
-            clickCount = 0;
-        }
-    }
+	function checkAdminLogin() {
+		// Enables Admins to log in after 5 clicks
+		clickCount++;
+		if (clickCount == 5) {
+			$AdminStore.toLogin = true;
+			clickCount = 0;
+		}
+	}
 </script>
 
-<section class="grid h-screen max-h-dvh grid-cols-2">
+<section class="grid h-screen max-h-dvh grid-cols-2 overflow-hidden">
 	<!-- Photocard -->
 	<div class="h-full p-4">
 		<PhotoCard
@@ -29,7 +29,7 @@
 	</div>
 
 	<!-- Register/Login -->
-	<div class="flex h-full w-full flex-col items-center justify-center p-4">
+	<div class="flex h-full w-full flex-col items-center justify-center overflow-hidden p-10">
 		<!-- Logo header -->
 		<div class="items-right flex h-[50px] w-full justify-end gap-4">
 			<img
@@ -46,12 +46,12 @@
 				src="../../../logos/engglib-logo.png"
 				class="h-full w-auto"
 				alt="Engineering Library logo"
-                on:click={checkAdminLogin}
+				on:click={checkAdminLogin}
 			/>
 		</div>
 
 		<!-- Register/Login -->
-		<div class="flex h-[90%] w-[80%] items-center justify-center">
+		<div class="flex h-full w-full items-center justify-center xl:w-[80%]">
 			{#if $navigating}
                 <p>Loading...</p>
             {:else}
