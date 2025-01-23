@@ -23,7 +23,7 @@
 		class="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
 	>
 		{#if $UserStore.formData.first_name !== ''}
-			<div class="mb-2 flex flex-col gap-2 p-2">
+			<div class="mb-2 flex flex-col gap-2 p-2 group-[[data-collapsed=true]]:hidden">
 				<div>
 					<h1 class="text-sm">Welcome,</h1>
 					<h2 class="text-lg font-medium">{$UserStore.formData.first_name}</h2>
