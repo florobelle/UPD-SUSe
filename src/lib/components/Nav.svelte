@@ -8,7 +8,7 @@
 	let { logOutUser, isCollapsed, routes } = $props();
 
 	export const getVariant = (pathname: string, match: string): 'default' | 'ghost' => {
-		return pathname.includes(match) ? 'default' : 'ghost';
+		return pathname.endsWith(match) ? 'default' : 'ghost';
 	};
 </script>
 

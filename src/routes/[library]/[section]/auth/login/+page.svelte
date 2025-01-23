@@ -19,13 +19,13 @@
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
-    let rfidConverted: string = '';
+	let rfidConverted: string = '';
 	let usernameGlobal: string = '';
 	let rfidError: boolean = false;
 	let UPMailError: boolean = false;
-    let checkAdminCount:number = 0;
-    let checkUsernameCount:number = 0;
-    let checkRfidCount:number = 0;
+	let checkAdminCount: number = 0;
+	let checkUsernameCount: number = 0;
+	let checkRfidCount: number = 0;
 
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
@@ -56,138 +56,138 @@
 		}
 	};
 
-    $AdminStore = {
-        toLogin: false,
-        authenticated: false,
-        toRegister: false,
-        active_admin1: null,
-        active_admin2: null,
-        formData: {
-            admin_id: 0,
-            rfid: '',
-            nickname: '',
-            email: '',
-            is_approved: false,
-            library: '',
-            section: ''
-        }
-    }
+	$AdminStore = {
+		toLogin: false,
+		authenticated: false,
+		toRegister: false,
+		active_admin1: null,
+		active_admin2: null,
+		formData: {
+			admin_id: 0,
+			rfid: '',
+			nickname: '',
+			email: '',
+			is_approved: false,
+			library: '',
+			section: ''
+		}
+	};
 
 	// ----------------------------------------------------------------------------
 
 	async function checkAdminRfid() {
 		// Check if admin is already registered
-        if (checkAdminCount == 1) {
-            if (checkInputValidity('adminRfid')) {
-                const loadID: string = toast.loading('Logging you in...');
-                const { email, error } = await readEmail(rfidConverted);
+		if (checkAdminCount == 1) {
+			if (checkInputValidity('adminRfid')) {
+				const loadID: string = toast.loading('Logging you in...');
+				const { email, error } = await readEmail(rfidConverted);
 
-                if (error) {
-                    toast.error(`Error with looking for a username: ${error}`);
-                    return;
-                } else if (email) {
-                    $AdminStore.formData.rfid = rfidConverted;
-                    $AdminStore.formData.email = email;
-                    const { error } = await loginAdmin(rfidConverted, email);
-                    if (error) {
-                        toast.error(`Error with logging in with RFID: ${error}`);
-                        goto(`/${library}/${section}/auth/login`);
-                    } else {
-                        $AdminStore.formData.email = email;
-                        goto(`/${library}/${section}/admin-dashboard/users`);
-                    }
-                } else {
-                    goto(`/${library}/${section}/auth/register-admin`);
-                }
-                toast.dismiss(loadID);
-            } else {
-                rfidError = true;
-            }
-        }
-        checkAdminCount = 0;
+				if (error) {
+					toast.error(`Error with looking for a username: ${error}`);
+					return;
+				} else if (email) {
+					$AdminStore.formData.rfid = rfidConverted;
+					$AdminStore.formData.email = email;
+					const { error } = await loginAdmin(rfidConverted, email);
+					if (error) {
+						toast.error(`Error with logging in with RFID: ${error}`);
+						goto(`/${library}/${section}/auth/login`);
+					} else {
+						$AdminStore.formData.email = email;
+						goto(`/${library}/${section}/admin-dashboard/users`);
+					}
+				} else {
+					goto(`/${library}/${section}/auth/register-admin`);
+				}
+				toast.dismiss(loadID);
+			} else {
+				rfidError = true;
+			}
+		}
+		checkAdminCount = 0;
 		return;
 	}
 
 	async function checkUserRfid() {
 		// Check if user is already registered
-        if (checkRfidCount == 1) {
-            if (checkInputValidity('userRfid')) {
-                const loadID: string = toast.loading('Logging you in...');
-                const { username, error } = await readUsername(rfidConverted, '');
+		if (checkRfidCount == 1) {
+			if (checkInputValidity('userRfid')) {
+				const loadID: string = toast.loading('Logging you in...');
+				const { username, error } = await readUsername(rfidConverted, '');
 
-                if (error) {
-                    toast.error(`Error with looking for a username: ${error}`);
-                    return;
-                } else {
-                    $UserStore.formData.rfid = rfidConverted;
-                    if (username) {
-                        const { error } = await loginRfid(rfidConverted, username);
-                        if (error) {
-                            toast.error(`Error with logging in with RFID: ${error}`);
-                            goto(`/${library}/${section}/auth/login`);
-                        } else {
-                            $UserStore.formData.username = username;
-                            goto(`/${library}/${section}/student-dashboard`);
-                        }
-                    } else {
-                        goto(`/${library}/${section}/auth/register`);
-                    }
-                }
-                toast.dismiss(loadID);
-            } else {
-                rfidError = true;
-            }
-        }
-        checkRfidCount = 0;
+				if (error) {
+					toast.error(`Error with looking for a username: ${error}`);
+					return;
+				} else {
+					$UserStore.formData.rfid = rfidConverted;
+					if (username) {
+						const { error } = await loginRfid(rfidConverted, username);
+						if (error) {
+							toast.error(`Error with logging in with RFID: ${error}`);
+							goto(`/${library}/${section}/auth/login`);
+						} else {
+							$UserStore.formData.username = username;
+							goto(`/${library}/${section}/student-dashboard`);
+						}
+					} else {
+						goto(`/${library}/${section}/auth/register`);
+					}
+				}
+				toast.dismiss(loadID);
+			} else {
+				rfidError = true;
+			}
+		}
+		checkRfidCount = 0;
 		return;
 	}
 
 	async function checkUsername() {
 		// Check if user is already registered
-        if (checkUsernameCount == 1) {
-            if (checkInputValidity('UPmail')) {
-                const loadID: string = toast.loading('Logging you in...');
-                const { username, error } = await readUsername('', usernameGlobal);
+		if (checkUsernameCount == 1) {
+			if (checkInputValidity('UPmail')) {
+				const loadID: string = toast.loading('Logging you in...');
+				const { username, error } = await readUsername('', usernameGlobal);
 
-                if (error) {
-                    toast.error(`Error with looking for a username: ${error}`);
-                } else {
-                    $UserStore.formData.username = usernameGlobal;
-                    if (username) {
-                        const { error } = await sendOtp(username);
-                        if (error) {
-                            toast.error(`Error with sending OTP: ${error}`);
-                            goto(`/${library}/${section}/auth/login`);
-                        } else {
-                            goto(`/${library}/${section}/auth/verify-otp`);
-                        }
-                    } else {
-                        goto(`/${library}/${section}/auth/register`);
-                    }
-                }
-                toast.dismiss(loadID);
-            } else {
-                UPMailError = true;
-            }
-        }
-        checkUsernameCount = 0;
+				if (error) {
+					toast.error(`Error with looking for a username: ${error}`);
+				} else {
+					$UserStore.formData.username = usernameGlobal;
+					if (username) {
+						const { error } = await sendOtp(username);
+						if (error) {
+							toast.error(`Error with sending OTP: ${error}`);
+							goto(`/${library}/${section}/auth/login`);
+						} else {
+							goto(`/${library}/${section}/auth/verify-otp`);
+						}
+					} else {
+						goto(`/${library}/${section}/auth/register`);
+					}
+				}
+				toast.dismiss(loadID);
+			} else {
+				UPMailError = true;
+			}
+		}
+		checkUsernameCount = 0;
 		return;
 	}
 
 	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key === 'Enter' || rfidGlobal.length == 10) {
-            if (rfidGlobal.match(/[a-fA-F]+/i)) {
-                rfidConverted = convertRfidInt(rfidGlobal);
-            } else {
-                rfidConverted = rfidGlobal;
-            }
+			if (rfidGlobal.match(/[a-fA-F]+/i)) {
+				rfidConverted = convertRfidInt(rfidGlobal);
+			} else {
+				rfidConverted = rfidGlobal;
+			}
 
 			if ($AdminStore.toLogin) {
-                checkAdminCount++;
+				checkAdminCount++;
 				checkAdminRfid();
 			} else {
-                checkRfidCount++;
+				checkRfidCount++;
 				checkUserRfid();
 			}
 		}
@@ -196,7 +196,7 @@
 	function handleKeydownUsername(event: KeyboardEvent) {
 		// Listens to input in the UP mail field
 		if (event.key === 'Enter') {
-            checkUsernameCount++;
+			checkUsernameCount++;
 			checkUsername();
 		}
 	}
@@ -263,7 +263,7 @@
 	async function selectLoginWithUserRfid() {
 		loginWithRfid = true;
 		$AdminStore.toLogin = false;
-        $AdminStore = $AdminStore;
+		$AdminStore = $AdminStore;
 		await tick(); // Ensure DOM updates before interacting
 		deselectText('UPmail');
 		deselectText('adminRfid');
@@ -293,7 +293,7 @@
 			<!-- Login with RFID User -->
 			<div class="flex w-full flex-col gap-8">
 				<div class="flex w-full flex-col gap-4 text-center">
-					<h1 class="text-5xl font-medium">Tap your UP ID to<br>login or register</h1>
+					<h1 class="text-5xl font-medium">Tap your UP ID to<br />login or register</h1>
 					<h2 class="text-lg font-normal">
 						Avail EnggLib services using SUSê by tapping your RFID!
 					</h2>
@@ -304,7 +304,7 @@
 						type="password"
 						placeholder="••••••••••"
 						pattern="[0-9a-fA-F]+"
-                        maxlength={10}
+						maxlength={10}
 						bind:value={rfidGlobal}
 						on:keyup={handleKeydownRfid}
 						class="max-w-full text-center text-base"
@@ -335,7 +335,7 @@
 			<!-- Login with RFID Admin -->
 			<div class="flex w-full flex-col gap-8">
 				<div class="flex w-full flex-col gap-4 text-center">
-					<h1 class="text-5xl font-medium">Tap your UP ID to<br>login or register</h1>
+					<h1 class="text-5xl font-medium">Tap your UP ID to<br />login or register</h1>
 					<h2 class="text-lg font-normal">Login as an admin in SUSê by tapping your RFID!</h2>
 				</div>
 				<div class="flex flex-col gap-2">
