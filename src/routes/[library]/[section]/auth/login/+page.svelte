@@ -82,30 +82,30 @@
 				const loadID: string = toast.loading('Logging you in...');
 				const { email, error } = await readEmail(rfidConverted, library, section);
 
-                if (error) {
-                    toast.error(`Error with looking for a username: ${error}`);
-                    return;
-                } else {
-                    $AdminStore.formData.rfid = rfidConverted;
-                    if (email) {
-                        const { error } = await loginAdmin(rfidConverted, email);
-                        if (error) {
-                            toast.error(`Error with logging in with RFID: ${error}`);
-                            goto(`/${library}/${section}/auth/login`);
-                        } else {
-                            $AdminStore.formData.email = email;
-                            goto(`/${library}/${section}/admin-dashboard/users`);
-                        }
-                    } else {
-                        goto(`/${library}/${section}/auth/register-admin`);
-                    }
-                } 
-                toast.dismiss(loadID);
-            } else {
-                rfidError = true;
-            }
-        }
-        checkAdminCount = 0;
+				if (error) {
+					toast.error(`Error with looking for a username: ${error}`);
+					return;
+				} else {
+					$AdminStore.formData.rfid = rfidConverted;
+					if (email) {
+						const { error } = await loginAdmin(rfidConverted, email);
+						if (error) {
+							toast.error(`Error with logging in with RFID: ${error}`);
+							goto(`/${library}/${section}/auth/login`);
+						} else {
+							$AdminStore.formData.email = email;
+							goto(`/${library}/${section}/admin-dashboard/users`);
+						}
+					} else {
+						goto(`/${library}/${section}/auth/register-admin`);
+					}
+				}
+				toast.dismiss(loadID);
+			} else {
+				rfidError = true;
+			}
+		}
+		checkAdminCount = 0;
 		return;
 	}
 
@@ -145,6 +145,7 @@
 
 	async function checkUsername() {
 		// Check if user is already registered
+        console.log(checkUsernameCount)
 		if (checkUsernameCount == 1) {
 			if (checkInputValidity('UPmail')) {
 				const loadID: string = toast.loading('Logging you in...');
@@ -235,10 +236,10 @@
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
 		if (target.tagName == 'BUTTON' || target.tagName == 'INPUT') {
-            return;
+			return;
 		} else {
 			event.preventDefault();
-        }
+		}
 	}
 
 	// Lifecycle management
@@ -419,7 +420,14 @@
 				<Button on:click={selectLoginWithUserRfid} variant="outline" class="w-full">
 					<p class="text-base">Login with UP RFID</p>
 				</Button>
-				<Button on:click={checkUsername} disabled={usernameGlobal.length == 0} class="w-full">
+				<Button
+					on:click={() => {
+						checkUsernameCount++;
+						checkUsername();
+					}}
+					disabled={usernameGlobal.length == 0}
+					class="w-full"
+				>
 					<p class="text-base">Send OTP</p>
 				</Button>
 			</div>
