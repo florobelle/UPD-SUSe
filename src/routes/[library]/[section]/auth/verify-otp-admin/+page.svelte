@@ -33,15 +33,13 @@
 				$AdminStore.formData
 			);
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with verifying OTP: ${error}`);
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-				toast.dismiss(loadID);
 				goto(`/${library}/${section}/admin-dashboard`);
 			}
+            toast.dismiss(loadID);
 		}
-
 		return;
 	}
 </script>
@@ -64,6 +62,7 @@
 				type="text"
 				placeholder="123456"
 				bind:value={otp}
+                maxlength={6}
 				on:keyup={checkOtpEnter}
 				class="max-w-full text-center text-base"
 			/>

@@ -84,8 +84,8 @@ export const columns: ColumnDef<UsageLogView>[] = [
 	createSortableColumn('lib_user_id', 'User ID', ''),
 	createSortableColumn('first_name', 'First Name', 'text'),
 	createSortableColumn('last_name', 'Last Name', 'text'),
-	createSortableColumn('admin_id1', 'Admin ID 1', ''),
-	createSortableColumn('admin_id2', 'Admin ID 2', ''),
+	createSortableColumn('admin_nickname1', 'Admin 1', 'text'),
+	createSortableColumn('admin_nickname2', 'Admin 2', 'text'),
 	{
 		id: 'actions',
 		cell: ({ row }) => {

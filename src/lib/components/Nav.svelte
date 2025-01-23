@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from './ui/button/button.svelte';
-	import { cn } from '$lib/utils.js';
+	import { cn } from '$lib/utilsFront.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index';
 	import { LogOut } from 'lucide-svelte';
 	import { page } from '$app/stores';
@@ -11,7 +11,7 @@
 	let { logOutUser, isCollapsed, routes } = $props();
 
 	export const getVariant = (pathname: string, match: string): 'default' | 'ghost' => {
-		return pathname.includes(match) ? 'default' : 'ghost';
+		return pathname.endsWith(match) ? 'default' : 'ghost';
 	};
 </script>
 

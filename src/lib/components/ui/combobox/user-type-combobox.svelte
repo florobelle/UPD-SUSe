@@ -3,7 +3,7 @@
 	import * as Command from '$lib/components/ui/command';
 	import { userTypes } from '$lib/stores/UserTypeStore';
 	import { ChevronsUpDown, Check } from 'lucide-svelte';
-	import { cn } from '$lib/utils';
+	import { cn } from '$lib/utilsFront';
 
 	let comboboxOpen = false;
 	export let selectedUserType = '';

@@ -11,7 +11,7 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
 	// Combobox Imports (User Type, College and Program Comboboxes)
-	import { cn } from '$lib/utils.js';
+	import { cn } from '$lib/utilsFront.js';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import PopoverContent from '$lib/components/ui/popover/popover-content.svelte';
@@ -149,12 +149,11 @@
 
 			const { error } = await sendOtp($formData.username);
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with sending OTP: ${error}`);
 			} else {
-				toast.dismiss(loadID);
 				goto(`/${library}/${section}/auth/verify-otp`);
 			}
+            toast.dismiss(loadID);
 		}
 		return;
 	}

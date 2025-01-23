@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { navigating } from '$app/stores';
+	import Loading from '$lib/components/Loading.svelte';
+
 	// UI Component Imports
 	import PhotoCard from '$lib/components/PhotoCard.svelte';
 	import { AdminStore } from '$lib/stores/AdminStore.js';
@@ -40,16 +43,18 @@
 				class="h-full w-auto"
 				alt="Department of Computer Science logo"
 			/>
-			<img
-				src="../../../logos/engglib-logo.png"
-				class="h-full w-auto"
-				alt="Engineering Library logo"
-				on:click={checkAdminLogin}
-			/>
+			<button class="cursor-default" on:click={checkAdminLogin}>
+				<img
+					src="../../../logos/engglib-logo.png"
+					class="h-full w-auto"
+					alt="Engineering Library logo"
+				/>
+			</button>
 		</div>
 
 		<!-- Register/Login -->
 		<div class="flex h-full w-full items-center justify-center xl:w-[80%]">
+			<Loading loadingText={'Thanks for using SUSê!'} loading={Boolean($navigating)} />
 			<slot></slot>
 		</div>
 	</div>

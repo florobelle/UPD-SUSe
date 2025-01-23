@@ -62,6 +62,8 @@
 				<h1 class="pt-10 text-3xl font-medium">Services</h1>
 				<DataTable data={$ServiceTableStore} {columns} {initialSort} />
 			</div>
+            {:else}
+                <p>Retrieving data...</p>
 		{/if}
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">
