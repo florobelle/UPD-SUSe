@@ -72,15 +72,16 @@
 			{/if}
 		{/each}
 	</nav>
-	<div class="mt-auto w-full p-2">
+	<div class="mt-auto grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
+	>
 		{#if isCollapsed}
 			<Button
 				on:click={logOutUser}
-				class="size-9 h-9 w-8 rounded-none p-1 -m-2 justify-start dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white"
+				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 size-9"
 				href="#"
 				size="icon"
 			>
-				<svelte:component this={LogOut} class="size-4" aria-hidden="true" />
+				<svelte:component this={LogOut} class="size-4 w-full" aria-hidden="true" />
 				<span class="sr-only">Logout</span>
 			</Button>
 		{:else}
