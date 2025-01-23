@@ -81,24 +81,25 @@
             if (checkInputValidity('adminRfid')) {
                 const loadID: string = toast.loading('Logging you in...');
                 const { email, error } = await readEmail(rfidConverted);
-                $AdminStore.formData.rfid = rfidConverted;
 
                 if (error) {
                     toast.error(`Error with looking for a username: ${error}`);
                     return;
-                } else if (email) {
-                    $AdminStore.formData.email = email;
-                    const { error } = await loginAdmin(rfidConverted, email);
-                    if (error) {
-                        toast.error(`Error with logging in with RFID: ${error}`);
-                        goto(`/${library}/${section}/auth/login`);
-                    } else {
-                        $AdminStore.formData.email = email;
-                        goto(`/${library}/${section}/admin-dashboard/users`);
-                    }
                 } else {
-                    goto(`/${library}/${section}/auth/register-admin`);
-                }
+                    $AdminStore.formData.rfid = rfidConverted;
+                    if (email) {
+                        const { error } = await loginAdmin(rfidConverted, email);
+                        if (error) {
+                            toast.error(`Error with logging in with RFID: ${error}`);
+                            goto(`/${library}/${section}/auth/login`);
+                        } else {
+                            $AdminStore.formData.email = email;
+                            goto(`/${library}/${section}/admin-dashboard/users`);
+                        }
+                    } else {
+                        goto(`/${library}/${section}/auth/register-admin`);
+                    }
+                } 
                 toast.dismiss(loadID);
             } else {
                 rfidError = true;
