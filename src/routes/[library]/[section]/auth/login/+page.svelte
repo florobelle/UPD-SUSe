@@ -83,7 +83,8 @@
 		// Check if admin is already registered
 		if (checkInputValidity('adminRfid')) {
 			const loadID: string = toast.loading('Logging you in...');
-			const { email, error } = await readEmail(rfidConverted);
+            $AdminStore.formData.rfid = rfidConverted;
+			const { email, error } = await readEmail(rfidConverted, library, section);
 
 			if (error) {
 				toast.dismiss(loadID);
@@ -91,7 +92,6 @@
 				return;
 			}
 			if (email) {
-				$AdminStore.formData.rfid = rfidConverted;
 				$AdminStore.formData.email = email;
 				const { error } = await loginAdmin(rfidConverted, email);
 				if (error) {
@@ -104,6 +104,7 @@
 					goto(`/${library}/${section}/admin-dashboard/users`);
 				}
 			} else {
+                console.log("no email, register")
 				toast.dismiss(loadID);
 				goto(`/${library}/${section}/auth/register-admin`);
 			}
@@ -236,9 +237,11 @@
 
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (target.tagName !== 'BUTTON') {
+		if (target.tagName == 'BUTTON' || target.tagName == 'INPUT') {
+            return;
+		} else {
 			event.preventDefault();
-		}
+        }
 	}
 
 	// Lifecycle management
@@ -389,7 +392,7 @@
 							placeholder="jddelacruz"
 							bind:value={usernameGlobal}
 							on:keyup={handleKeydownUsername}
-							pattern="^[A-Za-z]+[0-9]*"
+							pattern="^[a-z]+[0-9]*"
 							class="max-w-full rounded-r-none text-center text-base"
 						/>
 						<div class="px-2">
@@ -398,7 +401,7 @@
 					</div>
 					{#if UPMailError}
 						<p class="text-sm font-semibold text-muted-foreground text-red-500">
-							Please use your UP Mail!
+							Please use all lowercase for your UP Mail!
 						</p>
 					{/if}
 				</div>

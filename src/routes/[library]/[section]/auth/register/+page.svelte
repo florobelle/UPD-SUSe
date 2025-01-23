@@ -181,52 +181,57 @@
 			use:enhance
 		>
 			<!-- Scrollable register -->
-			<div class="h-full min-h-0 flex-1 overflow-y-auto p-2">
+			<div class="h-full min-h-0 flex-1 overflow-y-auto">
 				<div class="grid gap-8">
-					<div class="grid-rows grid xl:gap-6">
+					<div class="grid-rows grid gap-0">
 						<!-- Row 1: Name -->
-						<div class="grid xl:grid-cols-6 xl:gap-4">
-							<Form.Field {form} class="xl:col-span-3" name="first_name">
+						<div class="grid lg:grid-cols-6 lg:gap-4">
+							<Form.Field {form} class="lg:col-span-3" name="first_name">
 								<Form.Control let:attrs>
 									<Form.Label>First Name</Form.Label>
-									<Input {...attrs} bind:value={$formData.first_name} />
+									<Input placeholder="Juan Pedro III" {...attrs} bind:value={$formData.first_name} />
 								</Form.Control>
 								<Form.FieldErrors />
 							</Form.Field>
-							<Form.Field {form} class="xl:col-span-1" name="middle_name">
+							<Form.Field {form} class="lg:col-span-1" name="middle_name">
 								<Form.Control let:attrs>
 									<Form.Label>M.I.</Form.Label>
-									<Input {...attrs} bind:value={$formData.middle_name} />
+									<Input placeholder="D" {...attrs} bind:value={$formData.middle_name} />
 								</Form.Control>
 								<Form.FieldErrors />
 							</Form.Field>
-							<Form.Field {form} class="xl:col-span-2" name="last_name">
+							<Form.Field {form} class="lg:col-span-2" name="last_name">
 								<Form.Control let:attrs>
 									<Form.Label>Last Name</Form.Label>
-									<Input {...attrs} bind:value={$formData.last_name} />
+									<Input placeholder="Cruz" {...attrs} bind:value={$formData.last_name} />
 								</Form.Control>
 								<Form.FieldErrors />
 							</Form.Field>
 						</div>
 
 						<!-- Row 2: ID Number and Phone Number -->
-						<div class="grid xl:grid-cols-2 xl:gap-4">
+						<div class="grid lg:grid-cols-2 lg:gap-4">
 							<!-- Phone Number -->
-							<Form.Field {form} class="xl:col-span-1" name="phone_number">
+							<Form.Field {form} class="lg:col-span-1" name="phone_number">
 								<Form.Control let:attrs>
 									<Form.Label>Phone Number</Form.Label>
 									<div class="flex items-center rounded-l-md bg-zinc-100">
 										<div class="px-2">
 											<p class="text-sm">+63</p>
 										</div>
-										<Input {...attrs} class="rounded-l-none" bind:value={$formData.phone_number} />
+										<Input
+									placeholder="9999999999"
+									{...attrs}
+									class="rounded-l-none"
+									bind:value={$formData.phone_number}
+								/>
 									</div>
 								</Form.Control>
 								<Form.FieldErrors />
 							</Form.Field>
 
 							<!-- User Type -->
-							<Form.Field {form} name="user_type" class="mt-2 flex flex-col xl:col-span-1">
+							<Form.Field {form} name="user_type" class="mt-2 flex flex-col lg:col-span-1">
 								<Popover.Root bind:open={userTypeOpen}>
 									<Form.Control let:attrs>
 										<Form.Label>User Type</Form.Label>
@@ -280,9 +285,9 @@
 						</div>
 
 						<!-- Row 4: College, Department, Type -->
-						<div class="grid xl:grid-cols-2 xl:gap-4">
+						<div class="grid lg:grid-cols-2 lg:gap-4">
 							<!-- College -->
-							<Form.Field {form} name="college" class="mt-2 flex flex-col xl:col-span-1">
+							<Form.Field {form} name="college" class="mt-2 flex flex-col lg:col-span-1">
 								<Popover.Root bind:open={collegeOpen}>
 									<Form.Control let:attrs>
 										<Form.Label>College</Form.Label>
@@ -344,7 +349,7 @@
 							</Form.Field>
 
 							<!-- Program -->
-							<Form.Field {form} name="program" class="mt-2 flex flex-col xl:col-span-1">
+							<Form.Field {form} name="program" class="mt-2 flex flex-col lg:col-span-1">
 								<Popover.Root bind:open={programOpen}>
 									<Form.Control let:attrs>
 										<Form.Label>College Program</Form.Label>
@@ -407,22 +412,27 @@
 							</Form.Field>
 						</div>
 
-						<div class="grid xl:grid-cols-2 xl:gap-4">
+						<div class="grid lg:grid-cols-2 lg:gap-4">
 							<!-- ID Number -->
-							<Form.Field {form} class="xl:col-span-1" name="id">
+							<Form.Field {form} class="lg:col-span-1" name="id">
 								<Form.Control let:attrs>
-									<Form.Label>ID Number</Form.Label>
-									<Input {...attrs} bind:value={$formData.id} />
+									<Form.Label>ID/Student Number</Form.Label>
+									<Input placeholder="202012345" {...attrs} bind:value={$formData.id} />
 								</Form.Control>
 								<Form.FieldErrors />
 							</Form.Field>
 
 							<!-- Email -->
-							<Form.Field {form} class="xl:col-span-1" name="username">
+							<Form.Field {form} class="lg:col-span-1" name="username">
 								<Form.Control let:attrs>
 									<Form.Label>Email</Form.Label>
 									<div class="flex items-center rounded-r-md bg-zinc-100">
-										<Input {...attrs} class="rounded-r-none" bind:value={$formData.username} />
+										<Input
+									placeholder="jdcruz"
+									{...attrs}
+									class="rounded-r-none"
+									bind:value={$formData.username}
+								/>
 										<div class="px-2">
 											<p class="text-sm">@up.edu.ph</p>
 										</div>
