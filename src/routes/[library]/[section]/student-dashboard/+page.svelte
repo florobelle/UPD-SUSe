@@ -319,7 +319,7 @@
 
 			{#if $UserStore.formData.is_approved}
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
-				<div class="grid h-full grid-cols-2 gap-8 xl:grid-cols-4">
+				<div class="grid h-full grid-cols-2 gap-8 lg:grid-cols-3 xl:grid-cols-4">
 					<!-- SERVICES -->
                      {#if $ServiceTypeStore.length}
                         {#each $ServiceTypeStore as serviceType}

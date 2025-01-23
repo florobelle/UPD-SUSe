@@ -80,7 +80,7 @@
 		if (checkAdminCount == 1) {
 			if (checkInputValidity('adminRfid')) {
 				const loadID: string = toast.loading('Logging you in...');
-				const { email, error } = await readEmail(rfidConverted);
+				const { email, error } = await readEmail(rfidConverted, library, section);
 
                 if (error) {
                     toast.error(`Error with looking for a username: ${error}`);
@@ -234,9 +234,11 @@
 
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (target.tagName !== 'BUTTON' && target.tagName !== 'INPUT') {
+		if (target.tagName == 'BUTTON' || target.tagName == 'INPUT') {
+            return;
+		} else {
 			event.preventDefault();
-		}
+        }
 	}
 
 	// Lifecycle management
@@ -388,7 +390,7 @@
 							placeholder="jddelacruz"
 							bind:value={usernameGlobal}
 							on:keyup={handleKeydownUsername}
-							pattern="^[A-Za-z]+[0-9]*"
+							pattern="^[a-z]+[0-9]*"
 							class="max-w-full rounded-r-none text-center text-base"
 						/>
 						<div class="px-2">
@@ -397,7 +399,7 @@
 					</div>
 					{#if UPMailError}
 						<p class="text-sm font-semibold text-muted-foreground text-red-500">
-							Please use your UP Mail!
+							Please use all lowercase for your UP Mail!
 						</p>
 					{/if}
 				</div>
