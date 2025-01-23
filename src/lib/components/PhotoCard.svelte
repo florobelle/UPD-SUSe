@@ -17,9 +17,9 @@
 		class="overlay-blur bg-[#D9D9D9]/.20 absolute inset-x-0 bottom-0 h-1/3 w-full rounded-t-[2000px] backdrop-blur-lg"
 	></div>
 	<!-- Blur -->
-	<div class="gap-[20px absolute inset-x-0 bottom-0 flex w-full flex-col gap-8 p-10 text-center">
+	<div class="absolute inset-x-0 bottom-0 flex w-full flex-col gap-8 p-10 text-center">
 		<div class="flex w-full items-center justify-center gap-4">
-			<MapPin size="32" strokeWidth="2" color="#ffffff" />
+			<MapPin size="32" strokeWidth="2" color="#ffffff" class="hidden xl:block" />
 			<p class="text-3xl font-medium text-white">{libName}</p>
 		</div>
 		<p class="text-base font-normal text-white/[.80]">
