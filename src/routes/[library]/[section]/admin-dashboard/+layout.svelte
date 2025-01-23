@@ -4,6 +4,7 @@
 	import { adminRoutes } from '../../../../lib/components/UIconfig/navConfig';
 	import toast from 'svelte-5-french-toast';
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
+	import Loading from '$lib/components/Loading.svelte';
 
 	// Backend Imports
 	import { navigating, page } from '$app/stores';
@@ -59,16 +60,16 @@
 		getAdmin();
 	}
 
-    function createNewCookies(session: Session | null) {
-        // creates new access and refresh tokens
-        if (session) {
+	function createNewCookies(session: Session | null) {
+		// creates new access and refresh tokens
+		if (session) {
 			createCookie('accessTokenAdmin', session.access_token, 1, `${library}/${section}`);
 			createCookie('refreshTokenAdmin', session.refresh_token, 1, `${library}/${section}`);
-        } else {
-            toast.error(`Error with saving auth tokens. No available session.`)
-        }
-        return;
-    }
+		} else {
+			toast.error(`Error with saving auth tokens. No available session.`);
+		}
+		return;
+	}
 
 	async function startAdminSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -82,43 +83,43 @@
 
 			if (sessionResponse.error) {
 				toast.error(`Error with getting session: ${sessionResponse.error}`);
-                return;
+				return;
 			}
 		}
 
-        let admin = session?.user;
-        const accessTokenAdmin: string = readCookie('accessTokenAdmin');
-        const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
+		let admin = session?.user;
+		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
+		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-        if (session) {
-            // if there is currently a session with no cookies, save tokens in cookies
-            createNewCookies(session);
-            getSessionData(admin);
-        } else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
-            // if there is no session or tokens saved, go back to login
-            toast.error('Please login first.');
-            isLoggedOut = true;
-            goto(`/${library}/${section}/auth/login`);
-        } else if (accessTokenAdmin && refreshTokenAdmin) {
-            // if there is no current session, start one with the saved tokens
-            const {
-                data: { session },
-                error
-            } = await supabaseClient.auth.setSession({
-                access_token: accessTokenAdmin,
-                refresh_token: refreshTokenAdmin
-            });
+		if (session) {
+			// if there is currently a session with no cookies, save tokens in cookies
+			createNewCookies(session);
+			getSessionData(admin);
+		} else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
+			// if there is no session or tokens saved, go back to login
+			toast.error('Please login first.');
+			isLoggedOut = true;
+			goto(`/${library}/${section}/auth/login`);
+		} else if (accessTokenAdmin && refreshTokenAdmin) {
+			// if there is no current session, start one with the saved tokens
+			const {
+				data: { session },
+				error
+			} = await supabaseClient.auth.setSession({
+				access_token: accessTokenAdmin,
+				refresh_token: refreshTokenAdmin
+			});
 
-            if (error) {
-                toast.error(`Error with creating admin session: ${error}`);
-                isLoggedOut = true;
-                goto(`/${library}/${section}/auth/login`);
-            } else if (session) {
-                admin = session?.user;
-                createNewCookies(session);
-                getSessionData(admin);
-            }
-        }
+			if (error) {
+				toast.error(`Error with creating admin session: ${error}`);
+				isLoggedOut = true;
+				goto(`/${library}/${section}/auth/login`);
+			} else if (session) {
+				admin = session?.user;
+				createNewCookies(session);
+				getSessionData(admin);
+			}
+		}
 
 		return;
 	}
@@ -205,8 +206,8 @@
 		} catch {
 			toast.error('Logout error.');
 		}
-        toast.dismiss(loadID);
-        return;
+		toast.dismiss(loadID);
+		return;
 	}
 
 	beforeNavigate(({ to, cancel }) => {
@@ -254,12 +255,12 @@
 	}
 
 	// ----------------------------------------------------------------------------
-	
-    $: {
-        if (browser && document) {
-            startAdminSession();
-        }
-    }
+
+	$: {
+		if (browser && document) {
+			startAdminSession();
+		}
+	}
 </script>
 
 <div class="h-full">
@@ -283,11 +284,8 @@
 		<Resizable.Handle withHandle class="h-screen" />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<ScrollArea orientation="both" class="h-screen">
-				{#if $navigating}
-                    <p>Loading...</p>
-                {:else}
-                    <slot></slot>
-                {/if}
+				<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
+				<slot></slot>
 			</ScrollArea>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>

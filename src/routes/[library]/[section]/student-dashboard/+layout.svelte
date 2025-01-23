@@ -3,11 +3,11 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import { studentRoutes } from '../../../../lib/components/UIconfig/navConfig';
 	import toast from 'svelte-5-french-toast';
+	import Loading from '$lib/components/Loading.svelte';
 
 	// Backend Imports
 	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { Session, User } from '@supabase/supabase-js';
@@ -73,8 +73,8 @@
 		if ($UserStore.authenticated) {
 			return;
 		}
-        
-        if (!session) {
+
+		if (!session) {
 			const sessionResponse = await supabaseClient.auth.getSession();
 			session = sessionResponse.data.session;
 
@@ -200,8 +200,8 @@
 		} catch {
 			toast.error('Logout error.');
 		}
-        toast.dismiss(loadID);
-        return;
+		toast.dismiss(loadID);
+		return;
 	}
 
 	beforeNavigate(({ to, cancel }) => {
@@ -280,11 +280,8 @@
 		</Resizable.Pane>
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
-			{#if $navigating}
-                <p>Loading...</p>
-            {:else}
-                <slot></slot>
-            {/if}
+			<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
+			<slot></slot>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>
