@@ -260,7 +260,7 @@
 	}
 </script>
 
-<div class="hidden h-full md:block">
+<div class="h-full">
 	<Resizable.PaneGroup
 		on:mouseenter={resetTimer}
 		direction="horizontal"

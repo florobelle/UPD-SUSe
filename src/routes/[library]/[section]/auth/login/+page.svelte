@@ -80,31 +80,32 @@
 		if (checkAdminCount == 1) {
 			if (checkInputValidity('adminRfid')) {
 				const loadID: string = toast.loading('Logging you in...');
-				const { email, error } = await readEmail(rfidConverted);
+				const { email, error } = await readEmail(rfidConverted, library, section);
 
-				if (error) {
-					toast.error(`Error with looking for a username: ${error}`);
-					return;
-				} else if (email) {
-					$AdminStore.formData.rfid = rfidConverted;
-					$AdminStore.formData.email = email;
-					const { error } = await loginAdmin(rfidConverted, email);
-					if (error) {
-						toast.error(`Error with logging in with RFID: ${error}`);
-						goto(`/${library}/${section}/auth/login`);
-					} else {
-						$AdminStore.formData.email = email;
-						goto(`/${library}/${section}/admin-dashboard/users`);
-					}
-				} else {
-					goto(`/${library}/${section}/auth/register-admin`);
-				}
-				toast.dismiss(loadID);
-			} else {
-				rfidError = true;
-			}
-		}
-		checkAdminCount = 0;
+                if (error) {
+                    toast.error(`Error with looking for a username: ${error}`);
+                    return;
+                } else {
+                    $AdminStore.formData.rfid = rfidConverted;
+                    if (email) {
+                        const { error } = await loginAdmin(rfidConverted, email);
+                        if (error) {
+                            toast.error(`Error with logging in with RFID: ${error}`);
+                            goto(`/${library}/${section}/auth/login`);
+                        } else {
+                            $AdminStore.formData.email = email;
+                            goto(`/${library}/${section}/admin-dashboard/users`);
+                        }
+                    } else {
+                        goto(`/${library}/${section}/auth/register-admin`);
+                    }
+                } 
+                toast.dismiss(loadID);
+            } else {
+                rfidError = true;
+            }
+        }
+        checkAdminCount = 0;
 		return;
 	}
 
@@ -233,9 +234,11 @@
 
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (target.tagName !== 'BUTTON' && target.tagName !== 'INPUT') {
+		if (target.tagName == 'BUTTON' || target.tagName == 'INPUT') {
+            return;
+		} else {
 			event.preventDefault();
-		}
+        }
 	}
 
 	// Lifecycle management
@@ -387,7 +390,7 @@
 							placeholder="jddelacruz"
 							bind:value={usernameGlobal}
 							on:keyup={handleKeydownUsername}
-							pattern="^[A-Za-z]+[0-9]*"
+							pattern="^[a-z]+[0-9]*"
 							class="max-w-full rounded-r-none text-center text-base"
 						/>
 						<div class="px-2">
@@ -396,7 +399,7 @@
 					</div>
 					{#if UPMailError}
 						<p class="text-sm font-semibold text-muted-foreground text-red-500">
-							Please use your UP Mail!
+							Please use all lowercase for your UP Mail!
 						</p>
 					{/if}
 				</div>
@@ -412,7 +415,7 @@
 			</div>
 
 			<!-- Login with RFID -->
-			<div class="grid grid-cols-2 gap-4">
+			<div class="grid gap-4 xl:grid-cols-2">
 				<Button on:click={selectLoginWithUserRfid} variant="outline" class="w-full">
 					<p class="text-base">Login with UP RFID</p>
 				</Button>

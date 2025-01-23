@@ -8,27 +8,27 @@ type Email = {
     error: string | null 
 }
 
-export async function readEmail(rfid:string): Promise<Email> {
+export async function readEmail(rfid:string, library:string, section:string): Promise<Email> {
     // Reads the public_admin_info view in the database and returns the email of the admin
-        let query = supabaseClient.from('public_admin_info').select("email");
-    
-        if (rfid) {
-            query = query.eq('rfid', rfid);
-        }
-    
-        const { data, error } = await query;
-    
-        if (error) {
-            return {
-                email: '',
-                error: error.toString()
-            }
-        }
-    
+    let query = supabaseClient.from(`public_admin_${library}`).select("email").eq('section', section);
+
+    if (rfid) {
+        query = query.eq('rfid', rfid);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
         return {
-            email: data.length ? data[0].email : '',
-            error: null
+            email: '',
+            error: error.toString()
         }
+    }
+
+    return {
+        email: data.length ? data[0].email : '',
+        error: null
+    }
 }
 
 export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {

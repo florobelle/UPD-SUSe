@@ -18,7 +18,7 @@
 	}
 </script>
 
-<section class="grid h-screen max-h-dvh grid-cols-2">
+<section class="grid h-screen max-h-dvh grid-cols-2 overflow-hidden">
 	<!-- Photocard -->
 	<div class="h-full p-4">
 		<PhotoCard
@@ -30,7 +30,7 @@
 	</div>
 
 	<!-- Register/Login -->
-	<div class="flex h-full w-full flex-col items-center justify-center p-4">
+	<div class="flex h-full w-full flex-col items-center justify-center overflow-hidden p-10">
 		<!-- Logo header -->
 		<div class="items-right flex h-[50px] w-full justify-end gap-4">
 			<img
@@ -53,7 +53,7 @@
 		</div>
 
 		<!-- Register/Login -->
-		<div class="flex h-[90%] w-[80%] items-center justify-center">
+		<div class="flex h-full w-full items-center justify-center xl:w-[80%]">
 			<Loading loadingText={'Thanks for using SUSê!'} loading={Boolean($navigating)} />
 			<slot></slot>
 		</div>

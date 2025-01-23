@@ -3,17 +3,35 @@ import { userTypes } from '$lib/stores/UserTypeStore';
 import { z } from 'zod';
 
 export const formSchema = z.object({
-	first_name: z.string().min(2).max(50),
-	middle_name: z.string().min(1).max(5),
-	last_name: z.string().min(2).max(50),
-	username: z.string().regex(/^[A-Za-z]+[0-9]*/, {
-		message: 'Please enter your UP Mail'
+	first_name: z
+		.string()
+		.min(2)
+		.max(50)
+		.regex(
+			/^[A-Z][a-z]*(?:[-'\s][A-Z][a-z]*)*(?:\s(?:II|III|IV|V|VI|VII|VIII|IX|X))?$/,
+			'Please use sentence case letters only'
+		),
+	middle_name: z
+		.string()
+		.min(0)
+		.max(5)
+		.regex(/(^[A-Z]+$)*/, 'Capital letters only'),
+	last_name: z
+		.string()
+		.min(2)
+		.max(50)
+		.regex(
+			/^[A-Z][a-z]*(?:\s[A-Z][a-z]*)*$/,
+			'Please use sentence case'
+		),
+	username: z.string().regex(/^[a-z]+[0-9]*/, {
+		message: 'Lowercase letters (a-z) and numbers only'
 	}),
 	id: z.string().regex(/^\d{9}$/, {
-		message: 'ID number must have exactly 9 digits'
+		message: 'Exactly 9 digits'
 	}),
 	phone_number: z.string().regex(/^\d{10}$/, {
-		message: 'Phone number must have exactly 10 digits'
+		message: 'Exactly 10 digits'
 	}),
 	user_type: z.enum(userTypes.map((f) => f.value) as [string, ...string[]], {
 		message: 'Please select a user type'

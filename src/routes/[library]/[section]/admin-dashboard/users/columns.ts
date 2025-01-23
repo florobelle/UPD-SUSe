@@ -33,21 +33,19 @@ const createSortableColumn = (
 
 export const columns: ColumnDef<UserTable>[] = [
 	{
-		accessorKey: 'is_approved',
+		accessorKey: 'is_active',
 		header: ({ column }) => {
 			return renderComponent(DataTableHeaderButton, {
 				header: 'Status',
 				onclick: () => {
-					const isSorted = column.getIsSorted();
-					column.toggleSorting(isSorted === 'asc');
+					column.toggleSorting(column.getIsSorted() === 'asc');
 				}
 			});
 		},
+
 		cell: ({ row }) => {
 			const activeCellSnippet = createRawSnippet<[{ active: any; approved: any }]>((getData) => {
 				const { active, approved } = getData();
-
-				// console.log('approved', approved);
 
 				let dotColor = 'bg-gray-400';
 				if (approved) {
@@ -84,7 +82,7 @@ export const columns: ColumnDef<UserTable>[] = [
 	createSortableColumn('user_type', 'User Type', 'user_type'),
 
 	{
-		accessorKey: 'is_active',
+		accessorKey: 'is_approved',
 		header: () => {},
 		cell: () => {}
 	},
