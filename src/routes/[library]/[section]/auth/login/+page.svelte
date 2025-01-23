@@ -127,7 +127,7 @@
 							goto(`/${library}/${section}/auth/login`);
 						} else {
 							$UserStore.formData.username = username;
-							goto(`/${library}/${section}/student-dashboard`);
+							goto(`/${library}/${section}/student-dashboard/services`);
 						}
 					} else {
 						goto(`/${library}/${section}/auth/register`);

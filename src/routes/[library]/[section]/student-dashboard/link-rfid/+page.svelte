@@ -5,26 +5,28 @@
 	import { UserStore } from '$lib/stores/UserStore';
 	import { linkRfid } from '../../../../supabase/LoginReg';
 	import { convertRfidInt } from '$lib/utilsBack';
+	import { browser } from '$app/environment';
+	import { onMount, onDestroy } from 'svelte';
 	// ----------------------------------------------------------------------------
 	// RFID LINKING
 	// ----------------------------------------------------------------------------
-	let rfidGlobal:string = ''; // rfid linking
-	let rfidConverted:string = '';
-    let checkCallCount:number = 0;
+	let rfidGlobal: string = ''; // rfid linking
+	let rfidConverted: string = '';
+	let checkCallCount: number = 0;
 
 	async function checkRfidEnter() {
 		// checks once RFID has been entered
 		if (checkCallCount == 1) {
-            const { error } = await linkRfid(rfidConverted, $UserStore.formData.username);
-            rfidGlobal = '';
-            rfidConverted = '';
-            if (error) {
-                toast.error(`Error with linking RFID: ${error}`);
-            } else {
-                toast.success('Successful RFID linking!');
-            }
-            checkCallCount = 0;
-        }
+			const { error } = await linkRfid(rfidConverted, $UserStore.formData.username);
+			rfidGlobal = '';
+			rfidConverted = '';
+			if (error) {
+				toast.error(`Error with linking RFID: ${error}`);
+			} else {
+				toast.success('Successful RFID linking!');
+			}
+			checkCallCount = 0;
+		}
 		return;
 	}
 
@@ -37,10 +39,50 @@
 				rfidConverted = rfidGlobal;
 			}
 
-            checkCallCount++;
+			checkCallCount++;
 			checkRfidEnter();
 		}
 	}
+
+	// Functions for selecting and deselecting text boxes
+	function selectText(id: string) {
+		if (browser) {
+			const input = document.getElementById(id) as HTMLElement | null;
+			if (input) {
+				input.focus();
+			}
+		}
+	}
+
+	function deselectText(id: string): void {
+		if (browser) {
+			const input = document.getElementById(id) as HTMLElement | null;
+			if (input) {
+				input.blur();
+			}
+		}
+	}
+
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (target.tagName !== 'BUTTON' && target.tagName !== 'INPUT') {
+			event.preventDefault();
+		}
+	}
+
+	// Lifecycle management
+	onMount(() => {
+		if (browser) {
+			selectText('userRfid');
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+	});
+
+	onDestroy(() => {
+		if (browser) {
+			document.removeEventListener('mousedown', handleClickOutside);
+		}
+	});
 </script>
 
 <Toaster />
@@ -49,6 +91,7 @@
 	<h1 class="text-3xl font-medium">Please tap your UP ID to link it to your account!</h1>
 
 	<Input
+		id="userRfid"
 		type="text"
 		bind:value={rfidGlobal}
 		on:keyup={handleKeydownRfid}

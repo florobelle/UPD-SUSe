@@ -12,15 +12,15 @@ export type Route = {
 export const studentRoutes: Route[] = [
 	{
 		title: 'Library Services',
-		id: 'student-dashboard',
+		id: 'services',
 		icon: Icons.PencilRuler,
-		url: './'
+		url: './services'
 	},
 	{
 		title: 'Link UP ID',
 		id: 'link-rfid',
 		icon: Icons.IDCard,
-		url: './student-dashboard/link-rfid'
+		url: './link-rfid'
 	},
 	{
 		title: 'About SUSê',
