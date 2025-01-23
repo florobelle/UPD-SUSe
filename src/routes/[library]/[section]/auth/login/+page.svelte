@@ -417,7 +417,7 @@
 			</div>
 
 			<!-- Login with RFID -->
-			<div class="grid grid-cols-2 gap-4">
+			<div class="grid gap-4 xl:grid-cols-2">
 				<Button on:click={selectLoginWithUserRfid} variant="outline" class="w-full">
 					<p class="text-base">Login with UP RFID</p>
 				</Button>

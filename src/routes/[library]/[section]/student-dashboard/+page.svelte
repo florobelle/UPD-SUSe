@@ -10,6 +10,7 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import CircleAlert from 'lucide-svelte/icons/circle-alert';
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 
 	// Backend Imports
 	import { readUsageLog } from '../../../supabase/UsageLog';
@@ -33,6 +34,7 @@
 	export let data: { libraryName: string };
 
 	let serviceSelected = '';
+	let termsAccepted = false;
 
 	interface DialogState {
 		isOpen: boolean;
@@ -47,6 +49,7 @@
 
 	function handleDialogClose(serviceTypeId: number) {
 		dialogStates[serviceTypeId] = { isOpen: false, type: null };
+		termsAccepted = false;
 	}
 	function selectService(serviceName: string) {
 		serviceSelected = serviceName;
@@ -220,7 +223,7 @@
 			usagelog_id: 0,
 			start: null,
 			end: null,
-            is_active: true,
+			is_active: true,
 			lib_user_id: parseInt($UserStore.formData.lib_user_id),
 			service_type: '',
 			library,
@@ -319,7 +322,7 @@
 
 			{#if $UserStore.formData.is_approved}
 				<h2 class="text-lg text-[#636363]">Tap any service to begin using it!</h2>
-				<div class="grid h-full grid-cols-4 gap-8">
+				<div class="grid h-full grid-cols-2 gap-8 xl:grid-cols-4">
 					<!-- SERVICES -->
 					{#each $ServiceTypeStore as serviceType}
 						<!-- ACTIVE SERVICES -->
@@ -332,7 +335,7 @@
 								}}
 							>
 								<Dialog.Trigger
-									class="m-0 h-full w-full p-0"
+									class="m-0 h-full min-h-[250px] w-full p-0 xl:min-h-[0px]"
 									on:click={() => handleDialogOpen(serviceType.service_type_id, 'end')}
 								>
 									<ServiceCard
@@ -373,7 +376,7 @@
 								}}
 							>
 								<!-- Service Card -->
-								<Dialog.Trigger class="m-0 h-full w-full p-0">
+								<Dialog.Trigger class="m-0 h-full min-h-[250px] w-full p-0 xl:min-h-[0px]">
 									<ServiceCard
 										selectService={() => selectService(serviceType.service_type)}
 										serviceName={serviceType.service_type}
@@ -478,11 +481,34 @@
 									{/if}
 
 									<Dialog.Footer>
-										<Button
-											on:click={() =>
-												availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
-											>Avail</Button
-										>
+										<div class="flex w-full flex-col items-center justify-center gap-4 text-center">
+											<div class="mx-auto flex w-full max-w-md flex-col items-center gap-2">
+												<p class="text-sm text-muted-foreground">
+													I accept full responsibility for the {serviceType.service_type} once it is
+													loaned to me. I agree that I received the {serviceType.service_type} in good
+													condition and I understand that I will be charged with corresponding fees or
+													replacement if it is damaged or lost while under my possession.
+												</p>
+												<div class="flex items-center gap-2">
+													<Checkbox id="terms" bind:checked={termsAccepted} />
+													<div class="grid gap-2 leading-none">
+														<Label
+															for="terms"
+															class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+														>
+															Accept terms and conditions
+														</Label>
+													</div>
+												</div>
+											</div>
+
+											<Button
+												disabled={!termsAccepted}
+												on:click={() =>
+													availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
+												>Avail
+											</Button>
+										</div>
 									</Dialog.Footer>
 								</Dialog.Content>
 							</Dialog.Root>
