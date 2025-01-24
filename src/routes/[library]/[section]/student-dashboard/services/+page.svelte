@@ -158,6 +158,7 @@
 				return;
 			} else if (services) {
 				for (const service of services) {
+					// service option store
 					if (service.service_type == 'Discussion Room') {
 						if (service.service.includes('Frequency')) {
 							serviceOption[service.service_type][0].options.push(service);
@@ -188,10 +189,10 @@
 						serviceInfo['Discussion Room'].available_number++;
 					}
 				}
+				$ServiceTypeStore = serviceTypes;
+				$ServiceInfoStore = serviceInfo;
+				$ServiceOptionStore = serviceOption;
 			}
-			$ServiceTypeStore = serviceTypes;
-			$ServiceInfoStore = serviceInfo;
-			$ServiceOptionStore = serviceOption;
 		}
 		return;
 	}
@@ -232,7 +233,6 @@
 
 		if (error) {
 			toast.error(`Error with getting usagelogs: ${error}`);
-			return;
 		} else if (usagelogs != null) {
 			let activeUsagelogs: { [key: string]: UsageLogView } = {};
 			for (const usagelog of usagelogs) {
@@ -249,26 +249,25 @@
 		// avails a given service and updates the active usage log store
 		if (!$AdminStore.active_admin1) {
 			toast.error(`Error with availing a usage log: No active admin. Please let the admin know.`);
-			return;
-		}
-		const loadID: string = toast.loading('Availing service...');
-		const { error } = await availService(
-			service_id,
-			parseInt($UserStore.formData.lib_user_id),
-			$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
-			$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
-		);
+		} else {
+            const loadID: string = toast.loading('Availing service...');
+            const { error } = await availService(
+                service_id,
+                parseInt($UserStore.formData.lib_user_id),
+                $AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
+                $AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
+            );
 
-		if (error) {
-			toast.dismiss(loadID);
-			toast.error(`Error with availing a usage log: ${error}`);
-			return;
-		}
-		toast.dismiss(loadID);
-		getActiveUsageLogs();
-		getServices();
-		selectedOption = null;
-		toast.success('Service availed!');
+            if (error) {
+                toast.error(`Error with availing a usage log: ${error}`);
+            } else {
+                getActiveUsageLogs();
+                getServices();
+                selectedOption = null;
+                toast.success('Service availed!');
+            }
+            toast.dismiss(loadID);
+        }
 		return;
 	}
 
@@ -282,13 +281,14 @@
 			Object.keys($ActiveUsageLogStore).length == 1 ? false : true
 		);
 		if (error) {
-			toast.dismiss(loadID);
-			return;
-		}
+            toast.error(`Error with ending service: ${error}`);
+		} else {
+            getServices();
+            getActiveUsageLogs();
+            toast.success('Service ended!');
+        }
 		toast.dismiss(loadID);
-		getServices();
-		getActiveUsageLogs();
-		toast.success('Service ended!');
+		return;
 	}
 
 	// ----------------------------------------------------------------------------

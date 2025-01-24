@@ -145,7 +145,6 @@
 
 	async function checkUsername() {
 		// Check if user is already registered
-        console.log(checkUsernameCount)
 		if (checkUsernameCount == 1) {
 			if (checkInputValidity('UPmail')) {
 				const loadID: string = toast.loading('Logging you in...');

@@ -10,7 +10,6 @@ export async function availService(serviceID:number, libUserID:number, adminID1:
         admin_id1: adminID1,
         admin_id2: adminID2
     });
-    console.log(error)
 
     if (error) {
         return { error: error.toString() };
