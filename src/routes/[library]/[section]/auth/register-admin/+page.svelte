@@ -37,7 +37,7 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-	// Returns to Login if both email and rfid are lost after page refresh
+	// Returns to Login if rfid is lost after page refresh
 	if (browser && !$AdminStore.formData.rfid) {
 		goto(`/${library}/${section}/auth/login`);
 	}

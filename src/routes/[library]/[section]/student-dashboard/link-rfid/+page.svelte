@@ -30,7 +30,7 @@
 		return;
 	}
 
-	function handleKeydownRfid(event: KeyboardEvent) {
+	function handleKeydownRfid() {
 		// Listens to input in the RFID field
 		if (rfidGlobal.length == 10) {
 			if (rfidGlobal.match(/[a-fA-F]+/i)) {
