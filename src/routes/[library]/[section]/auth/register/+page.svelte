@@ -208,7 +208,7 @@
 							</Form.Field>
 						</div>
 
-						<!-- Row 2: ID Number and Phone Number -->
+						<!-- Row 2: Phone Number and User Type-->
 						<div class="grid lg:grid-cols-2 lg:gap-4">
 							<!-- Phone Number -->
 							<Form.Field {form} class="lg:col-span-1" name="phone_number">
@@ -283,7 +283,7 @@
 							</Form.Field>
 						</div>
 
-						<!-- Row 4: College, Department, Type -->
+						<!-- Row 3: College and Program -->
 						<div class="grid lg:grid-cols-2 lg:gap-4">
 							<!-- College -->
 							<Form.Field {form} name="college" class="mt-2 flex flex-col lg:col-span-1">
@@ -411,6 +411,7 @@
 							</Form.Field>
 						</div>
 
+                        <!-- Row 4: ID/Student Number and Email -->
 						<div class="grid lg:grid-cols-2 lg:gap-4">
 							<!-- ID Number -->
 							<Form.Field {form} class="lg:col-span-1" name="id">
