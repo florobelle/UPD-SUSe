@@ -10,6 +10,7 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import CircleAlert from 'lucide-svelte/icons/circle-alert';
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 
 	// Backend Imports
 	import { readUsageLog } from '../../../../supabase/UsageLog';
@@ -33,6 +34,7 @@
 	export let data: { libraryName: string };
 
 	let serviceSelected = '';
+	let termsAccepted = false;
 
 	interface DialogState {
 		isOpen: boolean;
@@ -47,6 +49,7 @@
 
 	function handleDialogClose(serviceTypeId: number) {
 		dialogStates[serviceTypeId] = { isOpen: false, type: null };
+		termsAccepted = false;
 	}
 	function selectService(serviceName: string) {
 		serviceSelected = serviceName;
@@ -152,9 +155,9 @@
 
 			if (error) {
 				toast.error(`Error with getting services: ${error}`);
+				return;
 			} else if (services) {
 				for (const service of services) {
-					// service option store
 					if (service.service_type == 'Discussion Room') {
 						if (service.service.includes('Frequency')) {
 							serviceOption[service.service_type][0].options.push(service);
@@ -185,10 +188,10 @@
 						serviceInfo['Discussion Room'].available_number++;
 					}
 				}
-				$ServiceTypeStore = serviceTypes;
-				$ServiceInfoStore = serviceInfo;
-				$ServiceOptionStore = serviceOption;
 			}
+			$ServiceTypeStore = serviceTypes;
+			$ServiceInfoStore = serviceInfo;
+			$ServiceOptionStore = serviceOption;
 		}
 		return;
 	}
@@ -205,6 +208,7 @@
 
 		if (error) {
 			toast.error(`Error with reading active admin information: ${error}`);
+			return;
 		} else if (admins) {
 			$AdminStore.active_admin1 = admins[0];
 			$AdminStore.active_admin2 = admins[1];
@@ -228,6 +232,7 @@
 
 		if (error) {
 			toast.error(`Error with getting usagelogs: ${error}`);
+			return;
 		} else if (usagelogs != null) {
 			let activeUsagelogs: { [key: string]: UsageLogView } = {};
 			for (const usagelog of usagelogs) {
@@ -236,6 +241,7 @@
 
 			$ActiveUsageLogStore = activeUsagelogs;
 		}
+
 		return;
 	}
 
@@ -243,25 +249,26 @@
 		// avails a given service and updates the active usage log store
 		if (!$AdminStore.active_admin1) {
 			toast.error(`Error with availing a usage log: No active admin. Please let the admin know.`);
-		} else {
-			const loadID: string = toast.loading('Availing service...');
-			const { error } = await availService(
-				service_id,
-				parseInt($UserStore.formData.lib_user_id),
-				$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
-				$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
-			);
-
-			if (error) {
-				toast.error(`Error with availing a usage log: ${error}`);
-			} else {
-				getActiveUsageLogs();
-				getServices();
-				selectedOption = null;
-				toast.success('Service availed!');
-			}
-			toast.dismiss(loadID);
+			return;
 		}
+		const loadID: string = toast.loading('Availing service...');
+		const { error } = await availService(
+			service_id,
+			parseInt($UserStore.formData.lib_user_id),
+			$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
+			$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
+		);
+
+		if (error) {
+			toast.dismiss(loadID);
+			toast.error(`Error with availing a usage log: ${error}`);
+			return;
+		}
+		toast.dismiss(loadID);
+		getActiveUsageLogs();
+		getServices();
+		selectedOption = null;
+		toast.success('Service availed!');
 		return;
 	}
 
@@ -275,14 +282,13 @@
 			Object.keys($ActiveUsageLogStore).length == 1 ? false : true
 		);
 		if (error) {
-			toast.error(`Error with ending service: ${error}`);
-		} else {
-			getServices();
-			getActiveUsageLogs();
-			toast.success('Service ended!');
+			toast.dismiss(loadID);
+			return;
 		}
 		toast.dismiss(loadID);
-		return;
+		getServices();
+		getActiveUsageLogs();
+		toast.success('Service ended!');
 	}
 
 	// ----------------------------------------------------------------------------
@@ -476,11 +482,36 @@
 										{/if}
 
 										<Dialog.Footer>
-											<Button
-												on:click={() =>
-													availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
-												>Avail</Button
+											<div
+												class="flex w-full flex-col items-center justify-center gap-4 text-center"
 											>
+												<div class="mx-auto flex w-full max-w-md flex-col items-center gap-2">
+													<p class="text-sm text-muted-foreground">
+														I accept full responsibility for the {serviceType.service_type} once it is
+														loaned to me. I agree that I received the {serviceType.service_type} in good
+														condition and I understand that I will be charged with corresponding fees
+														or replacement if it is damaged or lost while under my possession.
+													</p>
+													<div class="flex items-center gap-2">
+														<Checkbox id="terms" bind:checked={termsAccepted} />
+														<div class="grid gap-2 leading-none">
+															<Label
+																for="terms"
+																class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+															>
+																Accept terms and conditions
+															</Label>
+														</div>
+													</div>
+												</div>
+
+												<Button
+													disabled={!termsAccepted}
+													on:click={() =>
+														availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
+													>Avail
+												</Button>
+											</div>
 										</Dialog.Footer>
 									</Dialog.Content>
 								</Dialog.Root>
