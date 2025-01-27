@@ -3,11 +3,11 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import { studentRoutes } from '../../../../lib/components/UIconfig/navConfig';
 	import toast from 'svelte-5-french-toast';
+	import Loading from '$lib/components/Loading.svelte';
 
 	// Backend Imports
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { Session, User } from '@supabase/supabase-js';
@@ -57,19 +57,23 @@
 		getUser();
 	}
 
-    function createNewCookies(session: Session | null) {
-        // creates new access and refresh tokens
-        if (session) {
-            createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
-            createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
-        } else {
-            toast.error(`Error with saving auth tokens. No available session.`)
-        }
-        return;
-    }
+	function createNewCookies(session: Session | null) {
+		// creates new access and refresh tokens
+		if (session) {
+			createCookie('accessTokenUser', session.access_token, 1, `${library}/${section}`);
+			createCookie('refreshTokenUser', session.refresh_token, 1, `${library}/${section}`);
+		} else {
+			toast.error(`Error with saving auth tokens. No available session.`);
+		}
+		return;
+	}
 
 	async function startUserSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
+		if ($UserStore.authenticated) {
+			return;
+		}
+
 		if (!session) {
 			const sessionResponse = await supabaseClient.auth.getSession();
 			session = sessionResponse.data.session;
@@ -85,7 +89,7 @@
 
 		if (session) {
 			// if there is currently a session with no cookies, save tokens in cookies
-            createNewCookies(session);
+			createNewCookies(session);
 			getSessionData(user);
 		} else if (!session && !accessTokenUser && !refreshTokenUser) {
 			// if there is no session or tokens saved, go back to login
@@ -108,7 +112,7 @@
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-                createNewCookies(session)
+				createNewCookies(session);
 				getSessionData(user);
 			}
 		}
@@ -128,7 +132,6 @@
 		if (error) {
 			toast.error(`Error with ending session: ${error}`);
 		}
-
 		return;
 	}
 
@@ -193,18 +196,17 @@
 		try {
 			isLoggedOut = true;
 			await endUserSession();
-			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-			toast.dismiss(loadID);
 			toast.error('Logout error.');
-			return;
 		}
+		toast.dismiss(loadID);
+		return;
 	}
 
 	beforeNavigate(({ to, cancel }) => {
 		// Confirms user will be logged out if they navigate to other pages
-		if (to?.url.pathname == `/${library}/${section}/student-dashboard` || to == null) {
+		if (to?.url.pathname.includes(`/${library}/${section}/student-dashboard`) || to == null) {
 			return;
 		} else if (!isLoggedOut) {
 			if (!confirm('Leaving will logout your current session. Continue?')) {
@@ -220,7 +222,7 @@
 	// READ USER INFO
 	// ----------------------------------------------------------------------------
 
-	async function getUser(): Promise<boolean> {
+	async function getUser() {
 		// gets user information from database
 		const { users, error } = await readUser({
 			lib_user_id: 0,
@@ -234,7 +236,6 @@
 
 		if (error) {
 			toast.error(`Error with reading user information: ${error}`);
-			return false;
 		} else if (users != null) {
 			$UserStore.formData.lib_user_id = users[0].lib_user_id.toString();
 			$UserStore.formData.college = users[0].college;
@@ -245,21 +246,21 @@
 			$UserStore.formData.college = users[0].college;
 			$UserStore.formData.program = users[0].program ? users[0].program : '';
 			$UserStore.formData.is_approved = users[0].is_approved;
-            $UserStore = $UserStore;
+			$UserStore = $UserStore;
 		}
-		return true;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------
 
-    $: {
-        if (browser && document) {
-            startUserSession();
-        }
-    }
+	$: {
+		if (browser && document) {
+			startUserSession();
+		}
+	}
 </script>
 
-<div class="hidden h-full md:block">
+<div class="h-full">
 	<Resizable.PaneGroup
 		on:mouseenter={resetTimer}
 		direction="horizontal"
@@ -279,6 +280,7 @@
 		</Resizable.Pane>
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
+			<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
 			<slot></slot>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>

@@ -37,8 +37,8 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-	// Returns to Login if both email and rfid are lost after page refresh
-	if (browser && !$AdminStore.formData.rfid && !$AdminStore.formData.email) {
+	// Returns to Login if rfid is lost after page refresh
+	if (browser && !$AdminStore.formData.rfid) {
 		goto(`/${library}/${section}/auth/login`);
 	}
 
@@ -58,12 +58,11 @@
 
 		const { error } = await signUpAdmin($formData.email);
 		if (error) {
-			toast.dismiss(loadID);
 			toast.error(`Error with sending OTP: ${error}`);
 		} else {
-			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/verify-otp-admin`);
 		}
+        toast.dismiss(loadID);
 		return;
 	}
 </script>

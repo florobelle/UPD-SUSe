@@ -13,9 +13,9 @@
 	let otp: string = '';
 
 	// ----------------------------------------------------------------------------
-    const routes: Array<string> = $page.url.pathname.split('/');
+	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1];
-	const section: string = routes[2]; 
+	const section: string = routes[2];
 
 	// Returns to Login if both username and rfid are lost after page refresh
 	if (browser && !$UserStore.formData.username) {
@@ -25,7 +25,7 @@
 	async function checkOtpEnter() {
 		// Listens to input in the OTP field
 		if (otp.length == 6) {
-            const loadID: string = toast.loading('Verifying OTP...');
+			const loadID: string = toast.loading('Verifying OTP...');
 			const { error } = await loginOtp(
 				otp,
 				$UserStore.formData.username,
@@ -33,15 +33,13 @@
 				$UserStore.formData
 			);
 			if (error) {
-				toast.dismiss(loadID);
 				toast.error(`Error with verifying OTP: ${error}`);
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-				toast.dismiss(loadID);
-				goto(`/${library}/${section}/student-dashboard`);
+				goto(`/${library}/${section}/student-dashboard/services`);
 			}
+			toast.dismiss(loadID);
 		}
-
 		return;
 	}
 </script>
@@ -63,6 +61,7 @@
 			<Input
 				type="text"
 				placeholder="123456"
+				maxlength={6}
 				bind:value={otp}
 				on:keyup={checkOtpEnter}
 				class="max-w-full text-center text-base"

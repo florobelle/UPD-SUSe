@@ -68,7 +68,6 @@ export async function loginOtp(otp:string, username:string, toRegister:boolean, 
 export async function linkRfid(rfid:string, username:string): Promise<Error> {
     // Links the UP RFID of a student to their UP Mail account
     const { error } = await supabaseClient.auth.updateUser({ password: rfid})
-
     if (error) {
         return { error: error.toString()};
     } else {

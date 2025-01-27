@@ -15,12 +15,11 @@
 
 		if (error) {
             isActive = !isActive;
-            toast.dismiss(loadID);
 			toast.error(`Error with updating admin with id ${id}: ${error}`);
-			return;
+        } else {
+            toast.success("Successfully updated admin status!");
         }
         toast.dismiss(loadID);
-        toast.success("Successfully updated admin status!")
         return;
 	}
 </script>

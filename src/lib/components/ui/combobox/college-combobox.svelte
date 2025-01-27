@@ -3,7 +3,7 @@
 	import * as Command from '$lib/components/ui/command';
 	import { allColleges } from '$lib/stores/CollegeProgramStore';
 	import { ChevronsUpDown, Check } from 'lucide-svelte';
-	import { cn } from '$lib/utils';
+	import { cn } from '$lib/utilsFront';
 
 	// ----------------------------------------------------------------------------
 	// COMBOBOXES (Dropdowns for User Type, Colleges and Programs)

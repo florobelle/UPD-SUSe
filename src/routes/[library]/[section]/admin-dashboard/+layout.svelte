@@ -4,9 +4,10 @@
 	import { adminRoutes } from '../../../../lib/components/UIconfig/navConfig';
 	import toast from 'svelte-5-french-toast';
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
+	import Loading from '$lib/components/Loading.svelte';
 
 	// Backend Imports
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
@@ -59,16 +60,16 @@
 		getAdmin();
 	}
 
-    function createNewCookies(session: Session | null) {
-        // creates new access and refresh tokens
-        if (session) {
+	function createNewCookies(session: Session | null) {
+		// creates new access and refresh tokens
+		if (session) {
 			createCookie('accessTokenAdmin', session.access_token, 1, `${library}/${section}`);
 			createCookie('refreshTokenAdmin', session.refresh_token, 1, `${library}/${section}`);
-        } else {
-            toast.error(`Error with saving auth tokens. No available session.`)
-        }
-        return;
-    }
+		} else {
+			toast.error(`Error with saving auth tokens. No available session.`);
+		}
+		return;
+	}
 
 	async function startAdminSession(session: Session | null = null) {
 		// Saves the user's access and refresh tokens in cookies and creates a new session if needed.
@@ -82,6 +83,7 @@
 
 			if (sessionResponse.error) {
 				toast.error(`Error with getting session: ${sessionResponse.error}`);
+				return;
 			}
 		}
 
@@ -91,7 +93,7 @@
 
 		if (session) {
 			// if there is currently a session with no cookies, save tokens in cookies
-            createNewCookies(session);
+			createNewCookies(session);
 			getSessionData(admin);
 		} else if (!session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is no session or tokens saved, go back to login
@@ -107,17 +109,18 @@
 				access_token: accessTokenAdmin,
 				refresh_token: refreshTokenAdmin
 			});
-			admin = session?.user;
 
 			if (error) {
 				toast.error(`Error with creating admin session: ${error}`);
 				isLoggedOut = true;
 				goto(`/${library}/${section}/auth/login`);
-			} else {
-                createNewCookies(session);
+			} else if (session) {
+				admin = session?.user;
+				createNewCookies(session);
 				getSessionData(admin);
 			}
 		}
+
 		return;
 	}
 
@@ -199,13 +202,12 @@
 			isLoggedOut = true;
 			$AdminStore.toLogin = false;
 			await endAdminSession();
-			toast.dismiss(loadID);
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
-			toast.dismiss(loadID);
 			toast.error('Logout error.');
-			return;
 		}
+		toast.dismiss(loadID);
+		return;
 	}
 
 	beforeNavigate(({ to, cancel }) => {
@@ -226,7 +228,7 @@
 	// GET ADMIN DATA
 	// ----------------------------------------------------------------------------
 
-	async function getAdmin(): Promise<boolean> {
+	async function getAdmin() {
 		// gets user information from database
 		const { admins, error } = await readAdmin({
 			email: $AdminStore.formData.email,
@@ -238,7 +240,6 @@
 
 		if (error) {
 			toast.error(`Error with reading admin information: ${error}`);
-			return false;
 		} else if (admins != null) {
 			$AdminStore.formData.admin_id = admins[0].admin_id;
 			$AdminStore.formData.rfid = admins[0].rfid;
@@ -250,16 +251,16 @@
 
 			$AdminStore = $AdminStore;
 		}
-		return true;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------
-	
-    $: {
-        if (browser && document) {
-            startAdminSession();
-        }
-    }
+
+	$: {
+		if (browser && document) {
+			startAdminSession();
+		}
+	}
 </script>
 
 <div class="h-full">
@@ -283,6 +284,7 @@
 		<Resizable.Handle withHandle class="h-screen" />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<ScrollArea orientation="both" class="h-screen">
+				<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
 				<slot></slot>
 			</ScrollArea>
 		</Resizable.Pane>
