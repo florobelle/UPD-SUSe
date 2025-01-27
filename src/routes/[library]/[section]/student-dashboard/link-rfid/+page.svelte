@@ -30,9 +30,9 @@
 		return;
 	}
 
-	function handleKeydownRfid() {
+	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
-		if (rfidGlobal.length == 10) {
+		if (event.key === 'Enter' || rfidGlobal.length == 10) {
 			if (rfidGlobal.match(/[a-fA-F]+/i)) {
 				rfidConverted = convertRfidInt(rfidGlobal);
 			} else {
@@ -65,7 +65,7 @@
 
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (target.tagName !== 'BUTTON' && target.tagName !== 'INPUT') {
+		if (target.tagName !== 'INPUT') {
 			event.preventDefault();
 		}
 	}
@@ -80,6 +80,7 @@
 
 	onDestroy(() => {
 		if (browser) {
+            deselectText('userRfid');
 			document.removeEventListener('mousedown', handleClickOutside);
 		}
 	});
@@ -92,10 +93,11 @@
 
 	<Input
 		id="userRfid"
-		type="text"
+		type="password"
 		bind:value={rfidGlobal}
 		on:keyup={handleKeydownRfid}
 		maxlength={10}
+        pattern="[0-9a-fA-F]+"
 		placeholder="••••••••••"
 		class="max-w-full text-center text-base"
 	/>
