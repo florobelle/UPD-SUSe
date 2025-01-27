@@ -17,7 +17,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { browser } from '$app/environment';
 	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
-	import type { ServiceTable, ServiceView } from '$lib/dataTypes/EntityTypes';
+	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UserTable } from '$lib/dataTypes/EntityTypes';
 	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
@@ -261,7 +261,7 @@
 
     let userChannel: RealtimeChannel;
 
-    export function updateServicesRealtime(updatedService:ServiceTable) {
+    function updateServiceRealtime(updatedService:ServiceTable) {
         // Updates the Service Info and Option stores
         let serviceType:string = "";
         let serviceCount:number = 0;
@@ -322,8 +322,27 @@
         $ServiceOptionStore = $ServiceOptionStore;
     }
 
+    function updateUsageLogRealtime(updatedUsageLog:UsageLogTable) {
+        // Update Active Usage Log store
+        if (updatedUsageLog.end) {
+            // remove usage log from ActiveUsageLog store
+        } else {
+            // add usage log in ActiveUsageLog store
+        }
+    }
+
+    function updateAdminRealtime(updatedAdmin:AdminTable) {
+        // Updates active Admin store 
+        console.log(updatedAdmin)
+    }
+
+    function updateUserRealtime(updatedUser:UserTable) {
+        // Updates active Admin store 
+        console.log(updatedUser)
+    }
+
     export function subscribeRealtimeUpdates() {
-        // Subscribes to updates in services, admins, and user information
+        // Subscribes to updates in services, usagelogs, admins, and user information
         userChannel = supabaseClient
             .channel("user-dashboard")
             .on(
@@ -331,9 +350,49 @@
                 {
                     event: 'UPDATE',
                     schema: 'public',
-                    table: `service_engglib`,
+                    table: 'service_engglib',
                 },
-                (payload) => {updateServicesRealtime(payload.new as ServiceTable)}
+                (payload) => {updateServiceRealtime(payload.new as ServiceTable)}
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'usagelog_engglib',
+                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+                },
+                (payload) => {updateUsageLogRealtime(payload.new as UsageLogTable)}
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'usagelog_engglib',
+                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+                },
+                (payload) => {updateUsageLogRealtime(payload.new as UsageLogTable)}
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'admin_engglib',
+                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+                },
+                (payload) => {updateAdminRealtime(payload.new as AdminTable)}
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'lib_user',
+                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+                },
+                (payload) => {updateUserRealtime(payload.new as UserTable)}
             )
             .subscribe()
     }
