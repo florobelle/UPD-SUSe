@@ -35,6 +35,12 @@
 
 	let serviceSelected = '';
 	let termsAccepted = false;
+	let selectedOption: {
+		value: number;
+		label: string;
+		disabled: boolean;
+	} | null;
+	let tabSelected: string;
 
 	interface DialogState {
 		isOpen: boolean;
@@ -51,6 +57,7 @@
 		dialogStates[serviceTypeId] = { isOpen: false, type: null };
 		termsAccepted = false;
 	}
+
 	function selectService(serviceName: string) {
 		serviceSelected = serviceName;
 		return;
@@ -250,24 +257,24 @@
 		if (!$AdminStore.active_admin1) {
 			toast.error(`Error with availing a usage log: No active admin. Please let the admin know.`);
 		} else {
-            const loadID: string = toast.loading('Availing service...');
-            const { error } = await availService(
-                service_id,
-                parseInt($UserStore.formData.lib_user_id),
-                $AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
-                $AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
-            );
+			const loadID: string = toast.loading('Availing service...');
+			const { error } = await availService(
+				service_id,
+				parseInt($UserStore.formData.lib_user_id),
+				$AdminStore.active_admin1 ? $AdminStore.active_admin1.admin_id : 0,
+				$AdminStore.active_admin2 ? $AdminStore.active_admin2.admin_id : null
+			);
 
-            if (error) {
-                toast.error(`Error with availing a usage log: ${error}`);
-            } else {
-                getActiveUsageLogs();
-                getServices();
-                selectedOption = null;
-                toast.success('Service availed!');
-            }
-            toast.dismiss(loadID);
-        }
+			if (error) {
+				toast.error(`Error with availing a usage log: ${error}`);
+			} else {
+				getActiveUsageLogs();
+				getServices();
+				selectedOption = null;
+				toast.success('Service availed!');
+			}
+			toast.dismiss(loadID);
+		}
 		return;
 	}
 
@@ -281,24 +288,15 @@
 			Object.keys($ActiveUsageLogStore).length == 1 ? false : true
 		);
 		if (error) {
-            toast.error(`Error with ending service: ${error}`);
+			toast.error(`Error with ending service: ${error}`);
 		} else {
-            getServices();
-            getActiveUsageLogs();
-            toast.success('Service ended!');
-        }
+			getServices();
+			getActiveUsageLogs();
+			toast.success('Service ended!');
+		}
 		toast.dismiss(loadID);
 		return;
 	}
-
-	// ----------------------------------------------------------------------------
-
-	let selectedOption: {
-		value: number;
-		label: string;
-		disabled: boolean;
-	} | null;
-	let tabSelected: string;
 
 	// ----------------------------------------------------------------------------
 
@@ -386,134 +384,137 @@
 										/>
 									</Dialog.Trigger>
 
-									<!-- Dialog Content of Service Card -->
-									<Dialog.Content class="min-w-fit">
-										<Dialog.Header>
-											<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
-											<Dialog.Description
-												>Please select the specific {serviceType.service_type} ID!</Dialog.Description
-											>
-										</Dialog.Header>
+									{#key $ServiceOptionStore}
+										<!-- Dialog Content of Service Card -->
+										<Dialog.Content class="min-w-fit">
+											<Dialog.Header>
+												<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
+												<Dialog.Description
+													>Please select the specific {serviceType.service_type} ID!</Dialog.Description
+												>
+											</Dialog.Header>
 
-										<!-- Load Tabs -->
-										{#if $ServiceOptionStore[serviceType.service_type].length > 1}
-											<Tabs.Root class="w-full">
-												<!-- Tab headings -->
-												<Tabs.List class="w-full">
-													{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-														<Tabs.Trigger
-															on:click={() => {
-																tabSelected = serviceInput.label;
-																selectedOption = null;
-															}}
-															value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
-														>
-													{/each}
-												</Tabs.List>
-
-												<!-- Content of tabs -->
-												{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-													{#key tabSelected}
-														<Tabs.Content value={serviceInput.label}>
-															<Select.Root
-																portal={null}
-																onSelectedChange={(s) => {
-																	if (s) {
-																		selectedOption = s as unknown as {
-																			value: number;
-																			label: string;
-																			disabled: boolean;
-																		};
-																	}
+											<!-- Load Tabs -->
+											{#if $ServiceOptionStore[serviceType.service_type].length > 1}
+												<Tabs.Root class="w-full">
+													<!-- Tab headings -->
+													<Tabs.List class="w-full">
+														{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+															<Tabs.Trigger
+																on:click={() => {
+																	tabSelected = serviceInput.label;
+																	selectedOption = null;
 																}}
+																value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
 															>
-																<Select.Trigger>
-																	<Select.Value
-																		placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`}
-																	/>
-																</Select.Trigger>
-																<Select.Content class="max-h-[10rem] overflow-y-auto">
-																	<Select.Group>
-																		{#each serviceInput.options as option}
-																			<Select.Item value={option.service_id} label={option.service}
-																				>{option.service}</Select.Item
-																			>
-																		{/each}
-																	</Select.Group>
-																</Select.Content>
-																<Select.Input name={serviceInput.label} />
-															</Select.Root>
-														</Tabs.Content>
-													{/key}
-												{/each}
-											</Tabs.Root>
-										{:else}
-											{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-												{#if serviceInput.type == 'select'}
-													<Label for={serviceInput.label}>{serviceInput.label}</Label>
-													<Select.Root
-														portal={null}
-														onSelectedChange={(s) => {
-															if (s) {
-																selectedOption = s as unknown as {
-																	value: number;
-																	label: string;
-																	disabled: boolean;
-																};
-															}
-														}}
-													>
-														<Select.Trigger>
-															<Select.Value placeholder={`Select a ${serviceInput.label}`} />
-														</Select.Trigger>
-														<Select.Content>
-															<Select.Group>
-																{#each serviceInput.options as option}
-																	<Select.Item value={option.service_id} label={option.service}
-																		>{option.service}</Select.Item
-																	>
-																{/each}
-															</Select.Group>
-														</Select.Content>
-														<Select.Input name={serviceInput.label} />
-													</Select.Root>
-												{/if}
-											{/each}
-										{/if}
+														{/each}
+													</Tabs.List>
 
-										<Dialog.Footer>
-											<div
-												class="flex w-full flex-col items-center justify-center gap-4 text-center"
-											>
-												<div class="mx-auto flex w-full max-w-md flex-col items-center gap-2">
-													<p class="text-sm text-muted-foreground">
-														I accept full responsibility for the {serviceType.service_type} once it is
-														loaned to me. I agree that I received the {serviceType.service_type} in good
-														condition and I understand that I will be charged with corresponding fees
-														or replacement if it is damaged or lost while under my possession.
-													</p>
-													<div class="flex items-center gap-2">
-														<Checkbox id="terms" bind:checked={termsAccepted} />
-														<div class="grid gap-2 leading-none">
-															<Label
-																for="terms"
-																class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-															>
-																Accept terms and conditions
-															</Label>
+													<!-- Content of tabs -->
+													{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+														{#key tabSelected}
+															<Tabs.Content value={serviceInput.label}>
+																<Select.Root
+																	portal={null}
+																	onSelectedChange={(s) => {
+																		if (s) {
+																			selectedOption = s as unknown as {
+																				value: number;
+																				label: string;
+																				disabled: boolean;
+																			};
+																		}
+																	}}
+																>
+																	<Select.Trigger>
+																		<Select.Value
+																			placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`}
+																		/>
+																	</Select.Trigger>
+																	<Select.Content class="max-h-[10rem] overflow-y-auto">
+																		<Select.Group>
+																			{#each serviceInput.options as option}
+																				<Select.Item
+																					value={option.service_id}
+																					label={option.service}>{option.service}</Select.Item
+																				>
+																			{/each}
+																		</Select.Group>
+																	</Select.Content>
+																	<Select.Input name={serviceInput.label} />
+																</Select.Root>
+															</Tabs.Content>
+														{/key}
+													{/each}
+												</Tabs.Root>
+											{:else}
+												{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
+													{#if serviceInput.type == 'select'}
+														<Label for={serviceInput.label}>{serviceInput.label}</Label>
+														<Select.Root
+															portal={null}
+															onSelectedChange={(s) => {
+																if (s) {
+																	selectedOption = s as unknown as {
+																		value: number;
+																		label: string;
+																		disabled: boolean;
+																	};
+																}
+															}}
+														>
+															<Select.Trigger>
+																<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+															</Select.Trigger>
+															<Select.Content>
+																<Select.Group>
+																	{#each serviceInput.options as option}
+																		<Select.Item value={option.service_id} label={option.service}
+																			>{option.service}</Select.Item
+																		>
+																	{/each}
+																</Select.Group>
+															</Select.Content>
+															<Select.Input name={serviceInput.label} />
+														</Select.Root>
+													{/if}
+												{/each}
+											{/if}
+
+											<Dialog.Footer>
+												<div
+													class="flex w-full flex-col items-center justify-center gap-4 text-center"
+												>
+													<div class="mx-auto flex w-full max-w-md flex-col items-center gap-2">
+														<p class="text-sm text-muted-foreground">
+															I accept full responsibility for the {serviceType.service_type} once it
+															is loaned to me. I agree that I received the {serviceType.service_type}
+															in good condition and I understand that I will be charged with corresponding
+															fees or replacement if it is damaged or lost while under my possession.
+														</p>
+														<div class="flex items-center gap-2">
+															<Checkbox id="terms" bind:checked={termsAccepted} />
+															<div class="grid gap-2 leading-none">
+																<Label
+																	for="terms"
+																	class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+																>
+																	Accept terms and conditions
+																</Label>
+															</div>
 														</div>
 													</div>
-												</div>
 
-												<Button
-													disabled={!termsAccepted}
-													on:click={() =>
-														availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
-													>Avail
-												</Button>
-											</div>
-										</Dialog.Footer>
-									</Dialog.Content>
+													<Button
+														disabled={!termsAccepted}
+														on:click={() =>
+															availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
+														>Avail
+													</Button>
+												</div>
+											</Dialog.Footer>
+										</Dialog.Content>
+									{/key}
 								</Dialog.Root>
 							{/if}
 						{/each}

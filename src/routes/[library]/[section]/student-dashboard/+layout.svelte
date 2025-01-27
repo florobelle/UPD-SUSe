@@ -10,12 +10,15 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import type { Session, User } from '@supabase/supabase-js';
+	import type { RealtimeChannel, Session, User } from '@supabase/supabase-js';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { readUser } from '../../../supabase/User';
 
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { browser } from '$app/environment';
+	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
+	import type { ServiceTable, ServiceView } from '$lib/dataTypes/EntityTypes';
+	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -196,6 +199,7 @@
 		try {
 			isLoggedOut = true;
 			await endUserSession();
+            unsubscribeRealtimeUpdates();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
 			toast.error('Logout error.');
@@ -252,12 +256,106 @@
 	}
 
 	// ----------------------------------------------------------------------------
+    // REALTIME UPDATES
+	// ----------------------------------------------------------------------------
+
+    let userChannel: RealtimeChannel;
+
+    export function updateServicesRealtime(updatedService:ServiceTable) {
+        // Updates the Service Info and Option stores
+        let serviceType:string = "";
+        let serviceCount:number = 0;
+
+        for (const type of $ServiceTypeStore) {
+            if (type.service_type_id == updatedService.service_type_id) {
+                serviceType = type.service_type;
+            }
+        }
+
+        if (updatedService.in_use) { // if service is in use by other students, remove from current options of services          
+            for (const serviceOption of $ServiceOptionStore[serviceType]) {
+                serviceOption.options = serviceOption.options.filter((value) => value.service_id != updatedService.service_id)
+                serviceCount += serviceOption.options.length;
+            }
+            $ServiceInfoStore[serviceType].available_number = serviceCount;
+        } else if ($LibraryStore[updatedService.library_id] == library) { // if service is returned, add to current options of services
+            const convertedService:ServiceView = {
+                service_id: updatedService.service_id,
+                service_type: serviceType,
+                service: updatedService.service,
+                in_use: updatedService.in_use,
+                section: $SectionStore[updatedService.section_id], 
+            }
+
+            if (serviceType == 'Umbrella') {
+                if (convertedService.service.includes('Small Orange')) {
+                    $ServiceOptionStore[serviceType][0].options.push(convertedService);
+                    $ServiceOptionStore[serviceType][0].options.sort((a,b) => a.service_id - b.service_id)
+                } else if (convertedService.service.includes('Small Black')) {
+                    $ServiceOptionStore[serviceType][1].options.push(convertedService);
+                    $ServiceOptionStore[serviceType][1].options.sort((a,b) => a.service_id - b.service_id)
+                } else {
+                    $ServiceOptionStore[serviceType][2].options.push(convertedService);
+                    $ServiceOptionStore[serviceType][2].options.sort((a,b) => a.service_id - b.service_id)
+                }
+            } else if (serviceType == 'Discussion Room') {
+                if (convertedService.service.includes('Frequency')) {
+                    $ServiceOptionStore[serviceType][0].options.push(convertedService);
+                    $ServiceOptionStore[serviceType][0].options.sort((a,b) => a.service_id - b.service_id)
+                } else if (convertedService.service.includes('Programming')) {
+                    $ServiceOptionStore[serviceType][1].options.push(convertedService);
+                    $ServiceOptionStore[serviceType][1].options.sort((a,b) => a.service_id - b.service_id)
+                } else if (convertedService.service.includes('Signal')) {
+                    $ServiceOptionStore[serviceType][2].options.push(convertedService);
+                    $ServiceOptionStore[serviceType][2].options.sort((a,b) => a.service_id - b.service_id)
+                } else {
+                    $ServiceOptionStore[serviceType][3].options.push(convertedService);
+                    $ServiceOptionStore[serviceType][3].options.sort((a,b) => a.service_id - b.service_id)
+                }
+            } else {
+                $ServiceOptionStore[serviceType][0].options.push(convertedService)
+                $ServiceOptionStore[serviceType][0].options.sort((a,b) => a.service_id - b.service_id)
+            }    
+            $ServiceInfoStore[serviceType].available_number++;
+        }
+        $ServiceInfoStore = $ServiceInfoStore;
+        $ServiceOptionStore = $ServiceOptionStore;
+    }
+
+    export function subscribeRealtimeUpdates() {
+        // Subscribes to updates in services, admins, and user information
+        userChannel = supabaseClient
+            .channel("user-dashboard")
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: `service_engglib`,
+                },
+                (payload) => {updateServicesRealtime(payload.new as ServiceTable)}
+            )
+            .subscribe()
+    }
+
+    export function unsubscribeRealtimeUpdates() {
+        // Unsubscribes to the tables listed above
+        userChannel.unsubscribe()
+    }
+
+	// ----------------------------------------------------------------------------
 
 	$: {
 		if (browser && document) {
 			startUserSession();
 		}
 	}
+
+    $: {
+        if ($ServiceTypeStore.length) {
+            subscribeRealtimeUpdates();
+        }
+    }
 </script>
 
 <div class="h-full">

@@ -25,6 +25,15 @@ export type AdminTable = {
     section: string,
 }
 
+export type ServiceTable = {
+    service_id: number,
+    service_type_id: number,
+    service: string,
+    in_use: boolean,
+    library_id: number,
+    section_id: number,
+}
+
 export type ServiceView = {
     service_id: number,
     service_type: string,
