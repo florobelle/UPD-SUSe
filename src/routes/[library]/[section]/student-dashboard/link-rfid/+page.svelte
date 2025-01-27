@@ -65,7 +65,7 @@
 
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (target.tagName !== 'INPUT') {
+		if (target.tagName == 'BUTTON' || target.tagName !== 'INPUT') {
 			event.preventDefault();
 		}
 	}
@@ -80,7 +80,6 @@
 
 	onDestroy(() => {
 		if (browser) {
-            deselectText('userRfid');
 			document.removeEventListener('mousedown', handleClickOutside);
 		}
 	});
