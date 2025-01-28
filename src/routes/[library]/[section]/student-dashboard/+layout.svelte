@@ -17,7 +17,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { browser } from '$app/environment';
 	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
-	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UserTable } from '$lib/dataTypes/EntityTypes';
+	import type { ServiceTable, ServiceView, UserTable } from '$lib/dataTypes/EntityTypes';
 	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
