@@ -76,7 +76,6 @@
 
         if (error) {
 			toast.error(`Error with updating admin with id ${id}: ${error}`);
-			return;
         } else {
             toast.success("Successfully approved admin!")
         }

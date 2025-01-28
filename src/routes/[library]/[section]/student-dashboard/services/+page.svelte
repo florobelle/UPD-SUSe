@@ -208,6 +208,7 @@
 	async function getActiveAdmins() {
 		// gets two active admins from database
 		const { admins, error } = await readAdmin({
+            admin_id: 0,
 			email: '',
 			is_active: true,
 			is_approved: true,

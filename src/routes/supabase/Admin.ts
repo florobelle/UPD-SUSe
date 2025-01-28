@@ -40,6 +40,9 @@ export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
     
     let query = supabaseClient.from(table).select("*");
 
+    if (filter.admin_id) {
+        query = query.eq('admin_id', filter.admin_id)
+    }
     if (filter.is_active != null) {
         query = query.eq('is_active', filter.is_active)
     }

@@ -16,9 +16,9 @@
 
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { readAdmin } from '../../../supabase/Admin';
-	import { AdminStore } from '$lib/stores/AdminStore';
+	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
-	import type { ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
+	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
 	import { readUser } from '../../../supabase/User';
 	import { UserTableStore } from '$lib/stores/UserStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
@@ -238,6 +238,7 @@
 	async function getAdmin() {
 		// gets user information from database
 		const { admins, error } = await readAdmin({
+            admin_id: 0,
 			email: $AdminStore.formData.email,
 			is_active: null,
 			is_approved: null,
@@ -325,7 +326,7 @@
     }
 
     async function updateServicesRealtime(updatedService:ServiceTable, eventType:EventType) {
-        // Updates the usage log record in the Usage Log Table store
+        // Updates the service record in the Service Table store
         const { services, error } = await readService({
             service_id: updatedService.service_id,
 			service_type: '',
@@ -346,6 +347,33 @@
             }
             newServiceTableStore.push(services[0]);
             $ServiceTableStore = newServiceTableStore;
+		}
+		return;
+    }
+
+    async function updateAdminsRealtime(updatedAdmin:AdminTable, eventType:EventType) {
+        // Updates the admin record in the Admin Table store
+        const { admins, error } = await readAdmin({
+            admin_id: updatedAdmin.admin_id,
+			email: '',
+			is_active: null,
+			is_approved: null,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading admin table: ${error}`);
+			return false;
+		} else if (admins != null) {
+			let newAdminTableStore: Array<AdminTable>;
+            if (eventType == 'UPDATE') {
+                newAdminTableStore = $AdminTableStore.filter((value) => value.admin_id != updatedAdmin.admin_id);
+            } else {
+                newAdminTableStore = $AdminTableStore
+            }
+            newAdminTableStore.push(admins[0]);
+            $AdminTableStore = newAdminTableStore;
 		}
 		return;
     }
@@ -390,6 +418,18 @@
 				(payload) => {
 					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
                         updateServicesRealtime(payload.new as ServiceTable, payload.eventType);
+                    }
+				}
+			).on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'admin_engglib'
+				},
+				(payload) => {
+					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
+                        updateAdminsRealtime(payload.new as AdminTable, payload.eventType);
                     }
 				}
 			)
