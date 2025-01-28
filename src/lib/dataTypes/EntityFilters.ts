@@ -17,6 +17,7 @@ export type AdminFilter = {
 }
 
 export type ServiceFilter = {
+    service_id:number,
     service_type: string,
     in_use: boolean | null,
     library: string,

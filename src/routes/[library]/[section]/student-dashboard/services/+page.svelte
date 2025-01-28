@@ -154,6 +154,7 @@
 			}
 
 			const { services, error } = await readService({
+                service_id: 0,
 				service_type: '',
 				in_use: false,
 				library,

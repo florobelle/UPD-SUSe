@@ -18,11 +18,13 @@
 	import { readAdmin } from '../../../supabase/Admin';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
-	import type { UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
+	import type { ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
 	import { readUser } from '../../../supabase/User';
 	import { UserTableStore } from '$lib/stores/UserStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
+	import { readService } from '../../../supabase/Service';
+	import { ServiceTableStore } from '$lib/stores/ServiceStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -322,6 +324,32 @@
 		return;
     }
 
+    async function updateServicesRealtime(updatedService:ServiceTable, eventType:EventType) {
+        // Updates the usage log record in the Usage Log Table store
+        const { services, error } = await readService({
+            service_id: updatedService.service_id,
+			service_type: '',
+			in_use: null,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading service table: ${error}`);
+			return false;
+		} else if (services != null) {
+			let newServiceTableStore: Array<ServiceView>;
+            if (eventType == 'UPDATE') {
+                newServiceTableStore = $ServiceTableStore.filter((value) => value.service_id != updatedService.service_id);
+            } else {
+                newServiceTableStore = $ServiceTableStore
+            }
+            newServiceTableStore.push(services[0]);
+            $ServiceTableStore = newServiceTableStore;
+		}
+		return;
+    }
+
 	function subscribeRealtimeUpdates() {
 		// Subscribes to updates in services, usagelogs and user information
 		adminChannel = supabaseClient
@@ -349,6 +377,19 @@
 				(payload) => {
 					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
                         updateUsageLogsRealtime(payload.new as UsageLogTable, payload.eventType);
+                    }
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'service_engglib'
+				},
+				(payload) => {
+					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
+                        updateServicesRealtime(payload.new as ServiceTable, payload.eventType);
                     }
 				}
 			)
