@@ -1,4 +1,4 @@
-export type UserTable = {
+export type UserView = {
     lib_user_id: number,
     rfid: number | null,
     username: string,
@@ -9,7 +9,6 @@ export type UserTable = {
     is_approved: boolean,
     is_active: boolean,
     college: string,
-    unit: string,
     program: string | null,
     user_type: string
 }

@@ -21,7 +21,7 @@
 		ServiceTable,
 		ServiceView,
 		UsageLogTable,
-		UserTable
+		UserView
 	} from '$lib/dataTypes/EntityTypes';
 	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
 	import { onDestroy } from 'svelte';
@@ -334,7 +334,7 @@
 		$ServiceOptionStore = $ServiceOptionStore;
 	}
 
-	function updateUserRealtime(updatedUser: UserTable) {
+	function updateUserRealtime(updatedUser: UserView) {
 		// Updates User store if they are approved
 		if (updatedUser.is_approved) {
 			$UserStore.formData.is_approved = true;
@@ -393,7 +393,7 @@
 					filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
 				},
 				(payload) => {
-					updateUserRealtime(payload.new as UserTable);
+					updateUserRealtime(payload.new as UserView);
 				}
 			)
 			.on(

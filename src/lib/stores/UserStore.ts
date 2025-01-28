@@ -1,4 +1,4 @@
-import type { UserTable } from '$lib/dataTypes/EntityTypes';
+import type { UserView } from '$lib/dataTypes/EntityTypes';
 import { writable, type Writable } from 'svelte/store';
 
 export type UserFormData = {
@@ -39,4 +39,4 @@ export const UserStore: Writable<UserInformation> = writable({
 	}
 });
 
-export let UserTableStore: Writable<Array<UserTable>> = writable();
+export let UserTableStore: Writable<Array<UserView>> = writable();

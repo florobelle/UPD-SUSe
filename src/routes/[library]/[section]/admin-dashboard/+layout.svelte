@@ -18,7 +18,9 @@
 	import { readAdmin } from '../../../supabase/Admin';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
-	import type { UserTable } from '$lib/dataTypes/EntityTypes';
+	import type { UserView } from '$lib/dataTypes/EntityTypes';
+	import { readUser } from '../../../supabase/User';
+	import { UserTableStore } from '$lib/stores/UserStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -261,9 +263,31 @@
 
 	let adminChannel: RealtimeChannel;
 
-	function updateUserRealtime(updatedUser:UserTable) {
+	async function updateUserRealtime(updatedUser:UserView, eventType:'INSERT'|'UPDATE') {
         // Updates the user record displayed in the User Table store
-        console.log(updatedUser)
+        const { users, error } = await readUser({
+			lib_user_id: updatedUser.lib_user_id,
+			username: '',
+			is_approved: null,
+			is_active: null,
+			college: '',
+			program: '',
+			user_type: ''
+		});
+
+		if (error) {
+			toast.error(`Error with reading user table: ${error}`);
+			return false;
+		} else if (users != null) {
+            let newUserTableStore: Array<UserView>;
+            if (eventType == 'UPDATE') {
+                newUserTableStore = $UserTableStore.filter((value) => value.lib_user_id != updatedUser.lib_user_id);
+            } else {
+                newUserTableStore = $UserTableStore
+            }
+            newUserTableStore.push(users[0]);
+            $UserTableStore = newUserTableStore;
+		}
     }
 
 	function subscribeRealtimeUpdates() {
@@ -278,7 +302,9 @@
 					table: 'lib_user'
 				},
 				(payload) => {
-					updateUserRealtime(payload.new as UserTable);
+					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
+                        updateUserRealtime(payload.new as UserView, payload.eventType);
+                    }
 				}
 			)
 			// .on(
@@ -290,7 +316,7 @@
 			// 		filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
 			// 	},
 			// 	(payload) => {
-			// 		updateUserRealtime(payload.new as UserTable);
+			// 		updateUserRealtime(payload.new as UserView);
 			// 	}
 			// )
 			.subscribe();
