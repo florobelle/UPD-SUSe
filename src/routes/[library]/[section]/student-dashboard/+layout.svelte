@@ -19,6 +19,7 @@
 	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
 	import type { ServiceTable, ServiceView, UserTable } from '$lib/dataTypes/EntityTypes';
 	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
+	import { onDestroy } from 'svelte';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -330,7 +331,7 @@
         return;
     }
 
-    export function subscribeRealtimeUpdates() {
+    function subscribeRealtimeUpdates() {
         // Subscribes to updates in services, usagelogs and user information
         userChannel = supabaseClient
             .channel("user-dashboard")
@@ -356,10 +357,16 @@
             .subscribe()
     }
 
-    export function unsubscribeRealtimeUpdates() {
+    function unsubscribeRealtimeUpdates() {
         // Unsubscribes to the tables listed above
-        userChannel.unsubscribe()
+        try {
+            userChannel.unsubscribe()
+        } catch {
+            return;
+        }
     }
+
+    onDestroy(unsubscribeRealtimeUpdates)
 
 	// ----------------------------------------------------------------------------
 

@@ -9,15 +9,16 @@
 	// Backend Imports
 	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import type { Session, User } from '@supabase/supabase-js';
+	import type { RealtimeChannel, Session, User } from '@supabase/supabase-js';
 
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { readAdmin } from '../../../supabase/Admin';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
+	import type { UserTable } from '$lib/dataTypes/EntityTypes';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -255,10 +256,68 @@
 	}
 
 	// ----------------------------------------------------------------------------
+	// REALTIME UPDATES
+	// ----------------------------------------------------------------------------
+
+	let adminChannel: RealtimeChannel;
+
+	function updateUserRealtime(updatedUser:UserTable) {
+        // Updates the user record displayed in the User Table store
+        console.log(updatedUser)
+    }
+
+	function subscribeRealtimeUpdates() {
+		// Subscribes to updates in services, usagelogs and user information
+		adminChannel = supabaseClient
+			.channel('user-dashboard')
+			.on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'lib_user'
+				},
+				(payload) => {
+					updateUserRealtime(payload.new as UserTable);
+				}
+			)
+			// .on(
+			// 	'postgres_changes',
+			// 	{
+			// 		event: 'UPDATE',
+			// 		schema: 'public',
+			// 		table: 'lib_user',
+			// 		filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+			// 	},
+			// 	(payload) => {
+			// 		updateUserRealtime(payload.new as UserTable);
+			// 	}
+			// )
+			.subscribe();
+	}
+
+    function unsubscribeRealtimeUpdates() {
+        // Unsubscribes to the tables listed above
+        try {
+            adminChannel.unsubscribe()
+        } catch {
+            return;
+        }
+    }
+
+    onDestroy(unsubscribeRealtimeUpdates)
+
+	// ----------------------------------------------------------------------------
 
 	$: {
 		if (browser && document) {
 			startAdminSession();
+		}
+	}
+
+	$: {
+		if ($AdminStore.authenticated) {
+			subscribeRealtimeUpdates();
 		}
 	}
 </script>
