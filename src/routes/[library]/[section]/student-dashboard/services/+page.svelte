@@ -364,7 +364,8 @@
 								</Dialog.Root>
 
 								<!-- INACTIVE SERVICES -->
-							{:else if $ServiceInfoStore[serviceType.service_type].available_number}
+								<!-- {:else if $ServiceInfoStore[serviceType.service_type].available_number} -->
+							{:else}
 								<Dialog.Root
 									open={dialogStates[serviceType.service_type_id]?.isOpen &&
 										dialogStates[serviceType.service_type_id]?.type === 'avail'}
