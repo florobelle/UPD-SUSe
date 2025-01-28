@@ -307,18 +307,6 @@
                     }
 				}
 			)
-			// .on(
-			// 	'postgres_changes',
-			// 	{
-			// 		event: 'UPDATE',
-			// 		schema: 'public',
-			// 		table: 'lib_user',
-			// 		filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
-			// 	},
-			// 	(payload) => {
-			// 		updateUserRealtime(payload.new as UserView);
-			// 	}
-			// )
 			.subscribe();
 	}
 
