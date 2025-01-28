@@ -268,7 +268,6 @@
 			if (error) {
 				toast.error(`Error with availing a usage log: ${error}`);
 			} else {
-				// getActiveUsageLogs();
 				selectedOption = null;
 				toast.success('Service availed!');
 			}
@@ -289,7 +288,6 @@
 		if (error) {
 			toast.error(`Error with ending service: ${error}`);
 		} else {
-			// getActiveUsageLogs();
 			toast.success('Service ended!');
 		}
 		toast.dismiss(loadID);
