@@ -322,27 +322,16 @@
         $ServiceOptionStore = $ServiceOptionStore;
     }
 
-    function updateUsageLogRealtime(updatedUsageLog:UsageLogTable) {
-        // Update Active Usage Log store
-        if (updatedUsageLog.end) {
-            // remove usage log from ActiveUsageLog store
-        } else {
-            // add usage log in ActiveUsageLog store
-        }
-    }
-
-    function updateAdminRealtime(updatedAdmin:AdminTable) {
-        // Updates active Admin store 
-        console.log(updatedAdmin)
-    }
-
     function updateUserRealtime(updatedUser:UserTable) {
-        // Updates active Admin store 
-        console.log(updatedUser)
+        // Updates User store if they are approved 
+        if (updatedUser.is_approved) {
+            $UserStore.formData.is_approved = true;
+        }
+        return;
     }
 
     export function subscribeRealtimeUpdates() {
-        // Subscribes to updates in services, usagelogs, admins, and user information
+        // Subscribes to updates in services, usagelogs and user information
         userChannel = supabaseClient
             .channel("user-dashboard")
             .on(
@@ -353,36 +342,6 @@
                     table: 'service_engglib',
                 },
                 (payload) => {updateServiceRealtime(payload.new as ServiceTable)}
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'usagelog_engglib',
-                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
-                },
-                (payload) => {updateUsageLogRealtime(payload.new as UsageLogTable)}
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'usagelog_engglib',
-                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
-                },
-                (payload) => {updateUsageLogRealtime(payload.new as UsageLogTable)}
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'admin_engglib',
-                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
-                },
-                (payload) => {updateAdminRealtime(payload.new as AdminTable)}
             )
             .on(
                 'postgres_changes',
@@ -411,7 +370,7 @@
 	}
 
     $: {
-        if ($ServiceTypeStore.length) {
+        if ($UserStore.authenticated && $UserStore.formData.lib_user_id) {
             subscribeRealtimeUpdates();
         }
     }

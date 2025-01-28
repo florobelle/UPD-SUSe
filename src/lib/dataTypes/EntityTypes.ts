@@ -71,4 +71,5 @@ export type UsageLogTable = {
     lib_user_id: number,
     admin_id1: number,
     admin_id2: number,
+    is_active:boolean,
 }
