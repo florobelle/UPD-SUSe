@@ -17,9 +17,16 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { browser } from '$app/environment';
 	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
-	import type { ServiceTable, ServiceView, UserTable } from '$lib/dataTypes/EntityTypes';
+	import type {
+		ServiceTable,
+		ServiceView,
+		UsageLogTable,
+		UserTable
+	} from '$lib/dataTypes/EntityTypes';
 	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
 	import { onDestroy } from 'svelte';
+	import { readUsageLog } from '../../../supabase/UsageLog';
+	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -200,7 +207,7 @@
 		try {
 			isLoggedOut = true;
 			await endUserSession();
-            unsubscribeRealtimeUpdates();
+			unsubscribeRealtimeUpdates();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
 			toast.error('Logout error.');
@@ -257,116 +264,165 @@
 	}
 
 	// ----------------------------------------------------------------------------
-    // REALTIME UPDATES
+	// REALTIME UPDATES
 	// ----------------------------------------------------------------------------
 
-    let userChannel: RealtimeChannel;
+	let userChannel: RealtimeChannel;
 
-    function updateServiceRealtime(updatedService:ServiceTable) {
-        // Updates the Service Info and Option stores
-        let serviceType:string = "";
-        let serviceCount:number = 0;
+	function updateServiceRealtime(updatedService: ServiceTable) {
+		// Updates the Service Info and Option stores
+		let serviceType: string = '';
+		let serviceCount: number = 0;
 
-        for (const type of $ServiceTypeStore) {
-            if (type.service_type_id == updatedService.service_type_id) {
-                serviceType = type.service_type;
-            }
-        }
+		for (const type of $ServiceTypeStore) {
+			if (type.service_type_id == updatedService.service_type_id) {
+				serviceType = type.service_type;
+			}
+		}
 
-        if (updatedService.in_use) { // if service is in use by other students, remove from current options of services          
-            for (const serviceOption of $ServiceOptionStore[serviceType]) {
-                serviceOption.options = serviceOption.options.filter((value) => value.service_id != updatedService.service_id)
-                serviceCount += serviceOption.options.length;
-            }
-            $ServiceInfoStore[serviceType].available_number = serviceCount;
-        } else if ($LibraryStore[updatedService.library_id] == library) { // if service is returned, add to current options of services
-            const convertedService:ServiceView = {
-                service_id: updatedService.service_id,
-                service_type: serviceType,
-                service: updatedService.service,
-                in_use: updatedService.in_use,
-                section: $SectionStore[updatedService.section_id], 
-            }
+		if (updatedService.in_use) {
+			// if service is in use by other students, remove from current options of services
+			for (const serviceOption of $ServiceOptionStore[serviceType]) {
+				serviceOption.options = serviceOption.options.filter(
+					(value) => value.service_id != updatedService.service_id
+				);
+				serviceCount += serviceOption.options.length;
+			}
+			$ServiceInfoStore[serviceType].available_number = serviceCount;
+		} else if ($LibraryStore[updatedService.library_id] == library) {
+			// if service is returned, add to current options of services
+			const convertedService: ServiceView = {
+				service_id: updatedService.service_id,
+				service_type: serviceType,
+				service: updatedService.service,
+				in_use: updatedService.in_use,
+				section: $SectionStore[updatedService.section_id]
+			};
 
-            if (serviceType == 'Umbrella') {
-                if (convertedService.service.includes('Small Orange')) {
-                    $ServiceOptionStore[serviceType][0].options.push(convertedService);
-                    $ServiceOptionStore[serviceType][0].options.sort((a,b) => a.service_id - b.service_id)
-                } else if (convertedService.service.includes('Small Black')) {
-                    $ServiceOptionStore[serviceType][1].options.push(convertedService);
-                    $ServiceOptionStore[serviceType][1].options.sort((a,b) => a.service_id - b.service_id)
-                } else {
-                    $ServiceOptionStore[serviceType][2].options.push(convertedService);
-                    $ServiceOptionStore[serviceType][2].options.sort((a,b) => a.service_id - b.service_id)
-                }
-            } else if (serviceType == 'Discussion Room') {
-                if (convertedService.service.includes('Frequency')) {
-                    $ServiceOptionStore[serviceType][0].options.push(convertedService);
-                    $ServiceOptionStore[serviceType][0].options.sort((a,b) => a.service_id - b.service_id)
-                } else if (convertedService.service.includes('Programming')) {
-                    $ServiceOptionStore[serviceType][1].options.push(convertedService);
-                    $ServiceOptionStore[serviceType][1].options.sort((a,b) => a.service_id - b.service_id)
-                } else if (convertedService.service.includes('Signal')) {
-                    $ServiceOptionStore[serviceType][2].options.push(convertedService);
-                    $ServiceOptionStore[serviceType][2].options.sort((a,b) => a.service_id - b.service_id)
-                } else {
-                    $ServiceOptionStore[serviceType][3].options.push(convertedService);
-                    $ServiceOptionStore[serviceType][3].options.sort((a,b) => a.service_id - b.service_id)
-                }
-            } else {
-                $ServiceOptionStore[serviceType][0].options.push(convertedService)
-                $ServiceOptionStore[serviceType][0].options.sort((a,b) => a.service_id - b.service_id)
-            }    
-            $ServiceInfoStore[serviceType].available_number++;
-        }
-        $ServiceInfoStore = $ServiceInfoStore;
-        $ServiceOptionStore = $ServiceOptionStore;
-    }
+			if (serviceType == 'Umbrella') {
+				if (convertedService.service.includes('Small Orange')) {
+					$ServiceOptionStore[serviceType][0].options.push(convertedService);
+					$ServiceOptionStore[serviceType][0].options.sort((a, b) => a.service_id - b.service_id);
+				} else if (convertedService.service.includes('Small Black')) {
+					$ServiceOptionStore[serviceType][1].options.push(convertedService);
+					$ServiceOptionStore[serviceType][1].options.sort((a, b) => a.service_id - b.service_id);
+				} else {
+					$ServiceOptionStore[serviceType][2].options.push(convertedService);
+					$ServiceOptionStore[serviceType][2].options.sort((a, b) => a.service_id - b.service_id);
+				}
+			} else if (serviceType == 'Discussion Room') {
+				if (convertedService.service.includes('Frequency')) {
+					$ServiceOptionStore[serviceType][0].options.push(convertedService);
+					$ServiceOptionStore[serviceType][0].options.sort((a, b) => a.service_id - b.service_id);
+				} else if (convertedService.service.includes('Programming')) {
+					$ServiceOptionStore[serviceType][1].options.push(convertedService);
+					$ServiceOptionStore[serviceType][1].options.sort((a, b) => a.service_id - b.service_id);
+				} else if (convertedService.service.includes('Signal')) {
+					$ServiceOptionStore[serviceType][2].options.push(convertedService);
+					$ServiceOptionStore[serviceType][2].options.sort((a, b) => a.service_id - b.service_id);
+				} else {
+					$ServiceOptionStore[serviceType][3].options.push(convertedService);
+					$ServiceOptionStore[serviceType][3].options.sort((a, b) => a.service_id - b.service_id);
+				}
+			} else {
+				$ServiceOptionStore[serviceType][0].options.push(convertedService);
+				$ServiceOptionStore[serviceType][0].options.sort((a, b) => a.service_id - b.service_id);
+			}
+			$ServiceInfoStore[serviceType].available_number++;
+		}
+		$ServiceInfoStore = $ServiceInfoStore;
+		$ServiceOptionStore = $ServiceOptionStore;
+	}
 
-    function updateUserRealtime(updatedUser:UserTable) {
-        // Updates User store if they are approved 
-        if (updatedUser.is_approved) {
-            $UserStore.formData.is_approved = true;
-        }
-        return;
-    }
+	function updateUserRealtime(updatedUser: UserTable) {
+		// Updates User store if they are approved
+		if (updatedUser.is_approved) {
+			$UserStore.formData.is_approved = true;
+		}
+		return;
+	}
 
-    function subscribeRealtimeUpdates() {
-        // Subscribes to updates in services, usagelogs and user information
-        userChannel = supabaseClient
-            .channel("user-dashboard")
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'service_engglib',
-                },
-                (payload) => {updateServiceRealtime(payload.new as ServiceTable)}
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'lib_user',
-                    filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
-                },
-                (payload) => {updateUserRealtime(payload.new as UserTable)}
-            )
-            .subscribe()
-    }
+	async function updateUsageLogRealtime(updatedUsageLog: UsageLogTable) {
+		// Updates the Active Usage Log table based on insert or update
+		const { usagelogs, error } = await readUsageLog({
+			usagelog_id: updatedUsageLog.usagelog_id,
+			start: null,
+			end: null,
+			is_active: null,
+			lib_user_id: 0,
+			service_type: '',
+			library,
+			section
+		});
 
-    function unsubscribeRealtimeUpdates() {
-        // Unsubscribes to the tables listed above
-        try {
-            userChannel.unsubscribe()
-        } catch {
-            return;
-        }
-    }
+		if (error) {
+			toast.error(`Error with getting usagelogs: ${error}`);
+		} else if (usagelogs != null) {
+			if (updatedUsageLog.is_active) {
+		        $ActiveUsageLogStore[usagelogs[0].service_type] = usagelogs[0];
+		    } else {
+		        delete $ActiveUsageLogStore[usagelogs[0].service_type];
+		    }
+            $ActiveUsageLogStore = $ActiveUsageLogStore;
+		}
 
-    onDestroy(unsubscribeRealtimeUpdates)
+		return;
+	}
+
+	function subscribeRealtimeUpdates() {
+		// Subscribes to updates in services, usagelogs and user information
+		userChannel = supabaseClient
+			.channel('user-dashboard')
+			.on(
+				'postgres_changes',
+				{
+					event: 'UPDATE',
+					schema: 'public',
+					table: 'service_engglib'
+				},
+				(payload) => {
+					updateServiceRealtime(payload.new as ServiceTable);
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: 'UPDATE',
+					schema: 'public',
+					table: 'lib_user',
+					filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+				},
+				(payload) => {
+					updateUserRealtime(payload.new as UserTable);
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'usagelog_engglib',
+					filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+				},
+				(payload) => {
+					if (payload.eventType == 'UPDATE' || payload.eventType == 'INSERT') {
+						updateUsageLogRealtime(payload.new as UsageLogTable);
+					}
+				}
+			)
+			.subscribe();
+	}
+
+	function unsubscribeRealtimeUpdates() {
+		// Unsubscribes to the tables listed above
+		try {
+			userChannel.unsubscribe();
+		} catch {
+			return;
+		}
+	}
+
+	onDestroy(unsubscribeRealtimeUpdates);
 
 	// ----------------------------------------------------------------------------
 
@@ -376,11 +432,11 @@
 		}
 	}
 
-    $: {
-        if ($UserStore.authenticated && $UserStore.formData.lib_user_id) {
-            subscribeRealtimeUpdates();
-        }
-    }
+	$: {
+		if ($UserStore.authenticated && $UserStore.formData.lib_user_id) {
+			subscribeRealtimeUpdates();
+		}
+	}
 </script>
 
 <div class="h-full">
