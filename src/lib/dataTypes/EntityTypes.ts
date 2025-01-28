@@ -13,6 +13,21 @@ export type UserView = {
     user_type: string
 }
 
+export type UserTable = {
+    lib_user_id: number,
+    rfid: number | null,
+    username: string,
+    first_name: string,
+    middle_initial: string | null,
+    last_name: string,
+    phone_number: string,
+    is_approved: boolean,
+    is_active: boolean,
+    college_id: number,
+    program_id: number,
+    user_type_id: number
+}
+
 export type AdminTable = {
     admin_id: number,
     rfid: string,

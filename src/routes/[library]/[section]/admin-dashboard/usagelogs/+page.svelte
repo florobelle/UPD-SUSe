@@ -26,7 +26,7 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-	async function getUsageTable(): Promise<boolean> {
+	async function getUsageTable() {
 		// gets user information from database
 		const { usagelogs, error } = await readUsageLog({
 			usagelog_id: 0,
@@ -41,11 +41,11 @@
 
 		if (error) {
 			toast.error(`Error with reading usagelog table: ${error}`);
-			return false;
+			return;
 		} else if (usagelogs != null) {
 			$UsageLogTableStore = usagelogs;
 		}
-		return true;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -63,12 +63,14 @@
 <div class="flex w-full justify-center">
 	{#if $AdminStore.formData.is_approved}
 		{#if $UsageLogTableStore}
-			<div class="w-[95%]">
-				<h1 class="pt-10 text-3xl font-medium">Usage Logs</h1>
-				<DataTable data={$UsageLogTableStore} {columns} {initialSort} />
-			</div>
-            {:else}
-                <p>Retrieving data...</p>
+			{#key $UsageLogTableStore}
+				<div class="w-[95%]">
+					<h1 class="pt-10 text-3xl font-medium">Usage Logs</h1>
+					<DataTable data={$UsageLogTableStore} {columns} {initialSort} />
+				</div>
+			{/key}
+		{:else}
+			<p>Retrieving data...</p>
 		{/if}
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">

@@ -18,9 +18,11 @@
 	import { readAdmin } from '../../../supabase/Admin';
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
-	import type { UserView } from '$lib/dataTypes/EntityTypes';
+	import type { UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
 	import { readUser } from '../../../supabase/User';
 	import { UserTableStore } from '$lib/stores/UserStore';
+	import { readUsageLog } from '../../../supabase/UsageLog';
+	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -262,8 +264,9 @@
 	// ----------------------------------------------------------------------------
 
 	let adminChannel: RealtimeChannel;
+    type EventType = 'INSERT'|'UPDATE';
 
-	async function updateUserRealtime(updatedUser:UserView, eventType:'INSERT'|'UPDATE') {
+	async function updateUserRealtime(updatedUser:UserTable, eventType:EventType) {
         // Updates the user record displayed in the User Table store
         const { users, error } = await readUser({
 			lib_user_id: updatedUser.lib_user_id,
@@ -290,6 +293,35 @@
 		}
     }
 
+    async function updateUsageLogsRealtime(updatedUsagelog:UsageLogTable, eventType:EventType) {
+        // Updates the usage log record in the Usage Log Table store
+        const { usagelogs, error } = await readUsageLog({
+			usagelog_id: updatedUsagelog.usagelog_id,
+			start: null,
+			end: null,
+			is_active: null,
+			lib_user_id: 0,
+			service_type: '',
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading usagelog table: ${error}`);
+			return;
+		} else if (usagelogs != null) {
+			let newUsageLogTableStore: Array<UsageLogView>;
+            if (eventType == 'UPDATE') {
+                newUsageLogTableStore = $UsageLogTableStore.filter((value) => value.usagelog_id != updatedUsagelog.usagelog_id);
+            } else {
+                newUsageLogTableStore = $UsageLogTableStore
+            }
+            newUsageLogTableStore.push(usagelogs[0]);
+            $UsageLogTableStore = newUsageLogTableStore;
+		}
+		return;
+    }
+
 	function subscribeRealtimeUpdates() {
 		// Subscribes to updates in services, usagelogs and user information
 		adminChannel = supabaseClient
@@ -303,7 +335,20 @@
 				},
 				(payload) => {
 					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
-                        updateUserRealtime(payload.new as UserView, payload.eventType);
+                        updateUserRealtime(payload.new as UserTable, payload.eventType);
+                    }
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'usagelog_engglib'
+				},
+				(payload) => {
+					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
+                        updateUsageLogsRealtime(payload.new as UsageLogTable, payload.eventType);
                     }
 				}
 			)
