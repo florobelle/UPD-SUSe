@@ -73,7 +73,7 @@ export const columns: ColumnDef<UserTable>[] = [
 	},
 
 	createSortableColumn('lib_user_id', 'ID', ''),
-	createSortableColumn('username', 'Username', 'text'),
+	createSortableColumn('username', 'Username', ''),
 	createSortableColumn('first_name', 'First Name', 'text'),
 	createSortableColumn('middle_initial', 'M.I.', 'text'),
 	createSortableColumn('last_name', 'Last Name', 'text'),
