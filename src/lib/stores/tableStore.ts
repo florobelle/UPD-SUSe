@@ -1,6 +1,6 @@
 // stores/sortState.ts
 import { writable } from 'svelte/store';
-import { type UserTable } from '$lib/dataTypes/EntityTypes';
+import { type UserView } from '$lib/dataTypes/EntityTypes';
 
 export interface RowChanges {
 	[key: number]: {
@@ -9,4 +9,4 @@ export interface RowChanges {
 }
 
 export const activeHeader = writable<string | null>(null);
-export const rowChanges = writable<{ [key: number]: UserTable }>({});
+export const rowChanges = writable<{ [key: number]: UserView }>({});

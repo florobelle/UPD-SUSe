@@ -86,11 +86,12 @@ export const collegePrograms: Readable<College[]> = readable([
 			{ label: 'Industrial Engineering (BS)', value: '33' },
 			{ label: 'Industrial Engineering (ME, MS, PhD)', value: '34' },
 			{ label: 'Materials Engineering (BS)', value: '35' },
+			{ label: 'Materials Science and Engineering (MSE)', value: '81' },
 			{ label: 'Mechanical Engineering (BS)', value: '36' },
 			{ label: 'Mechanical Engineering (MS, PhD)', value: '37' },
 			{ label: 'Metallurgical Engineering (BS)', value: '38' },
 			{ label: 'Metallurgical Engineering (MS)', value: '39' },
-			{ label: 'Mining Engineering (BS)', value: '40' }
+			{ label: 'Mining Engineering (BS)', value: '40' },
 		]
 	},
 	// {

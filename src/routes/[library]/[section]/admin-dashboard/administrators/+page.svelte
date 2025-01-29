@@ -25,9 +25,10 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-	async function getAdminTable(): Promise<boolean> {
+	async function getAdminTable() {
 		// gets user information from database
 		const { admins, error } = await readAdmin({
+			admin_id: 0,
 			email: '',
 			is_active: null,
 			is_approved: null,
@@ -37,11 +38,11 @@
 
 		if (error) {
 			toast.error(`Error with reading admin table: ${error}`);
-			return false;
+			return;
 		} else if (admins != null) {
 			$AdminTableStore = admins;
 		}
-		return true;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -59,12 +60,14 @@
 <div class="flex w-full justify-center">
 	{#if $AdminStore.formData.is_approved}
 		{#if $AdminTableStore}
-			<div class="w-[95%]">
-				<h1 class="pt-10 text-3xl font-medium">Administrators</h1>
-				<DataTable data={$AdminTableStore} {columns} {initialSort} />
-			</div>
-            {:else}
-                <p>Retrieving data...</p>
+			{#key $AdminTableStore}
+				<div class="w-[95%]">
+					<h1 class="pt-10 text-3xl font-medium">Administrators</h1>
+					<DataTable data={$AdminTableStore} {columns} {initialSort} />
+				</div>
+			{/key}
+		{:else}
+			<p>Retrieving data...</p>
 		{/if}
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">

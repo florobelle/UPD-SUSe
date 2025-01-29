@@ -1,7 +1,7 @@
-import type { AdminTable, ServiceView, ServiceTypeTable, UsageLogView, UserTable } from "./EntityTypes"
+import type { AdminTable, ServiceView, ServiceTypeTable, UsageLogView, UserView } from "./EntityTypes"
 
 export type UserResponse = {
-    users: Array<UserTable> | null
+    users: Array<UserView> | null
     error: string | null
 }
 
