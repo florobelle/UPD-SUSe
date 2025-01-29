@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { Calendar as CalendarPrimitive } from "bits-ui";
-	import { cn } from "$lib/utils.js";
-
+	import { Calendar as CalendarPrimitive } from 'bits-ui';
+	import { cn } from '$lib/utilsFront.js';
 	type $$Props = CalendarPrimitive.GridHeadProps;
 
-	let className: $$Props["class"] = undefined;
+	let className: $$Props['class'] = undefined;
 	export { className as class };
 </script>
 
