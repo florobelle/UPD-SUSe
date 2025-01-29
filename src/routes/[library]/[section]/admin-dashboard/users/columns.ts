@@ -1,4 +1,4 @@
-import type { UserTable } from '$lib/dataTypes/EntityTypes';
+import type { UserView } from '$lib/dataTypes/EntityTypes';
 import type { ColumnDef } from '@tanstack/table-core';
 import { createRawSnippet } from 'svelte';
 import { renderSnippet } from '$lib/components/ui/data-table/index.js';
@@ -12,7 +12,7 @@ const createSortableColumn = (
 	accessorKey: string,
 	header: string,
 	editT: TableEditT
-): ColumnDef<UserTable> => ({
+): ColumnDef<UserView> => ({
 	accessorKey,
 	header: ({ column }) =>
 		renderComponent(DataTableHeaderButton, {
@@ -31,7 +31,7 @@ const createSortableColumn = (
 		})
 });
 
-export const columns: ColumnDef<UserTable>[] = [
+export const columns: ColumnDef<UserView>[] = [
 	{
 		accessorKey: 'is_active',
 		header: ({ column }) => {
