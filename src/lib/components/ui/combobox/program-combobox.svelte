@@ -2,7 +2,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
 	import { ChevronsUpDown, Check } from 'lucide-svelte';
-	import { cn } from '$lib/utils';
+	import { cn } from '$lib/utilsFront';
 	import type { College } from '$lib/stores/CollegeProgramStore';
 	import { collegeProgramsList } from '$lib/stores/CollegeProgramStore';
 	import { allPrograms } from '$lib/stores/CollegeProgramStore';

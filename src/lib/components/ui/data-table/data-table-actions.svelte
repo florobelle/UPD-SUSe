@@ -61,15 +61,14 @@
         const { error } = await updateUser({ is_approved: true}, '', id);
 
         if (error) {
-            toast.dismiss(loadID);
 			toast.error(`Error with updating user with id ${id}: ${error}`);
-			return;
+        } else {
+            const user = $UserTableStore.filter((v) => v.lib_user_id == id )[0];
+            user.is_approved = true;
+            $UserTableStore = $UserTableStore;
+            toast.success("Successfully approved user!")
         }
-        const user = $UserTableStore.filter((v) => v.lib_user_id == id )[0];
-        user.is_approved = true;
-        $UserTableStore = $UserTableStore;
         toast.dismiss(loadID);
-        toast.success("Successfully approved user!")
         return;
     }
 
@@ -79,12 +78,12 @@
         const { error } = await updateAdmin({ is_approved: true}, '', id);
 
         if (error) {
-            toast.dismiss(loadID);
 			toast.error(`Error with updating admin with id ${id}: ${error}`);
 			return;
+        } else {
+            toast.success("Successfully approved admin!")
         }
         toast.dismiss(loadID);
-        toast.success("Successfully approved admin!")
         return;
     }
 </script>

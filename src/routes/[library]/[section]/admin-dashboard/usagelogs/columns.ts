@@ -38,10 +38,20 @@ export const columns: ColumnDef<UsageLogView>[] = [
 			return renderComponent(DataTableHeaderButton, {
 				header: 'Is Active',
 				onclick: () => {
-					const isSorted = column.getIsSorted();
-					column.toggleSorting(isSorted === 'asc');
+					column.toggleSorting(column.getIsSorted() === 'asc');
 				}
 			});
+		},
+		accessorFn: (row) => row.end,
+		sortingFn: (rowA, rowB) => {
+			const endA = rowA.original.end;
+			const endB = rowB.original.end;
+
+			if (endA === null && endB === null) return 0;
+			if (endA === null) return -1;
+			if (endB === null) return 1;
+
+			return Number(new Date(endA)) - Number(new Date(endB));
 		},
 		cell: ({ row }) => {
 			const activeCellSnippet = createRawSnippet<[{ end: any }]>((getData) => {
@@ -74,8 +84,8 @@ export const columns: ColumnDef<UsageLogView>[] = [
 	createSortableColumn('lib_user_id', 'User ID', ''),
 	createSortableColumn('first_name', 'First Name', 'text'),
 	createSortableColumn('last_name', 'Last Name', 'text'),
-	createSortableColumn('admin_id1', 'Admin ID 1', ''),
-	createSortableColumn('admin_id2', 'Admin ID 2', ''),
+	createSortableColumn('admin_nickname1', 'Admin 1', 'text'),
+	createSortableColumn('admin_nickname2', 'Admin 2', 'text'),
 	{
 		id: 'actions',
 		cell: ({ row }) => {

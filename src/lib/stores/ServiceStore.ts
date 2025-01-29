@@ -15,7 +15,7 @@ export type ServiceOption = {
     variant: 'default' | 'ghost';
 }
 
-export const ServiceTypeStore: Writable<Array<ServiceTypeTable>> = writable();
+export const ServiceTypeStore: Writable<Array<ServiceTypeTable>> = writable([]);
 export const ServiceInfoStore: Writable<{ [key: string]: ServiceInfo }> = writable();
 export const ServiceOptionStore: Writable<{ [key: string]: Array<ServiceOption> }> = writable();
 

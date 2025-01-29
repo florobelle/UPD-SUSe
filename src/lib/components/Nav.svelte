@@ -1,14 +1,17 @@
 <script lang="ts">
 	import Button from './ui/button/button.svelte';
-	import { cn } from '$lib/utils.js';
+	import { cn } from '$lib/utilsFront.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index';
 	import { LogOut } from 'lucide-svelte';
 	import { page } from '$app/stores';
+	import { UserStore } from '$lib/stores/UserStore';
+	import { AdminStore } from '$lib/stores/AdminStore';
+	import Separator from './ui/separator/separator.svelte';
 
 	let { logOutUser, isCollapsed, routes } = $props();
 
 	export const getVariant = (pathname: string, match: string): 'default' | 'ghost' => {
-		return pathname.includes(match) ? 'default' : 'ghost';
+		return pathname.endsWith(match) ? 'default' : 'ghost';
 	};
 </script>
 
@@ -19,6 +22,23 @@
 	<nav
 		class="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
 	>
+		{#if $UserStore.formData.first_name !== ''}
+			<div class="mb-2 flex flex-col gap-2 p-2 group-[[data-collapsed=true]]:hidden">
+				<div>
+					<h1 class="text-sm">Welcome,</h1>
+					<h2 class="text-lg font-medium">{$UserStore.formData.first_name}</h2>
+				</div>
+				<Separator />
+			</div>
+		{:else}
+            <div class="mb-2 flex flex-col gap-2 p-2 group-[[data-collapsed=true]]:hidden">
+				<div>
+					<h1 class="text-sm">Welcome,</h1>
+					<h2 class="text-lg font-medium">{$AdminStore.formData.nickname}</h2>
+				</div>
+				<Separator />
+			</div>
+		{/if}
 		{#each routes as route}
 			{#if isCollapsed}
 				<Tooltip.Root openDelay={0}>
@@ -72,15 +92,16 @@
 			{/if}
 		{/each}
 	</nav>
-	<div class="mt-auto w-full p-2">
+	<div class="mt-auto grid gap-1 px-2 pb-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
+	>
 		{#if isCollapsed}
 			<Button
 				on:click={logOutUser}
-				class="size-9 h-9 w-full justify-start pl-3 dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white"
+				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 size-9"
 				href="#"
 				size="icon"
 			>
-				<svelte:component this={LogOut} class="size-4" aria-hidden="true" />
+				<svelte:component this={LogOut} class="size-4 w-full" aria-hidden="true" />
 				<span class="sr-only">Logout</span>
 			</Button>
 		{:else}
