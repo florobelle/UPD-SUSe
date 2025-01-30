@@ -19,4 +19,4 @@ export const ServiceTypeStore: Writable<Array<ServiceTypeTable>> = writable([]);
 export const ServiceInfoStore: Writable<{ [key: string]: ServiceInfo }> = writable();
 export const ServiceOptionStore: Writable<{ [key: string]: Array<ServiceOption> }> = writable();
 
-export const ServiceTableStore: Writable<Array<ServiceView>> = writable();
+export const ServiceTableStore: Writable<Array<ServiceView>> = writable([]);

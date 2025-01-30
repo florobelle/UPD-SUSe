@@ -67,7 +67,7 @@ export const columns: ColumnDef<ServiceView>[] = [
 	},
 
 	createSortableColumn('service_id', 'ID', ''),
-	createSortableColumn('service_type', 'Service Type', 'text'),
+	createSortableColumn('service_type', 'Service Type', ''),
 	createSortableColumn('service', 'Service', 'text'),
 	{
 		id: 'actions',

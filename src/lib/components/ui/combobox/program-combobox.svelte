@@ -68,7 +68,7 @@
 								value={program.label}
 								onSelect={() => {
 									selectedProgram = program.label;
-									onChange(program.label);
+									onChange(program.value);
 									comboboxOpen = false;
 								}}
 							>

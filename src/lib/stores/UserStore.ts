@@ -39,4 +39,4 @@ export const UserStore: Writable<UserInformation> = writable({
 	}
 });
 
-export let UserTableStore: Writable<Array<UserView>> = writable();
+export let UserTableStore: Writable<Array<UserView>> = writable([]);

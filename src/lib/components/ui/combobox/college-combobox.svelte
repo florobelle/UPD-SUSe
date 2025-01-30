@@ -55,7 +55,7 @@
 							value={college.label}
 							onSelect={() => {
 								selectedCollege = college.label;
-								onChange(college.label);
+								onChange(college.value);
 								comboboxOpen = false;
 							}}
 						>

@@ -71,11 +71,11 @@
 		on:input={(e) => handleInput(e, true)}
 	/>
 {:else if editT === 'college'}
-	<CollegeCombobox selectedCollege={initVal} onChange={(e) => handleInput(e, false)} />
+	<CollegeCombobox selectedCollege={initVal} onChange={(e) => handleInput(e, true)} />
 {:else if editT === 'program'}
-	<ProgramCombobox selectedProgram={initVal} onChange={(e) => handleInput(e, false)} />
+	<ProgramCombobox selectedProgram={initVal} onChange={(e) => handleInput(e, true)} />
 {:else if editT === 'user_type'}
-	<UserTypeCombobox selectedUserType={initVal} onChange={(e) => handleInput(e, false)} />
+	<UserTypeCombobox selectedUserType={initVal} onChange={(e) => handleInput(e, true)} />
 {:else if editT === 'datetime'}
 	<DatetimePicker date={initVal} onChange={(date) => handleInput(date, false)} />
 {:else}
