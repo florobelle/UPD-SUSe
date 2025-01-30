@@ -22,7 +22,8 @@
 		let value: string | number;
 
 		if (e instanceof Date) {
-			value = e.toISOString();
+			// value = e.toISOString();
+            value = e.toDateString();
 		} else if (typeof e === 'string') {
 			value = e;
 		} else if (e.target && e.target instanceof HTMLInputElement) {
@@ -60,7 +61,6 @@
 		class="w-full rounded border p-2"
 		value={currentValue}
 		on:input={(e) => {
-			console.log('Input changed:', e);
 			handleInput(e);
 		}}
 	/>

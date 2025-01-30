@@ -79,7 +79,7 @@ export const columns: ColumnDef<UsageLogView>[] = [
 	createSortableColumn('usagelog_id', 'ID', ''),
 	createSortableColumn('start', 'Start Time', 'datetime'),
 	createSortableColumn('end', 'End Time', 'datetime'),
-	createSortableColumn('service', 'Service', 'text'),
+	createSortableColumn('service', 'Service', ''),
 	createSortableColumn('service_type', 'Service Type', ''),
 	createSortableColumn('lib_user_id', 'User ID', ''),
 	createSortableColumn('first_name', 'First Name', ''),

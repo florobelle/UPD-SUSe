@@ -448,6 +448,30 @@
     onDestroy(unsubscribeRealtimeUpdates)
 
 	// ----------------------------------------------------------------------------
+	// READ ADMIN TABLES
+	// ----------------------------------------------------------------------------
+
+	async function getAdminTable() {
+		// gets user information from database
+		const { admins, error } = await readAdmin({
+			admin_id: 0,
+			email: '',
+			is_active: null,
+			is_approved: null,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading admin table: ${error}`);
+			return;
+		} else if (admins != null) {
+			$AdminTableStore = admins;
+		}
+		return;
+	}
+
+	// ----------------------------------------------------------------------------
 
 	$: {
 		if (browser && document) {
@@ -457,6 +481,9 @@
 
 	$: {
 		if ($AdminStore.authenticated) {
+            if (!$AdminTableStore.length) {
+                getAdminTable();
+            }
 			subscribeRealtimeUpdates();
 		}
 	}

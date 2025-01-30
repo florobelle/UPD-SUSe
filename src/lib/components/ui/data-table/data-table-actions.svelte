@@ -8,7 +8,11 @@
 	import toast from 'svelte-5-french-toast';
 	import { updateUser } from '../../../../routes/supabase/User';
 	import { updateAdmin } from '../../../../routes/supabase/Admin';
-	import { UserTableStore } from '$lib/stores/UserStore';
+	import type { AdminTable, UsageLogView } from '$lib/dataTypes/EntityTypes';
+	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
+	import { AdminTableStore } from '$lib/stores/AdminStore';
+	import { endService } from '../../../../routes/supabase/AvailEndService';
+	import { updateUsageLog } from '../../../../routes/supabase/UsageLog';
 
 	export let id: number;
 	export let row: any;
@@ -34,13 +38,63 @@
 		});
 	}
 
-	function saveChanges() {
+	async function saveChanges() {
 		// Get the current changes for this row
 		const changes = $rowChanges[id];
 		if (!changes) return;
 
-		// TODO: Implement your save logic here
-		console.log('Saving changes:', changes);
+        if (changes.hasOwnProperty('lib_user_id')) {
+            if (changes.hasOwnProperty('usagelog_id')) { // updated a usagelog
+                const originalUsageLog: UsageLogView = $UsageLogTableStore.filter((value) => value.usagelog_id == changes.usagelog_id)[0]
+                const updatedProperties: {[key: string]: string | number} = {};
+                const newEndDate:Date = new Date(changes['end']);
+                const originalStartDate:Date = new Date(originalUsageLog['start']);
+                // only retain changes values
+                for (const [key, value] of Object.entries(originalUsageLog)) {
+                    if (value != changes[key]) {
+                        if (key.includes('admin_nickname')) {
+                            const admin:AdminTable = $AdminTableStore.filter((v) => v.nickname == changes[key])[0];
+                            if (admin) {
+                                updatedProperties[`admin_id${key.slice(-1)}`] = admin.admin_id;
+                            } else {
+                                toast.error(`No admin found with nickname: ${changes[key]}`)
+                                return;
+                            }
+                        } else if ((key == 'end' && newEndDate > originalStartDate) || key != 'end') {
+                            updatedProperties[key] = changes[key];
+                        }
+                    }
+                }
+                console.log(updatedProperties)
+                // if (updatedProperties.hasOwnProperty('end')) { // end usagelog after start timestamp
+                //     const { error } = await endService(
+                //         originalUsageLog.usagelog_id,
+                //         originalUsageLog.service_id,
+                //         originalUsageLog.lib_user_id,
+                //         false // hardcoded! refactor to be according to be dynamic
+                //     );
+                //     if (error) {
+                //         toast.error(`Error with ending service: ${error}`);
+                //         return;
+                //     } else {
+                //         toast.success('Service ended!');
+                //     }
+                // }
+                // const { error } = await updateUsageLog(updatedProperties, originalUsageLog.usagelog_id);
+                // if (error) {
+                //     toast.error(`Error with updating usagelog: ${error}`);
+                //     return;
+                // } else {
+                //     toast.success('Usagelog updated!');
+                // } // test all scenarios
+            } else { // updated a user record
+                console.log('user!', changes)
+            }
+        } else if (changes.hasOwnProperty('service_id')) { // updated a service record
+            console.log('service!', changes)
+        } else { // updated an admin record
+            console.log('admin!', changes)
+        }
 
 		// After successful save, exit edit mode
 		setEditRow(false);

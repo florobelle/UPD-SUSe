@@ -9,49 +9,11 @@
 
 	// Backend Imports
 	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
-	import { page } from '$app/stores';
-	import { readAdmin } from '../../../../supabase/Admin';
 
 	export const initialSort = [
 		{ id: 'admin_id', desc: true }
 		// { id: 'is_active', desc: true }
 	];
-
-	// ----------------------------------------------------------------------------
-	// READ ADMIN TABLES
-	// ----------------------------------------------------------------------------
-
-	const routes: Array<string> = $page.url.pathname.split('/');
-	const library: string = routes[1]; // session
-	const section: string = routes[2]; // session
-
-	async function getAdminTable() {
-		// gets user information from database
-		const { admins, error } = await readAdmin({
-			admin_id: 0,
-			email: '',
-			is_active: null,
-			is_approved: null,
-			library,
-			section
-		});
-
-		if (error) {
-			toast.error(`Error with reading admin table: ${error}`);
-			return;
-		} else if (admins != null) {
-			$AdminTableStore = admins;
-		}
-		return;
-	}
-
-	// ----------------------------------------------------------------------------
-
-	$: {
-		if ($AdminStore.authenticated) {
-			getAdminTable();
-		}
-	}
 </script>
 
 <Toaster />

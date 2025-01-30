@@ -18,7 +18,7 @@ export async function availService(serviceID:number, libUserID:number, adminID1:
     return { error: null }
 }
 
-export async function endService(usagelog_id:number, service_id:number, username:string, is_user_active:boolean): Promise<Error> {
+export async function endService(usagelog_id:number, service_id:number, lib_user_id:number, is_user_active:boolean): Promise<Error> {
     // ends a service by updating the given usage log end datetime, updating the service to no in use, 
     // and updating the user to inactive if the user has no more active usagelogs 
 
@@ -26,7 +26,7 @@ export async function endService(usagelog_id:number, service_id:number, username
     if (error) {
         return { error: error.toString() };
     } else if (!is_user_active) {
-        const { error } = await updateUser({ is_active: false }, username);
+        const { error } = await updateUser({ is_active: false }, '', lib_user_id);
 
         if (error) {
             return { error }
