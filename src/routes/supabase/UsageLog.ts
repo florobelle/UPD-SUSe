@@ -65,3 +65,20 @@ export async function updateUsageLog(usagelog:object, usageLogID: number): Promi
         error: null,
     };
 }
+
+export async function deleteUsageLog(usagelog_id:number): Promise<UsageLogResponse> {
+    // Deletes usagelog record from usagelog_engglib table
+    const { error } = await supabaseClient.from('usagelog_engglib').delete().eq('usagelog_id', usagelog_id)
+
+    if (error) {
+        return {
+            usagelogs: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        usagelogs: null,
+        error: null,
+    };
+}

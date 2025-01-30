@@ -6,16 +6,16 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { rowChanges } from '$lib/stores/tableStore';
 	import toast from 'svelte-5-french-toast';
-	import { updateUser } from '../../../../routes/supabase/User';
-	import { updateAdmin } from '../../../../routes/supabase/Admin';
+	import { deleteUser, updateUser } from '../../../../routes/supabase/User';
+	import { deleteAdmin, updateAdmin } from '../../../../routes/supabase/Admin';
 	import type { AdminTable, ServiceView, UsageLogView, UserView } from '$lib/dataTypes/EntityTypes';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 	import { AdminTableStore } from '$lib/stores/AdminStore';
 	import { endService } from '../../../../routes/supabase/AvailEndService';
-	import { updateUsageLog } from '../../../../routes/supabase/UsageLog';
+	import { deleteUsageLog, updateUsageLog } from '../../../../routes/supabase/UsageLog';
 	import { UserTableStore } from '$lib/stores/UserStore';
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
-	import { updateService } from '../../../../routes/supabase/Service';
+	import { deleteService, updateService } from '../../../../routes/supabase/Service';
 
 	export let id: number;
 	export let row: any;
@@ -183,9 +183,48 @@
 		setEditRow(false);
 	}
 
-	function deleteRow() {
-		// TODO: Implement delete logic
-		console.log('Deleting row:', id);
+	async function deleteRow() {
+		// deletes a record if database allows it (cascading deletion is not allowed, any referencing records need to be deleted first)
+        // 1)usagelog, 2)service, admin or user
+		const loadID: string = toast.loading('Deleting user...');
+
+        if (row.hasOwnProperty('lib_user_id')) {
+            if (row.hasOwnProperty('usagelog_id')) {
+                // delete usagelog
+                const { error } = await deleteUsageLog(row.usagelog_id);
+                if (error) {
+                    toast.error(`Error with deleting admin: ${error}`);
+                } else {
+                    toast.success('Usagelog deleted!');
+                }
+            } else {
+                // delete user
+                const { error } = await deleteUser(row.lib_user_id);
+                if (error) {
+                    toast.error(`Error with deleting user: ${error}`);
+                } else {
+                    toast.success('User deleted!');
+                }
+            }
+        } else if (row.hasOwnProperty('service_id')) {
+            // delete service
+            const { error } = await deleteService(row.service_id);
+            if (error) {
+                toast.error(`Error with deleting service: ${error}`);
+            } else {
+                toast.success('Service deleted!');
+            }
+        } else {
+            // delete admin
+            const { error } = await deleteAdmin(row.admin_id);
+            if (error) {
+                toast.error(`Error with deleting admin: ${error}`);
+            } else {
+                toast.success('Admin deleted!');
+            }
+        }
+        toast.dismiss(loadID);
+		return;
 	}
 
 	async function approveUser() {
@@ -258,7 +297,7 @@
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
-				<DropdownMenu.Item on:click={deleteRow}>Delete</DropdownMenu.Item>
+				<!-- <DropdownMenu.Item on:click={deleteRow}>Delete</DropdownMenu.Item> -->
 				<DropdownMenu.Item on:click={() => setEditRow(true)}>Edit</DropdownMenu.Item>
 			</DropdownMenu.Group>
 		</DropdownMenu.Content>
