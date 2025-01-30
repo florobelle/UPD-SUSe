@@ -11,16 +11,23 @@
 	export let date: string;
 	export let onChange: (value: Date) => void = () => {};
 
-	let value = new Date(date);
-	let calendarDate: CalendarDate = parseDate(value.toLocaleDateString('en-CA'));
-	let formattedDate = format(date, 'MM/dd/yyyy h:mm aa');
-	let calendarDateTime: CalendarDateTime = new CalendarDateTime(
-		calendarDate.year,
-		calendarDate.month,
-		calendarDate.day,
-		value.getHours(),
-		value.getMinutes()
-	);
+	let value;
+	let calendarDate: CalendarDate;
+	let formattedDate: string;
+	let calendarDateTime: CalendarDateTime;
+
+    $: {
+        value = new Date(date);
+        calendarDate = parseDate(value.toLocaleDateString('en-CA'));
+        formattedDate = format(date, 'MM/dd/yyyy h:mm aa');
+        calendarDateTime = new CalendarDateTime(
+            calendarDate.year,
+            calendarDate.month,
+            calendarDate.day,
+            value.getHours(),
+            value.getMinutes()
+        );
+    }
 
 	$: {
 		if (calendarDateTime) {
@@ -104,6 +111,7 @@
 				!date && 'text-muted-foreground'
 			)}
 			builders={[builder]}
+            on:click={() => {date = date ? date : new Date().toLocaleString()}}
 		>
 			{date ? formattedDate : 'Pick a date'}
 			<CalendarIcon class="ml-auto h-4 w-4" />

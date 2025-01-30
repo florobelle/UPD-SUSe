@@ -22,8 +22,7 @@
 		let value: string | number;
 
 		if (e instanceof Date) {
-			// value = e.toISOString();
-            value = e.toDateString();
+            value = e.toLocaleString();
 		} else if (typeof e === 'string') {
 			value = e;
 		} else if (e.target && e.target instanceof HTMLInputElement) {

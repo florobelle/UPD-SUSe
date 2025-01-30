@@ -47,8 +47,9 @@
             if (changes.hasOwnProperty('usagelog_id')) { // updated a usagelog
                 const originalUsageLog: UsageLogView = $UsageLogTableStore.filter((value) => value.usagelog_id == changes.usagelog_id)[0]
                 const updatedProperties: {[key: string]: string | number} = {};
-                const newEndDate:Date = new Date(changes['end']);
-                const originalStartDate:Date = new Date(originalUsageLog['start']);
+                const newEndTime:number = new Date(changes['end']).getTime();
+                const newStartTime:number = new Date(changes['start']).getTime() 
+                const originalStartTime:number = new Date(originalUsageLog['start']).getTime();
                 // only retain changes values
                 for (const [key, value] of Object.entries(originalUsageLog)) {
                     if (value != changes[key]) {
@@ -60,33 +61,34 @@
                                 toast.error(`No admin found with nickname: ${changes[key]}`)
                                 return;
                             }
-                        } else if ((key == 'end' && newEndDate > originalStartDate) || key != 'end') {
+                        } else if ((key == 'end' && newEndTime > originalStartTime) || 
+                            (key == 'start' && newStartTime != originalStartTime) ||
+                            (key != 'end' && key != 'start')) {
                             updatedProperties[key] = changes[key];
                         }
                     }
                 }
-                console.log(updatedProperties)
-                // if (updatedProperties.hasOwnProperty('end')) { // end usagelog after start timestamp
-                //     const { error } = await endService(
-                //         originalUsageLog.usagelog_id,
-                //         originalUsageLog.service_id,
-                //         originalUsageLog.lib_user_id,
-                //         false // hardcoded! refactor to be according to be dynamic
-                //     );
-                //     if (error) {
-                //         toast.error(`Error with ending service: ${error}`);
-                //         return;
-                //     } else {
-                //         toast.success('Service ended!');
-                //     }
-                // }
-                // const { error } = await updateUsageLog(updatedProperties, originalUsageLog.usagelog_id);
-                // if (error) {
-                //     toast.error(`Error with updating usagelog: ${error}`);
-                //     return;
-                // } else {
-                //     toast.success('Usagelog updated!');
-                // } // test all scenarios
+                if (updatedProperties.hasOwnProperty('end')) { // end usagelog after start timestamp
+                    const { error } = await endService(
+                        originalUsageLog.usagelog_id,
+                        originalUsageLog.service_id,
+                        originalUsageLog.lib_user_id,
+                        false // hardcoded! refactor to be according to be dynamic
+                    );
+                    if (error) {
+                        toast.error(`Error with ending service: ${error}`);
+                        return;
+                    } else {
+                        toast.success('Service ended!');
+                    }
+                }
+                const { error } = await updateUsageLog(updatedProperties, originalUsageLog.usagelog_id);
+                if (error) {
+                    toast.error(`Error with updating usagelog: ${error}`);
+                    return;
+                } else {
+                    toast.success('Usagelog updated!');
+                }
             } else { // updated a user record
                 console.log('user!', changes)
             }
