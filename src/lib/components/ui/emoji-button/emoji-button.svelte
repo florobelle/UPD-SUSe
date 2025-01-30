@@ -1,10 +1,18 @@
-<script>
+<script lang="ts">
+	// Credits for the html and css to https://codepen.io/aaroniker/pen/mdyYBPP
+	export let rating: number;
 </script>
 
 <div class="feedback w-full items-center justify-center">
-	<p class="mr-4 text-sm text-slate-500">Very Unsatisfied</p>
+	<p class="mr-4 hidden text-sm text-slate-500 md:block">Very Unsatisfied</p>
 	<label class="angry relative flex flex-col items-center">
-		<input type="radio" value="1" name="feedback" class="absolute left-1/2 -translate-x-1/2" />
+		<input
+			type="radio"
+			value="1"
+			bind:group={rating}
+			name="feedback"
+			class="absolute left-1/2 -translate-x-1/2"
+		/>
 		<div>
 			<svg class="eye left"> <use xlink:href="#eye"> </use></svg>
 			<svg class="eye right"> <use xlink:href="#eye"> </use></svg>
@@ -12,7 +20,13 @@
 		</div>
 	</label>
 	<label class="sad relative flex flex-col items-center">
-		<input type="radio" value="2" name="feedback" class="absolute left-1/2 -translate-x-1/2" />
+		<input
+			type="radio"
+			value="2"
+			bind:group={rating}
+			name="feedback"
+			class="absolute left-1/2 -translate-x-1/2"
+		/>
 		<div>
 			<svg class="eye left"> <use xlink:href="#eye"> </use></svg>
 			<svg class="eye right"> <use xlink:href="#eye"> </use></svg>
@@ -20,7 +34,13 @@
 		</div>
 	</label>
 	<label class="ok relative flex flex-col items-center">
-		<input type="radio" value="3" name="feedback" class="absolute left-1/2 -translate-x-1/2" />
+		<input
+			type="radio"
+			value="3"
+			bind:group={rating}
+			name="feedback"
+			class="absolute left-1/2 -translate-x-1/2"
+		/>
 		<div></div>
 	</label>
 	<label class="good relative flex flex-col items-center">
@@ -28,7 +48,7 @@
 			type="radio"
 			value="4"
 			name="feedback"
-			checked
+			bind:group={rating}
 			class="absolute left-1/2 -translate-x-1/2"
 		/>
 		<div>
@@ -38,13 +58,19 @@
 		</div>
 	</label>
 	<label class="happy relative flex flex-col items-center">
-		<input type="radio" value="5" name="feedback" class="absolute left-1/2 -translate-x-1/2" />
+		<input
+			type="radio"
+			value="5"
+			bind:group={rating}
+			name="feedback"
+			class="absolute left-1/2 -translate-x-1/2"
+		/>
 		<div>
 			<svg class="eye left"> <use xlink:href="#eye"> </use></svg>
 			<svg class="eye right"> <use xlink:href="#eye"> </use></svg>
 		</div>
 	</label>
-	<p class="text-sm text-slate-500">Very Satisfied</p>
+	<p class="hidden text-sm text-slate-500 md:block">Very Satisfied</p>
 </div>
 
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
