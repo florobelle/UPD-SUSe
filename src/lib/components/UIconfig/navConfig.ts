@@ -30,9 +30,9 @@ export const studentRoutes: Route[] = [
 	},
 	{
 		title: 'Send Feedback',
-		id: 'feedback',
+		id: 'feedback-form',
 		icon: Icons.MessageCircleHeart,
-		url: ''
+		url: './feedback-form'
 	}
 ];
 
