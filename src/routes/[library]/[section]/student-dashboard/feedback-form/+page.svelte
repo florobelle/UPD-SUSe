@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Tabs from '$lib/components/ui/tabs/index';
@@ -7,10 +7,18 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Card from '$lib/components/ui/card/index';
 	import EmojiButton from '$lib/components/ui/emoji-button/emoji-button.svelte';
+
+	let rating: number = 5;
+
+	$: {
+		if (rating) {
+			console.log(rating, 'from the outside');
+		}
+	}
 </script>
 
 <ScrollArea class="h-screen">
-	<div class="flex h-full w-full flex-col gap-10 p-20">
+	<div class="flex h-full w-full flex-col gap-10 p-10 md:p-20">
 		<!-- Title -->
 		<div class="flex w-full flex-col gap-4">
 			<h1 class="text-3xl font-medium">We would love to hear your thoughts!</h1>
@@ -37,7 +45,7 @@
 							<Label for="bug-description"
 								>How satisfied are you with the overall experience compared to the previous system?</Label
 							>
-							<EmojiButton />
+							<EmojiButton bind:rating />
 						</div>
 
 						<div class="grid w-full gap-1.5">
