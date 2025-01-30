@@ -6,6 +6,10 @@ export async function readService(filter:ServiceFilter): Promise<ServiceResponse
     // Reads and filters the service_engglib table in the database and returns all corresponding entries
     let query = supabaseClient.from(`public_service_${filter.library}`).select("*").order('service_id', { ascending: true });
 
+    if (filter.service_id) {
+        query = query.eq('service_id', filter.service_id);
+    }
+
     if (filter.in_use != null) {
         query = query.eq('in_use', filter.in_use);
     }

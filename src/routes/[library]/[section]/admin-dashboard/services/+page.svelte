@@ -25,9 +25,10 @@
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-	async function getServiceTable(): Promise<boolean> {
+	async function getServiceTable() {
 		// gets user information from database
 		const { services, error } = await readService({
+			service_id: 0,
 			service_type: '',
 			in_use: null,
 			library,
@@ -36,11 +37,11 @@
 
 		if (error) {
 			toast.error(`Error with reading service table: ${error}`);
-			return false;
+			return;
 		} else if (services != null) {
 			$ServiceTableStore = services;
 		}
-		return true;
+		return;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -58,12 +59,14 @@
 <div class="flex w-full justify-center">
 	{#if $AdminStore.formData.is_approved}
 		{#if $ServiceTableStore}
-			<div class="w-[95%]">
-				<h1 class="pt-10 text-3xl font-medium">Services</h1>
-				<DataTable data={$ServiceTableStore} {columns} {initialSort} />
-			</div>
-            {:else}
-                <p>Retrieving data...</p>
+			{#key $ServiceTableStore}
+				<div class="w-[95%]">
+					<h1 class="pt-10 text-3xl font-medium">Services</h1>
+					<DataTable data={$ServiceTableStore} {columns} {initialSort} />
+				</div>
+			{/key}
+		{:else}
+			<p>Retrieving data...</p>
 		{/if}
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">
