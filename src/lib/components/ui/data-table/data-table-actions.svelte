@@ -58,6 +58,7 @@
 				const newEndTime: number = new Date(changes['end']).getTime();
 				const newStartTime: number = new Date(changes['start']).getTime();
 				const originalStartTime: number = new Date(originalUsageLog['start']).getTime();
+                const originalEndTime:number = originalUsageLog['end'] ? new Date(originalUsageLog['end']).getTime() : 0;
 				// only retain changes values
 				for (const [key, value] of Object.entries(originalUsageLog)) {
 					if (value != changes[key]) {
@@ -71,7 +72,7 @@
 								toast.error(`No admin found with nickname: ${changes[key]}`);
 							}
 						} else if (
-							(key == 'end' && newEndTime > originalStartTime) ||
+							(key == 'end' && newEndTime > originalStartTime && newEndTime != originalEndTime) ||
 							(key == 'start' && newStartTime != originalStartTime) ||
 							(key != 'end' && key != 'start')
 						) {
