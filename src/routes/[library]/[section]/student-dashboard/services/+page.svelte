@@ -76,95 +76,94 @@
 		// and puts the returned values in $ServiceStore
 
 		const { serviceTypes, error } = await readServiceType();
-        serviceTypes?.sort((a, b) => a.service_type_id - b.service_type_id)
+		serviceTypes?.sort((a, b) => a.service_type_id - b.service_type_id);
 
 		if (error) {
 			toast.error(`Error with reading service types: ${error}`);
 		} else if (serviceTypes) {
 			let serviceInfo: { [key: string]: ServiceInfo } = {};
-			let serviceOption: { [key: string]: Array<ServiceOption> } = {};
+			let serviceOption: { [key: string]: { [key: string]: ServiceOption } } = {};
 
 			for (const serviceType of serviceTypes) {
 				// service info and option store
-				if (serviceType.service_subtype_id) { // if service is a subtype (Big Umbrella, Geodesy DR)
-                    const mainServiceType:string = serviceTypes.filter((value) => value.service_type_id == serviceType.service_subtype_id)[0].service_type;
-                    serviceOption[mainServiceType].push(
-                        {
-							type: 'select',
-							label: serviceType.service_type,
-							options: [],
-							variant: 'default'
-						}
-                    );						
-                } else { // else service is a main type (Adapter, Discussion Room, Umbrella)
-                    serviceInfo[serviceType.service_type] = {
-                        service_type: serviceType.service_type,
-                        service_type_id: serviceType.service_type_id,
-                        available_number: 0,
-                        service_img_src: `../../../services/${serviceType.service_type}.png`
-                    };
+				if (serviceType.service_subtype_id) {
+					// if service is a subtype (Big Umbrella, Geodesy DR)
+					const mainServiceType: string = serviceTypes.filter(
+						(value) => value.service_type_id == serviceType.service_subtype_id
+					)[0].service_type;
+					serviceOption[mainServiceType][serviceType.service_type] = {
+						type: 'select',
+						label: serviceType.service_type,
+						options: [],
+						variant: 'default'
+					};
+				} else {
+					// else service is a main type (Adapter, Discussion Room, Umbrella)
+					serviceInfo[serviceType.service_type] = {
+						service_type: serviceType.service_type,
+						service_type_id: serviceType.service_type_id,
+						available_number: 0,
+                        total_available_number: 0,
+						service_img_src: `../../../services/${serviceType.service_type}.png`
+					};
 
-                    serviceOption[serviceType.service_type] = [
-						{
+					serviceOption[serviceType.service_type] = {
+						main: {
 							type: 'select',
 							label: serviceType.service_type,
 							options: [],
 							variant: 'default'
 						}
-					];
-                }
+					};
+				}
 			}
-            console.log(serviceInfo)
-            console.log(serviceOption)
 
-			// const { services, error } = await readService({
-            //     service_id: 0,
-			// 	service_type: '',
-			// 	in_use: false,
-			// 	library,
-			// 	section
-			// });
+			const { services, error } = await readService({
+				service_id: 0,
+				service_type: '',
+				in_use: false,
+				library,
+				section
+			});
 
-			// if (error) {
-			// 	toast.error(`Error with getting services: ${error}`);
-			// 	return;
-			// } else if (services) {
-			// 	for (const service of services) {
-			// 		// service option store
-			// 		if (service.service_type == 'Discussion Room') {
-			// 			if (service.service.includes('Frequency')) {
-			// 				serviceOption[service.service_type][0].options.push(service);
-			// 			} else if (service.service.includes('Programming')) {
-			// 				serviceOption[service.service_type][1].options.push(service);
-			// 			} else if (service.service.includes('Signal')) {
-			// 				serviceOption[service.service_type][2].options.push(service);
-			// 			} else {
-			// 				serviceOption[service.service_type][3].options.push(service);
-			// 			}
-			// 		} else if (service.service_type == 'Umbrella') {
-			// 			serviceInfo[service.service_type].available_number++;
-			// 			if (service.service.includes('Small Orange')) {
-			// 				serviceOption[service.service_type][0].options.push(service);
-			// 			} else if (service.service.includes('Small Black')) {
-			// 				serviceOption[service.service_type][1].options.push(service);
-			// 			} else {
-			// 				serviceOption[service.service_type][2].options.push(service);
-			// 			}
-			// 		} else {
-			// 			serviceInfo[service.service_type].available_number++;
-			// 			serviceOption[service.service_type][0].options.push(service);
-			// 		}
-			// 	}
-
-			// 	for (const subset of serviceOption['Discussion Room']) {
-			// 		if (subset.options.length == 10) {
-			// 			serviceInfo['Discussion Room'].available_number++;
-			// 		}
-			// 	}
-			// 	$ServiceTypeStore = serviceTypes;
-			// 	$ServiceInfoStore = serviceInfo;
-			// 	$ServiceOptionStore = serviceOption;
-			// }
+			if (error) {
+				toast.error(`Error with getting services: ${error}`);
+			} else if (services) {
+				for (const service of services) {
+					// service option store
+					if (serviceOption.hasOwnProperty(service.service_type)) {
+						// service is of main service type
+                        serviceInfo[service.service_type].total_available_number++;
+						serviceInfo[service.service_type].available_number++;
+						serviceOption[service.service_type].main.options.push(service);
+					} else {
+						// service is of sub service type
+						const subServiceTypeID: number = serviceTypes.filter(
+							(value) => value.service_type == service.service_type
+						)[0].service_subtype_id;
+						const mainServiceType: string = serviceTypes.filter(
+							(value) => value.service_type_id == subServiceTypeID
+						)[0].service_type;
+                        if (mainServiceType == "Umbrella") serviceInfo[mainServiceType].available_number++;
+                        serviceInfo[mainServiceType].total_available_number++;
+						serviceOption[mainServiceType][service.service_type].options.push(service);
+					}
+				}
+				// console.log(serviceInfo);
+				// console.log(serviceOpt/ion);
+				for (const subset of Object.values(serviceOption['Discussion Room'])) {
+					if ((library == 'engglib2' && subset.options.length == 10) ||
+                        (library == 'engglib1' && 
+                        (((subset.label == 'Ergonomics' || subset.label == 'Kinematics') && subset.options.length == 6) ||
+                        ((subset.label != 'Ergonomics' && subset.label != 'Kinematics') && subset.options.length == 8)))
+                    ) {
+						serviceInfo['Discussion Room'].available_number++;
+					}
+				}
+				$ServiceTypeStore = serviceTypes;
+				$ServiceInfoStore = serviceInfo;
+				$ServiceOptionStore = serviceOption;
+			}
 		}
 		return;
 	}
@@ -172,7 +171,7 @@
 	async function getActiveAdmins() {
 		// gets two active admins from database
 		const { admins, error } = await readAdmin({
-            admin_id: 0,
+			admin_id: 0,
 			email: '',
 			is_active: true,
 			is_approved: true,
@@ -286,199 +285,203 @@
 					<!-- SERVICES -->
 					{#if $ServiceTypeStore.length}
 						{#each $ServiceTypeStore as serviceType}
-							<!-- ACTIVE SERVICES -->
-							{#if $ActiveUsageLogStore[serviceType.service_type]}
-								<Dialog.Root
-									open={dialogStates[serviceType.service_type_id]?.isOpen &&
-										dialogStates[serviceType.service_type_id]?.type === 'end'}
-									onOpenChange={(isOpen) => {
-										if (!isOpen) handleDialogClose(serviceType.service_type_id);
-									}}
-								>
-									<Dialog.Trigger
-										class="m-0 h-full min-h-[250px] w-full p-0 p-0 xl:min-h-[0px]"
-										on:click={() => handleDialogOpen(serviceType.service_type_id, 'end')}
+							{#if !serviceType.service_subtype_id}
+								<!-- ACTIVE SERVICES -->
+								{#if $ActiveUsageLogStore[serviceType.service_type]}
+									<Dialog.Root
+										open={dialogStates[serviceType.service_type_id]?.isOpen &&
+											dialogStates[serviceType.service_type_id]?.type === 'end'}
+										onOpenChange={(isOpen) => {
+											if (!isOpen) handleDialogClose(serviceType.service_type_id);
+										}}
 									>
-										<ServiceCard
-											selectService={() => selectService(serviceType.service_type)}
-											serviceName={serviceType.service_type}
-											serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
-											inUse={true}
-											dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
-										/>
-									</Dialog.Trigger>
-									<Dialog.Content>
-										<Dialog.Header>
-											<Dialog.Title>End</Dialog.Title>
-											<Dialog.Description>
-												Please confirm to end using {serviceType.service_type}.
-											</Dialog.Description>
-										</Dialog.Header>
-										<Dialog.Footer>
-											<Button
-												on:click={() => {
-													endAndUpdateUsage(serviceType.service_type);
-													handleDialogClose(serviceType.service_type_id);
-												}}
-											>
-												End
-											</Button>
-										</Dialog.Footer>
-									</Dialog.Content>
-								</Dialog.Root>
-
-								<!-- INACTIVE SERVICES -->
-								<!-- {:else if $ServiceInfoStore[serviceType.service_type].available_number} -->
-							{:else}
-								<Dialog.Root
-									open={dialogStates[serviceType.service_type_id]?.isOpen &&
-										dialogStates[serviceType.service_type_id]?.type === 'avail'}
-									onOpenChange={(isOpen) => {
-										if (!isOpen) handleDialogClose(serviceType.service_type_id);
-									}}
-								>
-									<!-- Service Card -->
-									<Dialog.Trigger class="m-0 h-full min-h-[250px] w-full p-0 xl:min-h-[0px]">
-										<ServiceCard
-											selectService={() => selectService(serviceType.service_type)}
-											serviceName={serviceType.service_type}
-											serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
-											availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
-										/>
-									</Dialog.Trigger>
-
-									{#key $ServiceOptionStore}
-										<!-- Dialog Content of Service Card -->
-										<Dialog.Content class="min-w-fit">
+										<Dialog.Trigger
+											class="m-0 h-full min-h-[250px] w-full p-0 p-0 xl:min-h-[0px]"
+											on:click={() => handleDialogOpen(serviceType.service_type_id, 'end')}
+										>
+											<ServiceCard
+												selectService={() => selectService(serviceType.service_type)}
+												serviceName={serviceType.service_type}
+												serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+												inUse={true}
+												dateStarted={$ActiveUsageLogStore[serviceType.service_type].start}
+											/>
+										</Dialog.Trigger>
+										<Dialog.Content>
 											<Dialog.Header>
-												<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
-												<Dialog.Description
-													>Please select the specific {serviceType.service_type} ID!</Dialog.Description
-												>
+												<Dialog.Title>End</Dialog.Title>
+												<Dialog.Description>
+													Please confirm to end using {serviceType.service_type}.
+												</Dialog.Description>
 											</Dialog.Header>
-
-											<!-- Load Tabs -->
-											{#if $ServiceOptionStore[serviceType.service_type].length > 1}
-												<Tabs.Root class="w-full">
-													<!-- Tab headings -->
-													<Tabs.List class="w-full">
-														{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-															<Tabs.Trigger
-																on:click={() => {
-																	tabSelected = serviceInput.label;
-																	selectedOption = null;
-																}}
-																value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
-															>
-														{/each}
-													</Tabs.List>
-
-													<!-- Content of tabs -->
-													{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-														{#key tabSelected}
-															<Tabs.Content value={serviceInput.label}>
-																<Select.Root
-																	portal={null}
-																	onSelectedChange={(s) => {
-																		if (s) {
-																			selectedOption = s as unknown as {
-																				value: number;
-																				label: string;
-																				disabled: boolean;
-																			};
-																		}
-																	}}
-																>
-																	<Select.Trigger>
-																		<Select.Value
-																			placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`}
-																		/>
-																	</Select.Trigger>
-																	<Select.Content class="max-h-[10rem] overflow-y-auto">
-																		<Select.Group>
-																			{#each serviceInput.options as option}
-																				<Select.Item
-																					value={option.service_id}
-																					label={option.service}>{option.service}</Select.Item
-																				>
-																			{/each}
-																		</Select.Group>
-																	</Select.Content>
-																	<Select.Input name={serviceInput.label} />
-																</Select.Root>
-															</Tabs.Content>
-														{/key}
-													{/each}
-												</Tabs.Root>
-											{:else}
-												{#each $ServiceOptionStore[serviceType.service_type] as serviceInput}
-													{#if serviceInput.type == 'select'}
-														<Label for={serviceInput.label}>{serviceInput.label}</Label>
-														<Select.Root
-															portal={null}
-															onSelectedChange={(s) => {
-																if (s) {
-																	selectedOption = s as unknown as {
-																		value: number;
-																		label: string;
-																		disabled: boolean;
-																	};
-																}
-															}}
-														>
-															<Select.Trigger>
-																<Select.Value placeholder={`Select a ${serviceInput.label}`} />
-															</Select.Trigger>
-															<Select.Content>
-																<Select.Group>
-																	{#each serviceInput.options as option}
-																		<Select.Item value={option.service_id} label={option.service}
-																			>{option.service}</Select.Item
-																		>
-																	{/each}
-																</Select.Group>
-															</Select.Content>
-															<Select.Input name={serviceInput.label} />
-														</Select.Root>
-													{/if}
-												{/each}
-											{/if}
-
 											<Dialog.Footer>
-												<div
-													class="flex w-full flex-col items-center justify-center gap-4 text-center"
+												<Button
+													on:click={() => {
+														endAndUpdateUsage(serviceType.service_type);
+														handleDialogClose(serviceType.service_type_id);
+													}}
 												>
-													<div class="mx-auto flex w-full max-w-md flex-col items-center gap-2">
-														<p class="text-sm text-muted-foreground">
-															I accept full responsibility for the {serviceType.service_type} once it
-															is loaned to me. I agree that I received the {serviceType.service_type}
-															in good condition and I understand that I will be charged with corresponding
-															fees or replacement if it is damaged or lost while under my possession.
-														</p>
-														<div class="flex items-center gap-2">
-															<Checkbox id="terms" bind:checked={termsAccepted} />
-															<div class="grid gap-2 leading-none">
-																<Label
-																	for="terms"
-																	class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-																>
-																	Accept terms and conditions
-																</Label>
-															</div>
-														</div>
-													</div>
-
-													<Button
-														disabled={!termsAccepted}
-														on:click={() =>
-															availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
-														>Avail
-													</Button>
-												</div>
+													End
+												</Button>
 											</Dialog.Footer>
 										</Dialog.Content>
-									{/key}
-								</Dialog.Root>
+									</Dialog.Root>
+
+									<!-- INACTIVE SERVICES -->
+								{:else if $ServiceInfoStore[serviceType.service_type].total_available_number}
+									<!-- {:else} -->
+									<Dialog.Root
+										open={dialogStates[serviceType.service_type_id]?.isOpen &&
+											dialogStates[serviceType.service_type_id]?.type === 'avail'}
+										onOpenChange={(isOpen) => {
+											if (!isOpen) handleDialogClose(serviceType.service_type_id);
+										}}
+									>
+										<!-- Service Card -->
+										<Dialog.Trigger class="m-0 h-full min-h-[250px] w-full p-0 xl:min-h-[0px]">
+											<ServiceCard
+												selectService={() => selectService(serviceType.service_type)}
+												serviceName={serviceType.service_type}
+												serviceImgSrc={$ServiceInfoStore[serviceType.service_type].service_img_src}
+												availableNum={$ServiceInfoStore[serviceType.service_type].available_number}
+											/>
+										</Dialog.Trigger>
+
+										{#key $ServiceOptionStore}
+											<!-- Dialog Content of Service Card -->
+											<Dialog.Content class="min-w-fit">
+												<Dialog.Header>
+													<Dialog.Title>Avail {serviceType.service_type}</Dialog.Title>
+													<Dialog.Description
+														>Please select the specific {serviceType.service_type} ID!</Dialog.Description
+													>
+												</Dialog.Header>
+
+												<!-- Load Tabs -->
+												{#if Object.keys($ServiceOptionStore[serviceType.service_type]).length > 1}
+													<Tabs.Root class="w-full">
+														<!-- Tab headings -->
+														<Tabs.List class="w-full">
+															{#each Object.values($ServiceOptionStore[serviceType.service_type]) as serviceInput}
+																{#if serviceInput.options.length}
+																	<Tabs.Trigger
+																		on:click={() => {
+																			tabSelected = serviceInput.label;
+																			selectedOption = null;
+																		}}
+																		value={serviceInput.label}>{serviceInput.label}</Tabs.Trigger
+																	>
+																{/if}
+															{/each}
+														</Tabs.List>
+
+														<!-- Content of tabs -->
+														{#each Object.values($ServiceOptionStore[serviceType.service_type]) as serviceInput}
+															{#key tabSelected}
+																<Tabs.Content value={serviceInput.label}>
+																	<Select.Root
+																		portal={null}
+																		onSelectedChange={(s) => {
+																			if (s) {
+																				selectedOption = s as unknown as {
+																					value: number;
+																					label: string;
+																					disabled: boolean;
+																				};
+																			}
+																		}}
+																	>
+																		<Select.Trigger>
+																			<Select.Value
+																				placeholder={`Select a ${serviceType.service_type == 'Discussion Room' ? serviceInput.label + ' seat' : serviceInput.label}`}
+																			/>
+																		</Select.Trigger>
+																		<Select.Content class="max-h-[10rem] overflow-y-auto">
+																			<Select.Group>
+																				{#each serviceInput.options as option}
+																					<Select.Item
+																						value={option.service_id}
+																						label={option.service}>{option.service}</Select.Item
+																					>
+																				{/each}
+																			</Select.Group>
+																		</Select.Content>
+																		<Select.Input name={serviceInput.label} />
+																	</Select.Root>
+																</Tabs.Content>
+															{/key}
+														{/each}
+													</Tabs.Root>
+												{:else}
+													{#each Object.values($ServiceOptionStore[serviceType.service_type]) as serviceInput}
+														{#if serviceInput.type == 'select'}
+															<Label for={serviceInput.label}>{serviceInput.label}</Label>
+															<Select.Root
+																portal={null}
+																onSelectedChange={(s) => {
+																	if (s) {
+																		selectedOption = s as unknown as {
+																			value: number;
+																			label: string;
+																			disabled: boolean;
+																		};
+																	}
+																}}
+															>
+																<Select.Trigger>
+																	<Select.Value placeholder={`Select a ${serviceInput.label}`} />
+																</Select.Trigger>
+																<Select.Content>
+																	<Select.Group>
+																		{#each serviceInput.options as option}
+																			<Select.Item value={option.service_id} label={option.service}
+																				>{option.service}</Select.Item
+																			>
+																		{/each}
+																	</Select.Group>
+																</Select.Content>
+																<Select.Input name={serviceInput.label} />
+															</Select.Root>
+														{/if}
+													{/each}
+												{/if}
+
+												<Dialog.Footer>
+													<div
+														class="flex w-full flex-col items-center justify-center gap-4 text-center"
+													>
+														<div class="mx-auto flex w-full max-w-md flex-col items-center gap-2">
+															<p class="text-sm text-muted-foreground">
+																I accept full responsibility for the {serviceType.service_type} once
+																it is loaned to me. I agree that I received the {serviceType.service_type}
+																in good condition and I understand that I will be charged with corresponding
+																fees or replacement if it is damaged or lost while under my possession.
+															</p>
+															<div class="flex items-center gap-2">
+																<Checkbox id="terms" bind:checked={termsAccepted} />
+																<div class="grid gap-2 leading-none">
+																	<Label
+																		for="terms"
+																		class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+																	>
+																		Accept terms and conditions
+																	</Label>
+																</div>
+															</div>
+														</div>
+
+														<Button
+															disabled={!termsAccepted}
+															on:click={() =>
+																availAndUpdateUsage(selectedOption ? selectedOption.value : 0)}
+															>Avail
+														</Button>
+													</div>
+												</Dialog.Footer>
+											</Dialog.Content>
+										{/key}
+									</Dialog.Root>
+								{/if}
 							{/if}
 						{/each}
 					{:else}
