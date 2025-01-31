@@ -106,14 +106,12 @@
                         total_available_number: 0,
 						service_img_src: `../../../services/${serviceType.service_type}.png`
 					};
-
-					serviceOption[serviceType.service_type] = {
-						main: {
-							type: 'select',
-							label: serviceType.service_type,
-							options: [],
-							variant: 'default'
-						}
+                    serviceOption[serviceType.service_type] = {};
+					serviceOption[serviceType.service_type][serviceType.service_type] = {
+                        type: 'select',
+                        label: serviceType.service_type,
+                        options: [],
+                        variant: 'default'
 					};
 				}
 			}
@@ -135,7 +133,7 @@
 						// service is of main service type
                         serviceInfo[service.service_type].total_available_number++;
 						serviceInfo[service.service_type].available_number++;
-						serviceOption[service.service_type].main.options.push(service);
+						serviceOption[service.service_type][service.service_type].options.push(service);
 					} else {
 						// service is of sub service type
 						const subServiceTypeID: number = serviceTypes.filter(
@@ -149,8 +147,7 @@
 						serviceOption[mainServiceType][service.service_type].options.push(service);
 					}
 				}
-				// console.log(serviceInfo);
-				// console.log(serviceOpt/ion);
+
 				for (const subset of Object.values(serviceOption['Discussion Room'])) {
 					if ((library == 'engglib2' && subset.options.length == 10) ||
                         (library == 'engglib1' && 
