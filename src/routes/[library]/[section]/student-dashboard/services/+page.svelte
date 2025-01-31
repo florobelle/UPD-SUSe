@@ -76,6 +76,7 @@
 		// and puts the returned values in $ServiceStore
 
 		const { serviceTypes, error } = await readServiceType();
+        serviceTypes?.sort((a, b) => a.service_type_id - b.service_type_id)
 
 		if (error) {
 			toast.error(`Error with reading service types: ${error}`);
@@ -84,65 +85,26 @@
 			let serviceOption: { [key: string]: Array<ServiceOption> } = {};
 
 			for (const serviceType of serviceTypes) {
-				// service info store
-				serviceInfo[serviceType.service_type] = {
-					service_type: serviceType.service_type,
-					service_type_id: serviceType.service_type_id,
-					available_number: 0,
-					service_img_src: `../../../services/${serviceType.service_type}.png`
-				};
+				// service info and option store
+				if (serviceType.service_subtype_id) { // if service is a subtype (Big Umbrella, Geodesy DR)
+                    const mainServiceType:string = serviceTypes.filter((value) => value.service_type_id == serviceType.service_subtype_id)[0].service_type;
+                    serviceOption[mainServiceType].push(
+                        {
+							type: 'select',
+							label: serviceType.service_type,
+							options: [],
+							variant: 'default'
+						}
+                    );						
+                } else { // else service is a main type (Adapter, Discussion Room, Umbrella)
+                    serviceInfo[serviceType.service_type] = {
+                        service_type: serviceType.service_type,
+                        service_type_id: serviceType.service_type_id,
+                        available_number: 0,
+                        service_img_src: `../../../services/${serviceType.service_type}.png`
+                    };
 
-				// service option store
-				if (serviceType.service_type == 'Discussion Room') {
-					serviceOption[serviceType.service_type] = [
-						{
-							type: 'select',
-							label: 'Frequency DR',
-							options: [],
-							variant: 'default'
-						},
-						{
-							type: 'select',
-							label: 'Programming DR',
-							options: [],
-							variant: 'default'
-						},
-						{
-							type: 'select',
-							label: 'Signal DR',
-							options: [],
-							variant: 'default'
-						},
-						{
-							type: 'select',
-							label: 'Transistor DR',
-							options: [],
-							variant: 'default'
-						}
-					];
-				} else if (serviceType.service_type == 'Umbrella') {
-					serviceOption[serviceType.service_type] = [
-						{
-							type: 'select',
-							label: 'Small Orange Umbrella',
-							options: [],
-							variant: 'default'
-						},
-						{
-							type: 'select',
-							label: 'Small Black Umbrella',
-							options: [],
-							variant: 'default'
-						},
-						{
-							type: 'select',
-							label: 'Big Orange Umbrella',
-							options: [],
-							variant: 'default'
-						}
-					];
-				} else {
-					serviceOption[serviceType.service_type] = [
+                    serviceOption[serviceType.service_type] = [
 						{
 							type: 'select',
 							label: serviceType.service_type,
@@ -150,57 +112,59 @@
 							variant: 'default'
 						}
 					];
-				}
+                }
 			}
+            console.log(serviceInfo)
+            console.log(serviceOption)
 
-			const { services, error } = await readService({
-                service_id: 0,
-				service_type: '',
-				in_use: false,
-				library,
-				section
-			});
+			// const { services, error } = await readService({
+            //     service_id: 0,
+			// 	service_type: '',
+			// 	in_use: false,
+			// 	library,
+			// 	section
+			// });
 
-			if (error) {
-				toast.error(`Error with getting services: ${error}`);
-				return;
-			} else if (services) {
-				for (const service of services) {
-					// service option store
-					if (service.service_type == 'Discussion Room') {
-						if (service.service.includes('Frequency')) {
-							serviceOption[service.service_type][0].options.push(service);
-						} else if (service.service.includes('Programming')) {
-							serviceOption[service.service_type][1].options.push(service);
-						} else if (service.service.includes('Signal')) {
-							serviceOption[service.service_type][2].options.push(service);
-						} else {
-							serviceOption[service.service_type][3].options.push(service);
-						}
-					} else if (service.service_type == 'Umbrella') {
-						serviceInfo[service.service_type].available_number++;
-						if (service.service.includes('Small Orange')) {
-							serviceOption[service.service_type][0].options.push(service);
-						} else if (service.service.includes('Small Black')) {
-							serviceOption[service.service_type][1].options.push(service);
-						} else {
-							serviceOption[service.service_type][2].options.push(service);
-						}
-					} else {
-						serviceInfo[service.service_type].available_number++;
-						serviceOption[service.service_type][0].options.push(service);
-					}
-				}
+			// if (error) {
+			// 	toast.error(`Error with getting services: ${error}`);
+			// 	return;
+			// } else if (services) {
+			// 	for (const service of services) {
+			// 		// service option store
+			// 		if (service.service_type == 'Discussion Room') {
+			// 			if (service.service.includes('Frequency')) {
+			// 				serviceOption[service.service_type][0].options.push(service);
+			// 			} else if (service.service.includes('Programming')) {
+			// 				serviceOption[service.service_type][1].options.push(service);
+			// 			} else if (service.service.includes('Signal')) {
+			// 				serviceOption[service.service_type][2].options.push(service);
+			// 			} else {
+			// 				serviceOption[service.service_type][3].options.push(service);
+			// 			}
+			// 		} else if (service.service_type == 'Umbrella') {
+			// 			serviceInfo[service.service_type].available_number++;
+			// 			if (service.service.includes('Small Orange')) {
+			// 				serviceOption[service.service_type][0].options.push(service);
+			// 			} else if (service.service.includes('Small Black')) {
+			// 				serviceOption[service.service_type][1].options.push(service);
+			// 			} else {
+			// 				serviceOption[service.service_type][2].options.push(service);
+			// 			}
+			// 		} else {
+			// 			serviceInfo[service.service_type].available_number++;
+			// 			serviceOption[service.service_type][0].options.push(service);
+			// 		}
+			// 	}
 
-				for (const subset of serviceOption['Discussion Room']) {
-					if (subset.options.length == 10) {
-						serviceInfo['Discussion Room'].available_number++;
-					}
-				}
-				$ServiceTypeStore = serviceTypes;
-				$ServiceInfoStore = serviceInfo;
-				$ServiceOptionStore = serviceOption;
-			}
+			// 	for (const subset of serviceOption['Discussion Room']) {
+			// 		if (subset.options.length == 10) {
+			// 			serviceInfo['Discussion Room'].available_number++;
+			// 		}
+			// 	}
+			// 	$ServiceTypeStore = serviceTypes;
+			// 	$ServiceInfoStore = serviceInfo;
+			// 	$ServiceOptionStore = serviceOption;
+			// }
 		}
 		return;
 	}
