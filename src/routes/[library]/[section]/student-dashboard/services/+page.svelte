@@ -151,8 +151,8 @@
 				for (const subset of Object.values(serviceOption['Discussion Room'])) {
 					if ((library == 'engglib2' && subset.options.length == 10) ||
                         (library == 'engglib1' && 
-                        (((subset.label == 'Ergonomics' || subset.label == 'Kinematics') && subset.options.length == 6) ||
-                        ((subset.label != 'Ergonomics' && subset.label != 'Kinematics') && subset.options.length == 8)))
+                        (((subset.label == 'Ergonomics DR' || subset.label == 'Kinematics DR') && subset.options.length == 8)) ||
+                        ((subset.label != 'Ergonomics DR' && subset.label != 'Kinematics DR') && subset.options.length == 6))
                     ) {
 						serviceInfo['Discussion Room'].available_number++;
 					}
