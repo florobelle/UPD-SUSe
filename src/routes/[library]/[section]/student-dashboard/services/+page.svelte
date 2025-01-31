@@ -30,6 +30,7 @@
 	} from '$lib/stores/ServiceStore';
 	import { readService } from '../../../../supabase/Service';
 	import type { UsageLogView } from '$lib/dataTypes/EntityTypes';
+	import { countDiscRoomAvailability } from '$lib/utilsBack';
 
 	export let data: { libraryName: string };
 
@@ -147,16 +148,7 @@
 						serviceOption[mainServiceType][service.service_type].options.push(service);
 					}
 				}
-
-				for (const subset of Object.values(serviceOption['Discussion Room'])) {
-					if ((library == 'engglib2' && subset.options.length == 10) ||
-                        (library == 'engglib1' && 
-                        (((subset.label == 'Ergonomics DR' || subset.label == 'Kinematics DR') && subset.options.length == 8)) ||
-                        ((subset.label != 'Ergonomics DR' && subset.label != 'Kinematics DR') && subset.options.length == 6))
-                    ) {
-						serviceInfo['Discussion Room'].available_number++;
-					}
-				}
+                serviceInfo['Discussion Room'].available_number = countDiscRoomAvailability(serviceOption['Discussion Room'], library);
 				$ServiceTypeStore = serviceTypes;
 				$ServiceInfoStore = serviceInfo;
 				$ServiceOptionStore = serviceOption;

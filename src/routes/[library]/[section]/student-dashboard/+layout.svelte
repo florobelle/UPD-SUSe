@@ -28,6 +28,7 @@
 	import { onDestroy } from 'svelte';
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
+	import { countDiscRoomAvailability } from '$lib/utilsBack';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -295,17 +296,7 @@
                 $ServiceInfoStore[mainServiceType].available_number--;
                 $ServiceInfoStore[mainServiceType].total_available_number--;
             } else {
-                let currentCount:number = 0;
-                for (const subset of Object.values($ServiceOptionStore['Discussion Room'])) {
-					if ((library == 'engglib2' && subset.options.length == 10) ||
-                        (library == 'engglib1' && 
-                        (((subset.label == 'Ergonomics DR' || subset.label == 'Kinematics DR') && subset.options.length == 8) ||
-                        ((subset.label != 'Ergonomics DR' && subset.label != 'Kinematics DR') && subset.options.length == 6)))
-                    ) {
-						currentCount++;
-					}
-				}
-                $ServiceInfoStore['Discussion Room'].available_number = currentCount;
+                $ServiceInfoStore['Discussion Room'].available_number = countDiscRoomAvailability($ServiceOptionStore['Discussion Room'], library);
                 $ServiceInfoStore[mainServiceType].total_available_number--;
             }
 		} else if ($LibraryStore[updatedService.library_id] == library) {
@@ -327,17 +318,7 @@
                 $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.push(convertedService);
                 $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.sort((a, b) => a.service_id - b.service_id);
                 $ServiceInfoStore[mainServiceType].total_available_number++;
-                let currentCount:number = 0;
-                for (const subset of Object.values($ServiceOptionStore['Discussion Room'])) {
-					if ((library == 'engglib2' && subset.options.length == 10) ||
-                        (library == 'engglib1' && 
-                        (((subset.label == 'Ergonomics DR' || subset.label == 'Kinematics DR') && subset.options.length == 8) ||
-                        ((subset.label != 'Ergonomics DR' && subset.label != 'Kinematics DR') && subset.options.length == 6)))
-                    ) {
-						currentCount++;
-					}
-				}
-                $ServiceInfoStore['Discussion Room'].available_number = currentCount;
+                $ServiceInfoStore['Discussion Room'].available_number = countDiscRoomAvailability($ServiceOptionStore['Discussion Room'], library);
             }
 		}
 		$ServiceInfoStore = $ServiceInfoStore;
