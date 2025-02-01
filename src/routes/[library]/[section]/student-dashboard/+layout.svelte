@@ -460,7 +460,14 @@
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
-			<slot></slot>
+			<div class="relative">
+				<slot></slot>
+				<p
+					class="absolute bottom-0 flex h-20 w-full items-end justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-2 text-center"
+				>
+					Made with 🧡 by Zarah Floro and Allaine Tan
+				</p>
+			</div>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>

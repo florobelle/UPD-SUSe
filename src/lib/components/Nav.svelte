@@ -31,7 +31,7 @@
 				<Separator />
 			</div>
 		{:else}
-            <div class="mb-2 flex flex-col gap-2 p-2 group-[[data-collapsed=true]]:hidden">
+			<div class="mb-2 flex flex-col gap-2 p-2 group-[[data-collapsed=true]]:hidden">
 				<div>
 					<h1 class="text-sm">Welcome,</h1>
 					<h2 class="text-lg font-medium">{$AdminStore.formData.nickname}</h2>
@@ -92,12 +92,13 @@
 			{/if}
 		{/each}
 	</nav>
-	<div class="mt-auto grid gap-1 px-2 pb-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
+	<div
+		class="mt-auto grid gap-1 px-2 pb-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
 	>
 		{#if isCollapsed}
 			<Button
 				on:click={logOutUser}
-				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 size-9"
+				class="inline-flex size-9 items-center justify-center whitespace-nowrap rounded-md bg-primary text-sm text-primary-foreground ring-offset-background hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 				href="#"
 				size="icon"
 			>

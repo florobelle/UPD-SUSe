@@ -484,7 +484,14 @@
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<ScrollArea orientation="both" class="h-screen">
 				<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
-				<slot></slot>
+				<div class="flex min-h-screen w-full flex-col items-center">
+					<div class="w-full flex-1">
+						<slot></slot>
+					</div>
+					<div class="p-4">
+						<p>Made with 🧡 by Zarah Floro and Allaine Tan</p>
+					</div>
+				</div>
 			</ScrollArea>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
