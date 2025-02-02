@@ -58,7 +58,8 @@ export type ServiceView = {
 
 export type ServiceTypeTable = {
     service_type_id: number,
-    service_type: string
+    service_type: string,
+    service_subtype_id:number,
 }
 
 export type UsageLogView = {
