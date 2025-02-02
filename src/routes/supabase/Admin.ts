@@ -40,6 +40,9 @@ export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
     
     let query = supabaseClient.from(table).select("*");
 
+    if (filter.admin_id) {
+        query = query.eq('admin_id', filter.admin_id)
+    }
     if (filter.is_active != null) {
         query = query.eq('is_active', filter.is_active)
     }
@@ -95,7 +98,7 @@ export async function createAdmin(adminData:AdminFormData): Promise<AdminRespons
 }
 
 export async function updateAdmin(adminInfo:object, email:string, admin_id:number=0): Promise<AdminResponse> {
-    // Updates user information in the lib_user table
+    // Updates user information in the admin_engglib table
     let query = supabaseClient.from('admin_engglib').update(adminInfo)
 
     if (email) {
@@ -104,6 +107,23 @@ export async function updateAdmin(adminInfo:object, email:string, admin_id:numbe
         query = query.eq('admin_id', admin_id);
     }
     const { error } = await query;
+
+    if (error) {
+        return {
+            admins: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        admins: null,
+        error: null,
+    };
+}
+
+export async function deleteAdmin(admin_id:number): Promise<AdminResponse> {
+    // Deletes admin record from admin_engglib table
+    const { error } = await supabaseClient.from('admin_engglib').delete().eq('admin_id', admin_id)
 
     if (error) {
         return {

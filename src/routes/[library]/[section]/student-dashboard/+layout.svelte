@@ -10,12 +10,25 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
-	import type { Session, User } from '@supabase/supabase-js';
+	import type { RealtimeChannel, Session, User } from '@supabase/supabase-js';
 	import { UserStore } from '$lib/stores/UserStore';
 	import { readUser } from '../../../supabase/User';
 
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { browser } from '$app/environment';
+	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
+	import type {
+		ServiceTable,
+		ServiceTypeTable,
+		ServiceView,
+		UsageLogTable,
+		UserView
+	} from '$lib/dataTypes/EntityTypes';
+	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
+	import { onDestroy } from 'svelte';
+	import { readUsageLog } from '../../../supabase/UsageLog';
+	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
+	import { countDiscRoomAvailability } from '$lib/utilsBack';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -196,6 +209,7 @@
 		try {
 			isLoggedOut = true;
 			await endUserSession();
+			unsubscribeRealtimeUpdates();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
 			toast.error('Logout error.');
@@ -252,10 +266,166 @@
 	}
 
 	// ----------------------------------------------------------------------------
+	// REALTIME UPDATES
+	// ----------------------------------------------------------------------------
+
+	let userChannel: RealtimeChannel;
+
+	function updateServiceRealtime(updatedService: ServiceTable) {
+		// Updates the Service Info and Option stores
+		const subServiceType: ServiceTypeTable = $ServiceTypeStore.filter(
+			(value) => value.service_type_id == updatedService.service_type_id
+		)[0];
+		let mainServiceType: string;
+        if (subServiceType.service_subtype_id) {
+            mainServiceType = $ServiceTypeStore.filter(
+                (value) => value.service_type_id == subServiceType.service_subtype_id
+            )[0].service_type;
+        } else {
+            mainServiceType = subServiceType.service_type
+        }
+
+		if (updatedService.in_use) {
+			// if service is in use by other students, remove from current options of services
+			$ServiceOptionStore[mainServiceType][subServiceType.service_type].options =
+				$ServiceOptionStore[mainServiceType][subServiceType.service_type].options.filter(
+					(value) => value.service_id != updatedService.service_id
+				);
+			// $ServiceInfoStore[serviceType].available_number = serviceCount;
+            if (subServiceType.service_type == mainServiceType || mainServiceType == 'Umbrella') {
+                $ServiceInfoStore[mainServiceType].available_number--;
+                $ServiceInfoStore[mainServiceType].total_available_number--;
+            } else {
+                $ServiceInfoStore['Discussion Room'].available_number = countDiscRoomAvailability($ServiceOptionStore['Discussion Room'], library);
+                $ServiceInfoStore[mainServiceType].total_available_number--;
+            }
+		} else if ($LibraryStore[updatedService.library_id] == library) {
+			// if service is returned, add to current options of services
+			const convertedService: ServiceView = {
+				service_id: updatedService.service_id,
+				service_type: subServiceType.service_type,
+				service: updatedService.service,
+				in_use: updatedService.in_use,
+				section: $SectionStore[updatedService.section_id]
+			};
+            if (subServiceType.service_type == mainServiceType || mainServiceType == 'Umbrella') { // main type of service
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.push(convertedService);
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.sort((a, b) => a.service_id - b.service_id);
+                $ServiceInfoStore[mainServiceType].available_number++;
+                $ServiceInfoStore[mainServiceType].total_available_number++;
+
+            } else { // 
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.push(convertedService);
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.sort((a, b) => a.service_id - b.service_id);
+                $ServiceInfoStore[mainServiceType].total_available_number++;
+                $ServiceInfoStore['Discussion Room'].available_number = countDiscRoomAvailability($ServiceOptionStore['Discussion Room'], library);
+            }
+		}
+		$ServiceInfoStore = $ServiceInfoStore;
+		$ServiceOptionStore = $ServiceOptionStore;
+	}
+
+	function updateUserRealtime(updatedUser: UserView) {
+		// Updates User store if they are approved
+		if (updatedUser.is_approved) {
+			$UserStore.formData.is_approved = true;
+		}
+		return;
+	}
+
+	async function updateUsageLogRealtime(updatedUsageLog: UsageLogTable) {
+		// Updates the Active Usage Log table based on insert or update
+		const { usagelogs, error } = await readUsageLog({
+			usagelog_id: updatedUsageLog.usagelog_id,
+			start: null,
+			end: null,
+			is_active: null,
+			lib_user_id: 0,
+			service_type: '',
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with getting usagelogs: ${error}`);
+		} else if (usagelogs != null) {
+			if (updatedUsageLog.is_active) {
+				$ActiveUsageLogStore[usagelogs[0].service_type] = usagelogs[0];
+			} else {
+				delete $ActiveUsageLogStore[usagelogs[0].service_type];
+			}
+			$ActiveUsageLogStore = $ActiveUsageLogStore;
+		}
+
+		return;
+	}
+
+	function subscribeRealtimeUpdates() {
+		// Subscribes to updates in services, usagelogs and user information
+		userChannel = supabaseClient
+			.channel('user-dashboard')
+			.on(
+				'postgres_changes',
+				{
+					event: 'UPDATE',
+					schema: 'public',
+					table: 'service_engglib'
+				},
+				(payload) => {
+					updateServiceRealtime(payload.new as ServiceTable);
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: 'UPDATE',
+					schema: 'public',
+					table: 'lib_user',
+					filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+				},
+				(payload) => {
+					updateUserRealtime(payload.new as UserView);
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'usagelog_engglib',
+					filter: `lib_user_id=eq.${$UserStore.formData.lib_user_id}`
+				},
+				(payload) => {
+					if (payload.eventType == 'UPDATE' || payload.eventType == 'INSERT') {
+						updateUsageLogRealtime(payload.new as UsageLogTable);
+					}
+				}
+			)
+			.subscribe();
+	}
+
+	function unsubscribeRealtimeUpdates() {
+		// Unsubscribes to the tables listed above
+		try {
+			userChannel.unsubscribe();
+		} catch {
+			return;
+		}
+	}
+
+	onDestroy(unsubscribeRealtimeUpdates);
+
+	// ----------------------------------------------------------------------------
 
 	$: {
 		if (browser && document) {
 			startUserSession();
+		}
+	}
+
+	$: {
+		if ($UserStore.authenticated && $UserStore.formData.lib_user_id) {
+			subscribeRealtimeUpdates();
 		}
 	}
 </script>
@@ -281,7 +451,14 @@
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
-			<slot></slot>
+			<div class="relative">
+				<slot></slot>
+				<p
+					class="absolute bottom-0 flex h-20 w-full items-end justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-2 text-center"
+				>
+					Made with 🧡 by Zarah Floro and Allaine Tan
+				</p>
+			</div>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>

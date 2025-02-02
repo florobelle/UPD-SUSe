@@ -37,4 +37,4 @@ export const AdminStore: Writable<AdminInformation> = writable({
     }
 })
 
-export const AdminTableStore: Writable<Array<AdminTable>> = writable();
+export const AdminTableStore: Writable<Array<AdminTable>> = writable([]);

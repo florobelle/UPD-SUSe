@@ -46,7 +46,7 @@ export const columns: ColumnDef<AdminTable>[] = [
 	},
 	createSortableColumn('admin_id', 'ID', ''),
 	createSortableColumn('nickname', 'Nickname', 'text'),
-    createSortableColumn('email', 'Email', 'text'),
+    createSortableColumn('email', 'Email', ''),
 	{
 		id: 'actions',
 		cell: ({ row }) => {
