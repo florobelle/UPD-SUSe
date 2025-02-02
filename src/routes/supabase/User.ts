@@ -128,3 +128,20 @@ export async function updateUser(userInfo: object, username: string, lib_user_id
         error: null,
     };
 }
+
+export async function deleteUser(lib_user_id:number): Promise<UserResponse> {
+    // Deletes user record from user_engglib table
+    const { error } = await supabaseClient.from('lib_user').delete().eq('lib_user_id', lib_user_id)
+
+    if (error) {
+        return {
+            users: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        users: null,
+        error: null,
+    };
+}

@@ -284,7 +284,7 @@
 		const { error } = await endService(
 			$ActiveUsageLogStore[service_type].usagelog_id,
 			$ActiveUsageLogStore[service_type].service_id,
-			$UserStore.formData.username,
+			parseInt($UserStore.formData.lib_user_id),
 			Object.keys($ActiveUsageLogStore).length == 1 ? false : true
 		);
 		if (error) {

@@ -63,7 +63,7 @@ export type ServiceTypeTable = {
 
 export type UsageLogView = {
     usagelog_id: number,
-    start: Date | null,
+    start: Date,
     end: Date | null,
     is_active: boolean,
     service_id: number,
@@ -74,7 +74,9 @@ export type UsageLogView = {
     last_name: string,
     section: string,
     admin_id1: number,
-    admin_id2: number
+    admin_id2: number,
+    admin_nickname1:string,
+    admin_nickname2:string,
 }
 
 export type UsageLogTable = {

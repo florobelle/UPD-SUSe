@@ -232,7 +232,7 @@
 	});
 
 	// ----------------------------------------------------------------------------
-	// GET ADMIN DATA
+	// GET CURRENT ADMIN DATA
 	// ----------------------------------------------------------------------------
 
 	async function getAdmin() {
@@ -448,6 +448,73 @@
     onDestroy(unsubscribeRealtimeUpdates)
 
 	// ----------------------------------------------------------------------------
+	// READ TABLES ONCE
+	// ----------------------------------------------------------------------------
+
+	async function getAdminTable() {
+		// gets user information from database
+		const { admins, error } = await readAdmin({
+			admin_id: 0,
+			email: '',
+			is_active: null,
+			is_approved: null,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading admin table: ${error}`);
+			return;
+		} else if (admins != null) {
+			$AdminTableStore = admins;
+		}
+		return;
+	}
+
+    async function getUserTable(): Promise<boolean> {
+		// gets user information from database
+		const { users, error } = await readUser({
+			lib_user_id: 0,
+			username: '',
+			is_approved: null,
+			is_active: null,
+			college: '',
+			program: '',
+			user_type: ''
+		});
+
+		if (error) {
+			toast.error(`Error with reading user table: ${error}`);
+			return false;
+		} else if (users != null) {
+			$UserTableStore = users;
+		}
+		return true;
+	}
+
+    async function getUsageTable() {
+		// gets user information from database
+		const { usagelogs, error } = await readUsageLog({
+			usagelog_id: 0,
+			start: null,
+			end: null,
+			is_active: null,
+			lib_user_id: 0,
+			service_type: '',
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading usagelog table: ${error}`);
+			return;
+		} else if (usagelogs != null) {
+			$UsageLogTableStore = usagelogs;
+		}
+		return;
+	}
+
+	// ----------------------------------------------------------------------------
 
 	$: {
 		if (browser && document) {
@@ -457,6 +524,15 @@
 
 	$: {
 		if ($AdminStore.authenticated) {
+            if (!$AdminTableStore.length) {
+                getAdminTable();
+            }
+            if (!$UserTableStore.length) {
+                getUserTable();
+            }
+            if (!$UsageLogTableStore.length) {
+                getUsageTable();
+            }
 			subscribeRealtimeUpdates();
 		}
 	}

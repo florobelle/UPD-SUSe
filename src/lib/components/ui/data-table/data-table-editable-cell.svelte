@@ -5,6 +5,7 @@
 	import CollegeCombobox from '../combobox/college-combobox.svelte';
 	import ProgramCombobox from '../combobox/program-combobox.svelte';
 	import { type RowChanges } from '$lib/stores/tableStore';
+	import DatetimePicker from '../datetime-picker/datetime-picker.svelte';
 
 	export let id: number;
 	export let colId: string;
@@ -17,10 +18,12 @@
 	// Track the current value with proper typing
 	$: currentValue = ($rowChanges as RowChanges)[id]?.[colId] ?? initVal;
 
-	function handleInput(e: Event | string, isNumber = false) {
+	function handleInput(e: Event | string | Date, isNumber = false) {
 		let value: string | number;
 
-		if (typeof e === 'string') {
+		if (e instanceof Date) {
+            value = e.toLocaleString();
+		} else if (typeof e === 'string') {
 			value = e;
 		} else if (e.target && e.target instanceof HTMLInputElement) {
 			value = isNumber ? parseFloat(e.target.value) : e.target.value;
@@ -28,19 +31,26 @@
 			value = '';
 		}
 
-		rowChanges.update((rows) => ({
-			...rows,
-			[id]: {
-				...(rows[id] || {}),
-				[colId]: value
-			}
-		}));
+		rowChanges.update((rows) => {
+			const newRows = {
+				...rows,
+				[id]: {
+					...(rows[id] || {}),
+					[colId]: value
+				}
+			};
+			return newRows;
+		});
 	}
 </script>
 
 {#if !rInEdit}
 	{#if editT === 'datetime'}
-		<p>{initVal ? new Date(initVal).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : "unfinished"}</p>
+		<p>
+			{initVal
+				? new Date(initVal).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })
+				: 'unfinished'}
+		</p>
 	{:else}
 		<span>{initVal}</span>
 	{/if}
@@ -49,7 +59,9 @@
 		type="text"
 		class="w-full rounded border p-2"
 		value={currentValue}
-		on:input={(e) => handleInput(e)}
+		on:input={(e) => {
+			handleInput(e);
+		}}
 	/>
 {:else if editT === 'number'}
 	<input
@@ -59,13 +71,13 @@
 		on:input={(e) => handleInput(e, true)}
 	/>
 {:else if editT === 'college'}
-	<CollegeCombobox selectedCollege={initVal} onChange={(e) => handleInput(e, false)} />
+	<CollegeCombobox selectedCollege={initVal} onChange={(e) => handleInput(e, true)} />
 {:else if editT === 'program'}
-	<ProgramCombobox selectedProgram={initVal} onChange={(e) => handleInput(e, false)} />
+	<ProgramCombobox selectedProgram={initVal} onChange={(e) => handleInput(e, true)} />
 {:else if editT === 'user_type'}
-	<UserTypeCombobox selectedUserType={initVal} onChange={(e) => handleInput(e, false)} />
+	<UserTypeCombobox selectedUserType={initVal} onChange={(e) => handleInput(e, true)} />
 {:else if editT === 'datetime'}
-	<p>{new Date(initVal).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</p>
+	<DatetimePicker date={initVal} onChange={(date) => handleInput(date, false)} />
 {:else}
 	<span>{initVal}</span>
 {/if}

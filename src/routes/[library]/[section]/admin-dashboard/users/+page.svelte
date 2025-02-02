@@ -1,7 +1,6 @@
 <script lang="ts">
 	// UI Imports
-	import toast, { Toaster } from 'svelte-5-french-toast';
-	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
+	import { Toaster } from 'svelte-5-french-toast';
 	import * as Alert from '$lib/components/ui/alert';
 	import CircleAlert from 'lucide-svelte/icons/circle-alert';
 	import DataTable from '$lib/components/ui/data-table/data-table.svelte';
@@ -10,55 +9,15 @@
 	// Backend Imports
 	import { UserTableStore } from '$lib/stores/UserStore';
 	import { AdminStore } from '$lib/stores/AdminStore';
-	import { page } from '$app/stores';
-	import { readUser } from '../../../../supabase/User';
 
 	export const initialSort = [
 		{ id: 'is_approved', desc: false },
 		{ id: 'is_active', desc: true }
 	];
-
-	// ----------------------------------------------------------------------------
-	// READ ADMIN TABLES
-	// ----------------------------------------------------------------------------
-
-	const routes: Array<string> = $page.url.pathname.split('/');
-	const library: string = routes[1]; // session
-	const section: string = routes[2]; // session
-
-	async function getUserTable(): Promise<boolean> {
-		// gets user information from database
-		const { users, error } = await readUser({
-			lib_user_id: 0,
-			username: '',
-			is_approved: null,
-			is_active: null,
-			college: '',
-			program: '',
-			user_type: ''
-		});
-
-		if (error) {
-			toast.error(`Error with reading user table: ${error}`);
-			return false;
-		} else if (users != null) {
-			$UserTableStore = users;
-		}
-		return true;
-	}
-
-	// ----------------------------------------------------------------------------
-
-	$: {
-		if ($AdminStore.authenticated) {
-			getUserTable();
-		}
-	}
 </script>
 
 <Toaster />
 
-<!-- <ScrollArea class="h-screen"> -->
 <div class="flex w-full justify-center">
 	{#if $AdminStore.formData.is_approved}
 		{#if $UserTableStore}
@@ -86,4 +45,3 @@
 		</div>
 	{/if}
 </div>
-<!-- </ScrollArea> -->
