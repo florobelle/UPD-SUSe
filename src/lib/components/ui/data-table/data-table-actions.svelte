@@ -80,7 +80,7 @@
 						}
 					}
 				}
-				if (updatedProperties.hasOwnProperty('end')) {
+				if (updatedProperties.hasOwnProperty('end') && originalEndTime == null) {
 					// end usagelog after start timestamp
 					const { error } = await endService(
 						originalUsageLog.usagelog_id,
@@ -94,9 +94,14 @@
 						return;
 					} else {
 						toast.success('Service ended!');
+                        const { error } = await updateUsageLog(updatedProperties, originalUsageLog.usagelog_id);
+                        if (error) {
+                            toast.error(`Error with updating usagelog: ${error}`);
+                        } else {
+                            toast.success('Usagelog updated!');
+                        }
 					}
-				}
-				if (Object.keys(updatedProperties).length) {
+				} else if (Object.keys(updatedProperties).length) {
 					const { error } = await updateUsageLog(updatedProperties, originalUsageLog.usagelog_id);
 					if (error) {
 						toast.error(`Error with updating usagelog: ${error}`);
