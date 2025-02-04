@@ -87,12 +87,8 @@
 
 			for (const serviceType of serviceTypes) {
 				// service info and option store
-				if (serviceType.service_subtype_id) {
-					// if service is a subtype (Big Umbrella, Geodesy DR)
-					const mainServiceType: string = serviceTypes.filter(
-						(value) => value.service_type_id == serviceType.service_subtype_id
-					)[0].service_type;
-					serviceOption[mainServiceType][serviceType.service_type] = {
+				if (serviceType.main_service_type) {
+					serviceOption[serviceType.main_service_type][serviceType.service_type] = {
 						type: 'select',
 						label: serviceType.service_type,
 						options: [],
@@ -136,12 +132,9 @@
 						serviceOption[service.service_type][service.service_type].options.push(service);
 					} else {
 						// service is of sub service type
-						const subServiceTypeID: number = serviceTypes.filter(
-							(value) => value.service_type == service.service_type
-						)[0].service_subtype_id;
 						const mainServiceType: string = serviceTypes.filter(
-							(value) => value.service_type_id == subServiceTypeID
-						)[0].service_type;
+							(value) => value.service_type == service.service_type
+						)[0].main_service_type;
                         if (mainServiceType == "Umbrella") serviceInfo[mainServiceType].available_number++;
                         serviceInfo[mainServiceType].total_available_number++;
 						serviceOption[mainServiceType][service.service_type].options.push(service);
@@ -151,6 +144,7 @@
 				$ServiceTypeStore = serviceTypes;
 				$ServiceInfoStore = serviceInfo;
 				$ServiceOptionStore = serviceOption;
+                console.log($ServiceTypeStore)
 			}
 		}
 		return;
@@ -196,7 +190,8 @@
 		} else if (usagelogs != null) {
 			let activeUsagelogs: { [key: string]: UsageLogView } = {};
 			for (const usagelog of usagelogs) {
-				activeUsagelogs[usagelog.service_type] = usagelog;
+                const serviceType:string = usagelog.main_service_type ? usagelog.main_service_type : usagelog.service;
+				activeUsagelogs[serviceType] = usagelog;
 			}
 
 			$ActiveUsageLogStore = activeUsagelogs;
@@ -273,7 +268,7 @@
 					<!-- SERVICES -->
 					{#if $ServiceTypeStore.length}
 						{#each $ServiceTypeStore as serviceType}
-							{#if !serviceType.service_subtype_id}
+							{#if !serviceType.main_service_type}
 								<!-- ACTIVE SERVICES -->
 								{#if $ActiveUsageLogStore[serviceType.service_type]}
 									<Dialog.Root

@@ -276,14 +276,7 @@
 		const subServiceType: ServiceTypeTable = $ServiceTypeStore.filter(
 			(value) => value.service_type_id == updatedService.service_type_id
 		)[0];
-		let mainServiceType: string;
-        if (subServiceType.service_subtype_id) {
-            mainServiceType = $ServiceTypeStore.filter(
-                (value) => value.service_type_id == subServiceType.service_subtype_id
-            )[0].service_type;
-        } else {
-            mainServiceType = subServiceType.service_type
-        }
+		let mainServiceType: string = subServiceType.main_service_type ? subServiceType.main_service_type : subServiceType.service_type;
 
 		if (updatedService.in_use) {
 			// if service is in use by other students, remove from current options of services
@@ -349,10 +342,11 @@
 		if (error) {
 			toast.error(`Error with getting usagelogs: ${error}`);
 		} else if (usagelogs != null) {
+            let serviceType:string = usagelogs[0].main_service_type ? usagelogs[0].main_service_type : usagelogs[0].service_type
 			if (updatedUsageLog.is_active) {
-				$ActiveUsageLogStore[usagelogs[0].service_type] = usagelogs[0];
+				$ActiveUsageLogStore[serviceType] = usagelogs[0];
 			} else {
-				delete $ActiveUsageLogStore[usagelogs[0].service_type];
+				delete $ActiveUsageLogStore[serviceType];
 			}
 			$ActiveUsageLogStore = $ActiveUsageLogStore;
 		}
