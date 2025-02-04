@@ -59,7 +59,7 @@ export type ServiceView = {
 export type ServiceTypeTable = {
     service_type_id: number,
     service_type: string,
-    service_subtype_id:number,
+    main_service_type:string,
 }
 
 export type UsageLogView = {
@@ -70,6 +70,7 @@ export type UsageLogView = {
     service_id: number,
     service: string,
     service_type: string,
+    main_service_type:string,
     lib_user_id: number,
     first_name: string,
     last_name: string,
