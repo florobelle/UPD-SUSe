@@ -47,7 +47,7 @@
 		if (!changes) return;
 
 		const updatedProperties: { [key: string]: string | number } = {};
-		const loadID: string = toast.loading('Approving user...');
+		const loadID: string = toast.loading('Updating usagelog...');
 
 		if (changes.hasOwnProperty('lib_user_id')) {
 			if (changes.hasOwnProperty('usagelog_id')) {
@@ -80,7 +80,7 @@
 						}
 					}
 				}
-				if (updatedProperties.hasOwnProperty('end') && originalEndTime == null) {
+				if (updatedProperties.hasOwnProperty('end') && !originalEndTime) {
 					// end usagelog after start timestamp
 					const { error } = await endService(
 						originalUsageLog.usagelog_id,

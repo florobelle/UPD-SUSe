@@ -271,6 +271,7 @@
 
 	async function updateUserRealtime(updatedUser:UserTable, eventType:EventType) {
         // Updates the user record displayed in the User Table store
+        console.log(updatedUser)
         const { users, error } = await readUser({
 			lib_user_id: updatedUser.lib_user_id,
 			username: '',
@@ -287,6 +288,7 @@
 		} else if (users != null) {
             let newUserTableStore: Array<UserView>;
             if (eventType == 'UPDATE') {
+                console.log("UPDATED!")
                 newUserTableStore = $UserTableStore.filter((value) => value.lib_user_id != updatedUser.lib_user_id);
             } else {
                 newUserTableStore = $UserTableStore
