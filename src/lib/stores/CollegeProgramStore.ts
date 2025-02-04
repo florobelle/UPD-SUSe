@@ -77,6 +77,8 @@ export const collegePrograms: Readable<College[]> = readable([
 			{ label: 'Civil Engineering (MS, PhD)', value: '24' },
 			{ label: 'Computer Engineering (BS)', value: '25' },
 			{ label: 'Computer Science (BS)', value: '26' },
+			{ label: 'Computer Science (MS, PhD)', value: '82' },
+			{ label: 'Bioinformatics (MS)', value: '83' },
 			{ label: 'Electrical Engineering (BS)', value: '27' },
 			{ label: 'Electrical Engineering (ME, MS, PhD)', value: '28' },
 			{ label: 'Environmental Engineering (Dip, MS, PhD)', value: '29' },
