@@ -22,7 +22,7 @@
 	<nav
 		class="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
 	>
-		{#if $UserStore.formData.first_name !== ''}
+		{#if $UserStore.formData.first_name !== '' && $UserStore.authenticated}
 			<div class="mb-2 flex flex-col gap-2 p-2 group-[[data-collapsed=true]]:hidden">
 				<div>
 					<h1 class="text-sm">Welcome,</h1>
