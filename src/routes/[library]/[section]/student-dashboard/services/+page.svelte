@@ -190,7 +190,7 @@
 		} else if (usagelogs != null) {
 			let activeUsagelogs: { [key: string]: UsageLogView } = {};
 			for (const usagelog of usagelogs) {
-                const serviceType:string = usagelog.main_service_type ? usagelog.main_service_type : usagelog.service;
+                const serviceType:string = usagelog.main_service_type ? usagelog.main_service_type : usagelog.service_type;
 				activeUsagelogs[serviceType] = usagelog;
 			}
 

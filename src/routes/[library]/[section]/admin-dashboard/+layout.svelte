@@ -434,7 +434,8 @@
                         updateServicesRealtime(payload.new as ServiceTable, payload.eventType);
                     }
 				}
-			).on(
+			)
+            .on(
 				'postgres_changes',
 				{
 					event: '*',
