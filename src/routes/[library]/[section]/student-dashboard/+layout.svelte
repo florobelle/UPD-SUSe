@@ -18,6 +18,7 @@
 	import { browser } from '$app/environment';
 	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
 	import type {
+	AdminTable,
 		ServiceTable,
 		ServiceTypeTable,
 		ServiceView,
@@ -29,6 +30,7 @@
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import { countDiscRoomAvailability } from '$lib/utilsBack';
+	import { AdminStore } from '$lib/stores/AdminStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -354,6 +356,18 @@
 		return;
 	}
 
+    async function updateAdminRealtime(updatedAdmin:AdminTable) {
+        // Updates the Admin store based on update
+        if (updatedAdmin.is_approved && updatedAdmin.is_active) {
+            if (!$AdminStore.active_admin1) {
+                $AdminStore.active_admin1 = updatedAdmin;
+            } else if (!$AdminStore.active_admin2) {
+                $AdminStore.active_admin2 = updatedAdmin;
+            }
+        }
+        return;
+    }
+
 	function subscribeRealtimeUpdates() {
 		// Subscribes to updates in services, usagelogs and user information
 		userChannel = supabaseClient
@@ -393,6 +407,17 @@
 					if (payload.eventType == 'UPDATE' || payload.eventType == 'INSERT') {
 						updateUsageLogRealtime(payload.new as UsageLogTable);
 					}
+				}
+			)
+            .on(
+				'postgres_changes',
+				{
+					event: 'UPDATE',
+					schema: 'public',
+					table: 'admin_engglib'
+				},
+				(payload) => {
+					updateAdminRealtime(payload.new as AdminTable);
 				}
 			)
 			.subscribe();
