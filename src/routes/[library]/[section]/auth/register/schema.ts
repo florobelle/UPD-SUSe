@@ -8,20 +8,20 @@ export const formSchema = z.object({
 		.min(2)
 		.max(50)
 		.regex(
-			/^[A-Z][a-z]*(?:[-'\s][A-Z][a-z]*)*(?:\s(?:II|III|IV|V|VI|VII|VIII|IX|X))?$/,
+			/^[A-ZÑ][a-zñ]*(?:[-'\s][A-ZÑ][a-zñ]*)*(?:\s(?:II|III|IV|V|VI|VII|VIII|IX|X))?$/,
 			'Please use sentence case letters only'
 		),
 	middle_name: z
 		.string()
 		.min(0)
 		.max(5)
-		.regex(/(^[A-Z]+$)*/, 'Capital letters only'),
+		.regex(/^[A-ZÑ]*$/, 'Capital letters only'),
 	last_name: z
 		.string()
 		.min(2)
 		.max(50)
 		.regex(
-			/^[A-Z][a-z]*(?:\s[A-Z][a-z]*)*$/,
+			/^[A-ZÑ][a-zñ]*(?:\s[A-ZÑ][a-zñ]*)*$/,
 			'Please use sentence case'
 		),
 	username: z.string().regex(/^[a-z]+[0-9]*/, {
