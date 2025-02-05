@@ -15,7 +15,7 @@
 	import type { RealtimeChannel, Session, User } from '@supabase/supabase-js';
 
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { readAdmin } from '../../../supabase/Admin';
+	import { readAdmin, updateAdmin } from '../../../supabase/Admin';
 	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
 	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
@@ -208,6 +208,11 @@
 		try {
 			isLoggedOut = true;
 			$AdminStore.toLogin = false;
+            const { error } = await updateAdmin({ is_active: false }, $AdminStore.formData.email);
+
+            if (error) {
+                toast.error(`Error with deactivating admin with email ${$AdminStore.formData.email}: ${error}`);
+            }
 			await endAdminSession();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
@@ -237,28 +242,35 @@
 
 	async function getAdmin() {
 		// gets user information from database
-		const { admins, error } = await readAdmin({
-            admin_id: 0,
-			email: $AdminStore.formData.email,
-			is_active: null,
-			is_approved: null,
-			library: '',
-			section: ''
-		});
+        const { error } = await updateAdmin({ is_active: true }, $AdminStore.formData.email);
 
 		if (error) {
-			toast.error(`Error with reading admin information: ${error}`);
-		} else if (admins != null) {
-			$AdminStore.formData.admin_id = admins[0].admin_id;
-			$AdminStore.formData.rfid = admins[0].rfid;
-			$AdminStore.formData.nickname = admins[0].nickname;
-			$AdminStore.formData.email = admins[0].email;
-			$AdminStore.formData.is_approved = admins[0].is_approved;
-			$AdminStore.formData.library = library; // NOTE: the admin's designation
-			$AdminStore.formData.section = section;
+			toast.error(`Error with activating admin with email ${$AdminStore.formData.email}: ${error}`);
+        } else {
+            const { admins, error } = await readAdmin({
+                admin_id: 0,
+                email: $AdminStore.formData.email,
+                is_active: null,
+                is_approved: null,
+                library: '',
+                section: ''
+            });
 
-			$AdminStore = $AdminStore;
-		}
+            if (error) {
+                toast.error(`Error with reading admin information: ${error}`);
+            } else if (admins != null) {
+                $AdminStore.formData.admin_id = admins[0].admin_id;
+                $AdminStore.formData.rfid = admins[0].rfid;
+                $AdminStore.formData.nickname = admins[0].nickname;
+                $AdminStore.formData.email = admins[0].email;
+                $AdminStore.formData.is_approved = admins[0].is_approved;
+                $AdminStore.formData.library = library; // NOTE: the admin's designation
+                $AdminStore.formData.section = section;
+
+                $AdminStore = $AdminStore;
+            }
+        }
+		
 		return;
 	}
 
@@ -422,7 +434,8 @@
                         updateServicesRealtime(payload.new as ServiceTable, payload.eventType);
                     }
 				}
-			).on(
+			)
+            .on(
 				'postgres_changes',
 				{
 					event: '*',
