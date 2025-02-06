@@ -303,7 +303,7 @@
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
-				<!-- <DropdownMenu.Item on:click={deleteRow}>Delete</DropdownMenu.Item> -->
+				<DropdownMenu.Item on:click={deleteRow}>Delete</DropdownMenu.Item>
 				<DropdownMenu.Item on:click={() => setEditRow(true)}>Edit</DropdownMenu.Item>
 			</DropdownMenu.Group>
 		</DropdownMenu.Content>

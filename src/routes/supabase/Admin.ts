@@ -21,7 +21,7 @@ export async function readEmail(rfid:string, library:string, section:string): Pr
     if (error) {
         return {
             email: '',
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -61,7 +61,7 @@ export async function readAdmin(filter:AdminFilter): Promise<AdminResponse> {
     if (error) {
         return {
             admins: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -87,7 +87,7 @@ export async function createAdmin(adminData:AdminFormData): Promise<AdminRespons
     if (error) {
         return {
             admins: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -111,7 +111,7 @@ export async function updateAdmin(adminInfo:object, email:string, admin_id:numbe
     if (error) {
         return {
             admins: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -128,7 +128,7 @@ export async function deleteAdmin(admin_id:number): Promise<AdminResponse> {
     if (error) {
         return {
             admins: null,
-            error: error.toString()
+            error: error.message
         }
     }
 

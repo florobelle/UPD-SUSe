@@ -39,7 +39,7 @@ export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogRespo
     if (error) {
         return {
             usagelogs: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -56,7 +56,7 @@ export async function updateUsageLog(usagelog:object, usageLogID: number): Promi
     if (error) {
         return {
             usagelogs: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -73,7 +73,7 @@ export async function deleteUsageLog(usagelog_id:number): Promise<UsageLogRespon
     if (error) {
         return {
             usagelogs: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
