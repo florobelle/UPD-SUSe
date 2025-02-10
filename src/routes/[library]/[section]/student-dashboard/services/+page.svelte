@@ -256,7 +256,7 @@
 <Toaster />
 
 <ScrollArea class="h-screen">
-	<div class="flex h-full w-full flex-col gap-10 p-20">
+	<div class="flex h-full w-full flex-col gap-10 p-10 md:p-20">
 		<div class="flex w-full grow flex-col gap-4">
 			<h1 class="text-3xl font-medium">
 				Welcome to {data.libraryName}, {$UserStore.formData.first_name}!
