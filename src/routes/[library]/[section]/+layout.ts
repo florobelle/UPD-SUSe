@@ -7,6 +7,8 @@ export const load: LayoutLoad = ({ params }) => {
         section = 'Circulation';
     } else if (params.section === 'the-learning-commons') {
         section = 'The Learning Commons';
+    } else if (params.section === 'ground-floor-service') {
+        section = 'Ground Floor Service';
     }
 
 	if (section) {
