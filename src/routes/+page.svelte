@@ -21,12 +21,17 @@
 				<Button
 					on:click={() => {
 						goto('/engglib1/circulation/auth/login');
-					}}>Engineering Library I</Button
+					}}>EnggLib I Circulation</Button
 				>
 				<Button
 					on:click={() => {
 						goto('/engglib2/circulation/auth/login');
-					}}>Engineering Library II</Button
+					}}>EnggLib II Circulation</Button
+				>
+				<Button
+					on:click={() => {
+						goto('/engglib2/the-learning-commons/auth/login');
+					}}>EnggLib II TLC</Button
 				>
 			</div>
 		</div>
