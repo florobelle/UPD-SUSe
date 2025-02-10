@@ -8,7 +8,6 @@ export const LibraryStore: Readable<{[key:number]:string}> = readable({
 export const SectionStore: Readable<{[key:number]:string}> = readable({
     1: 'circulation',
     2: 'serials',
-    3: 'tlc1',
-    4: 'tlc2',
-    5: 'ground-floor-service',
+    3: 'the-learning-commons',
+    4: 'ground-floor-service',
 })
