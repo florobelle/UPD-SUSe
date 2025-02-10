@@ -18,7 +18,9 @@
 	import { browser } from '$app/environment';
 	import { ServiceInfoStore, ServiceOptionStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
 	import type {
+	AdminTable,
 		ServiceTable,
+		ServiceTypeTable,
 		ServiceView,
 		UsageLogTable,
 		UserView
@@ -27,6 +29,8 @@
 	import { onDestroy } from 'svelte';
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
+	import { countDiscRoomAvailability } from '$lib/utilsBack';
+	import { AdminStore } from '$lib/stores/AdminStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -271,64 +275,46 @@
 
 	function updateServiceRealtime(updatedService: ServiceTable) {
 		// Updates the Service Info and Option stores
-		let serviceType: string = '';
-		let serviceCount: number = 0;
-
-		for (const type of $ServiceTypeStore) {
-			if (type.service_type_id == updatedService.service_type_id) {
-				serviceType = type.service_type;
-			}
-		}
+		const subServiceType: ServiceTypeTable = $ServiceTypeStore.filter(
+			(value) => value.service_type_id == updatedService.service_type_id
+		)[0];
+		let mainServiceType: string = subServiceType.main_service_type ? subServiceType.main_service_type : subServiceType.service_type;
 
 		if (updatedService.in_use) {
 			// if service is in use by other students, remove from current options of services
-			for (const serviceOption of $ServiceOptionStore[serviceType]) {
-				serviceOption.options = serviceOption.options.filter(
+			$ServiceOptionStore[mainServiceType][subServiceType.service_type].options =
+				$ServiceOptionStore[mainServiceType][subServiceType.service_type].options.filter(
 					(value) => value.service_id != updatedService.service_id
 				);
-				serviceCount += serviceOption.options.length;
-			}
-			$ServiceInfoStore[serviceType].available_number = serviceCount;
+			// $ServiceInfoStore[serviceType].available_number = serviceCount;
+            if (subServiceType.service_type == mainServiceType || mainServiceType == 'Umbrella') {
+                $ServiceInfoStore[mainServiceType].available_number--;
+                $ServiceInfoStore[mainServiceType].total_available_number--;
+            } else {
+                $ServiceInfoStore['Discussion Room'].available_number = countDiscRoomAvailability($ServiceOptionStore['Discussion Room'], library);
+                $ServiceInfoStore[mainServiceType].total_available_number--;
+            }
 		} else if ($LibraryStore[updatedService.library_id] == library) {
 			// if service is returned, add to current options of services
 			const convertedService: ServiceView = {
 				service_id: updatedService.service_id,
-				service_type: serviceType,
+				service_type: subServiceType.service_type,
 				service: updatedService.service,
 				in_use: updatedService.in_use,
 				section: $SectionStore[updatedService.section_id]
 			};
+            if (subServiceType.service_type == mainServiceType || mainServiceType == 'Umbrella') { // main type of service
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.push(convertedService);
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.sort((a, b) => a.service_id - b.service_id);
+                $ServiceInfoStore[mainServiceType].available_number++;
+                $ServiceInfoStore[mainServiceType].total_available_number++;
 
-			if (serviceType == 'Umbrella') {
-				if (convertedService.service.includes('Small Orange')) {
-					$ServiceOptionStore[serviceType][0].options.push(convertedService);
-					$ServiceOptionStore[serviceType][0].options.sort((a, b) => a.service_id - b.service_id);
-				} else if (convertedService.service.includes('Small Black')) {
-					$ServiceOptionStore[serviceType][1].options.push(convertedService);
-					$ServiceOptionStore[serviceType][1].options.sort((a, b) => a.service_id - b.service_id);
-				} else {
-					$ServiceOptionStore[serviceType][2].options.push(convertedService);
-					$ServiceOptionStore[serviceType][2].options.sort((a, b) => a.service_id - b.service_id);
-				}
-			} else if (serviceType == 'Discussion Room') {
-				if (convertedService.service.includes('Frequency')) {
-					$ServiceOptionStore[serviceType][0].options.push(convertedService);
-					$ServiceOptionStore[serviceType][0].options.sort((a, b) => a.service_id - b.service_id);
-				} else if (convertedService.service.includes('Programming')) {
-					$ServiceOptionStore[serviceType][1].options.push(convertedService);
-					$ServiceOptionStore[serviceType][1].options.sort((a, b) => a.service_id - b.service_id);
-				} else if (convertedService.service.includes('Signal')) {
-					$ServiceOptionStore[serviceType][2].options.push(convertedService);
-					$ServiceOptionStore[serviceType][2].options.sort((a, b) => a.service_id - b.service_id);
-				} else {
-					$ServiceOptionStore[serviceType][3].options.push(convertedService);
-					$ServiceOptionStore[serviceType][3].options.sort((a, b) => a.service_id - b.service_id);
-				}
-			} else {
-				$ServiceOptionStore[serviceType][0].options.push(convertedService);
-				$ServiceOptionStore[serviceType][0].options.sort((a, b) => a.service_id - b.service_id);
-			}
-			$ServiceInfoStore[serviceType].available_number++;
+            } else { // 
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.push(convertedService);
+                $ServiceOptionStore[mainServiceType][subServiceType.service_type].options.sort((a, b) => a.service_id - b.service_id);
+                $ServiceInfoStore[mainServiceType].total_available_number++;
+                $ServiceInfoStore['Discussion Room'].available_number = countDiscRoomAvailability($ServiceOptionStore['Discussion Room'], library);
+            }
 		}
 		$ServiceInfoStore = $ServiceInfoStore;
 		$ServiceOptionStore = $ServiceOptionStore;
@@ -358,16 +344,29 @@
 		if (error) {
 			toast.error(`Error with getting usagelogs: ${error}`);
 		} else if (usagelogs != null) {
+            let serviceType:string = usagelogs[0].main_service_type ? usagelogs[0].main_service_type : usagelogs[0].service_type
 			if (updatedUsageLog.is_active) {
-		        $ActiveUsageLogStore[usagelogs[0].service_type] = usagelogs[0];
-		    } else {
-		        delete $ActiveUsageLogStore[usagelogs[0].service_type];
-		    }
-            $ActiveUsageLogStore = $ActiveUsageLogStore;
+				$ActiveUsageLogStore[serviceType] = usagelogs[0];
+			} else {
+				delete $ActiveUsageLogStore[serviceType];
+			}
+			$ActiveUsageLogStore = $ActiveUsageLogStore;
 		}
 
 		return;
 	}
+
+    async function updateAdminRealtime(updatedAdmin:AdminTable) {
+        // Updates the Admin store based on update
+        if (updatedAdmin.is_approved && updatedAdmin.is_active) {
+            if (!$AdminStore.active_admin1) {
+                $AdminStore.active_admin1 = updatedAdmin;
+            } else if (!$AdminStore.active_admin2) {
+                $AdminStore.active_admin2 = updatedAdmin;
+            }
+        }
+        return;
+    }
 
 	function subscribeRealtimeUpdates() {
 		// Subscribes to updates in services, usagelogs and user information
@@ -408,6 +407,17 @@
 					if (payload.eventType == 'UPDATE' || payload.eventType == 'INSERT') {
 						updateUsageLogRealtime(payload.new as UsageLogTable);
 					}
+				}
+			)
+            .on(
+				'postgres_changes',
+				{
+					event: 'UPDATE',
+					schema: 'public',
+					table: 'admin_engglib'
+				},
+				(payload) => {
+					updateAdminRealtime(payload.new as AdminTable);
 				}
 			)
 			.subscribe();
@@ -460,7 +470,14 @@
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
-			<slot></slot>
+			<div class="relative">
+				<slot></slot>
+				<p
+					class="absolute bottom-0 flex h-20 w-full items-end justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-2 text-center"
+				>
+					Made with 🧡 by Zarah Floro and Allaine Tan
+				</p>
+			</div>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>

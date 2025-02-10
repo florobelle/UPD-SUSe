@@ -5,6 +5,7 @@ export type ServiceInfo = {
     service_type: string,
     service_type_id: number,
     available_number: number,
+    total_available_number:number,
     service_img_src: string,
 }
 
@@ -17,6 +18,6 @@ export type ServiceOption = {
 
 export const ServiceTypeStore: Writable<Array<ServiceTypeTable>> = writable([]);
 export const ServiceInfoStore: Writable<{ [key: string]: ServiceInfo }> = writable();
-export const ServiceOptionStore: Writable<{ [key: string]: Array<ServiceOption> }> = writable();
+export const ServiceOptionStore: Writable<{ [key: string]: {[key:string]: ServiceOption} }> = writable();
 
-export const ServiceTableStore: Writable<Array<ServiceView>> = writable();
+export const ServiceTableStore: Writable<Array<ServiceView>> = writable([]);

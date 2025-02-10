@@ -31,7 +31,7 @@
 							value={userType.label}
 							onSelect={() => {
 								selectedUserType = userType.label;
-								onChange(userType.label);
+								onChange(userType.value);
 								comboboxOpen = false;
 							}}
 						>

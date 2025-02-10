@@ -87,7 +87,7 @@
 
 <Toaster />
 
-<div class="flex h-full w-full flex-col gap-10 p-10 md:p-20">
+<div class="flex h-screen w-full flex-col gap-10 p-10 md:p-20">
 	<h1 class="text-3xl font-medium">Please tap your UP ID to link it to your account!</h1>
 
 	<Input

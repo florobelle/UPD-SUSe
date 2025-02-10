@@ -53,3 +53,20 @@ export async function updateService(service:object, serviceID: number): Promise<
         error: null,
     };
 }
+
+export async function deleteService(service_id:number): Promise<ServiceResponse> {
+    // Deletes service record from service_engglib table
+    const { error } = await supabaseClient.from('service_engglib').delete().eq('service_id', service_id)
+
+    if (error) {
+        return {
+            services: null,
+            error: error.toString()
+        }
+    }
+
+    return {
+        services: null,
+        error: null,
+    };
+}

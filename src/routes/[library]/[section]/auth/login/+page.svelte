@@ -6,16 +6,18 @@
 	import { browser } from '$app/environment';
 
 	// Backend Imports
-	import { UserStore } from '$lib/stores/UserStore';
+	import { UserStore, UserTableStore } from '$lib/stores/UserStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
 	import { loginAdmin, loginRfid, sendOtp } from '../../../../supabase/LoginReg';
 	import { readUsername } from '../../../../supabase/User';
 	import { page } from '$app/stores';
 	import { deleteCookie } from '$lib/client/Cookie';
-	import { AdminStore } from '$lib/stores/AdminStore';
+	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
 	import { readEmail } from '../../../../supabase/Admin';
 	import { convertRfidInt } from '$lib/utilsBack';
+	import { ServiceTableStore } from '$lib/stores/ServiceStore';
+	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
@@ -72,6 +74,11 @@
 			section: ''
 		}
 	};
+
+    $UserTableStore = [];
+    $ServiceTableStore = [];
+    $UsageLogTableStore = [];
+    $AdminTableStore = [];
 
 	// ----------------------------------------------------------------------------
 

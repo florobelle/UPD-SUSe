@@ -15,7 +15,7 @@
 	import type { RealtimeChannel, Session, User } from '@supabase/supabase-js';
 
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { readAdmin } from '../../../supabase/Admin';
+	import { readAdmin, updateAdmin } from '../../../supabase/Admin';
 	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
 	import type {
@@ -216,6 +216,11 @@
 		try {
 			isLoggedOut = true;
 			$AdminStore.toLogin = false;
+            const { error } = await updateAdmin({ is_active: false }, $AdminStore.formData.email);
+
+            if (error) {
+                toast.error(`Error with deactivating admin with email ${$AdminStore.formData.email}: ${error}`);
+            }
 			await endAdminSession();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
@@ -240,33 +245,40 @@
 	});
 
 	// ----------------------------------------------------------------------------
-	// GET ADMIN DATA
+	// GET CURRENT ADMIN DATA
 	// ----------------------------------------------------------------------------
 
 	async function getAdmin() {
 		// gets user information from database
-		const { admins, error } = await readAdmin({
-			admin_id: 0,
-			email: $AdminStore.formData.email,
-			is_active: null,
-			is_approved: null,
-			library: '',
-			section: ''
-		});
+        const { error } = await updateAdmin({ is_active: true }, $AdminStore.formData.email);
 
 		if (error) {
-			toast.error(`Error with reading admin information: ${error}`);
-		} else if (admins != null) {
-			$AdminStore.formData.admin_id = admins[0].admin_id;
-			$AdminStore.formData.rfid = admins[0].rfid;
-			$AdminStore.formData.nickname = admins[0].nickname;
-			$AdminStore.formData.email = admins[0].email;
-			$AdminStore.formData.is_approved = admins[0].is_approved;
-			$AdminStore.formData.library = library; // NOTE: the admin's designation
-			$AdminStore.formData.section = section;
+			toast.error(`Error with activating admin with email ${$AdminStore.formData.email}: ${error}`);
+        } else {
+            const { admins, error } = await readAdmin({
+                admin_id: 0,
+                email: $AdminStore.formData.email,
+                is_active: null,
+                is_approved: null,
+                library: '',
+                section: ''
+            });
 
-			$AdminStore = $AdminStore;
-		}
+            if (error) {
+                toast.error(`Error with reading admin information: ${error}`);
+            } else if (admins != null) {
+                $AdminStore.formData.admin_id = admins[0].admin_id;
+                $AdminStore.formData.rfid = admins[0].rfid;
+                $AdminStore.formData.nickname = admins[0].nickname;
+                $AdminStore.formData.email = admins[0].email;
+                $AdminStore.formData.is_approved = admins[0].is_approved;
+                $AdminStore.formData.library = library; // NOTE: the admin's designation
+                $AdminStore.formData.section = section;
+
+                $AdminStore = $AdminStore;
+            }
+        }
+		
 		return;
 	}
 
@@ -277,9 +289,9 @@
 	let adminChannel: RealtimeChannel;
 	type EventType = 'INSERT' | 'UPDATE';
 
-	async function updateUserRealtime(updatedUser: UserTable, eventType: EventType) {
-		// Updates the user record displayed in the User Table store
-		const { users, error } = await readUser({
+	async function updateUserRealtime(updatedUser:UserTable, eventType:EventType) {
+        // Updates the user record displayed in the User Table store
+        const { users, error } = await readUser({
 			lib_user_id: updatedUser.lib_user_id,
 			username: '',
 			is_approved: null,
@@ -437,7 +449,7 @@
 					}
 				}
 			)
-			.on(
+            .on(
 				'postgres_changes',
 				{
 					event: '*',
@@ -462,7 +474,74 @@
 		}
 	}
 
-	onDestroy(unsubscribeRealtimeUpdates);
+    onDestroy(unsubscribeRealtimeUpdates)
+
+	// ----------------------------------------------------------------------------
+	// READ TABLES ONCE
+	// ----------------------------------------------------------------------------
+
+	async function getAdminTable() {
+		// gets user information from database
+		const { admins, error } = await readAdmin({
+			admin_id: 0,
+			email: '',
+			is_active: null,
+			is_approved: null,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading admin table: ${error}`);
+			return;
+		} else if (admins != null) {
+			$AdminTableStore = admins;
+		}
+		return;
+	}
+
+    async function getUserTable(): Promise<boolean> {
+		// gets user information from database
+		const { users, error } = await readUser({
+			lib_user_id: 0,
+			username: '',
+			is_approved: null,
+			is_active: null,
+			college: '',
+			program: '',
+			user_type: ''
+		});
+
+		if (error) {
+			toast.error(`Error with reading user table: ${error}`);
+			return false;
+		} else if (users != null) {
+			$UserTableStore = users;
+		}
+		return true;
+	}
+
+    async function getUsageTable() {
+		// gets user information from database
+		const { usagelogs, error } = await readUsageLog({
+			usagelog_id: 0,
+			start: null,
+			end: null,
+			is_active: null,
+			lib_user_id: 0,
+			service_type: '',
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading usagelog table: ${error}`);
+			return;
+		} else if (usagelogs != null) {
+			$UsageLogTableStore = usagelogs;
+		}
+		return;
+	}
 
 	// ----------------------------------------------------------------------------
 
@@ -474,6 +553,15 @@
 
 	$: {
 		if ($AdminStore.authenticated) {
+            if (!$AdminTableStore.length) {
+                getAdminTable();
+            }
+            if (!$UserTableStore.length) {
+                getUserTable();
+            }
+            if (!$UsageLogTableStore.length) {
+                getUsageTable();
+            }
 			subscribeRealtimeUpdates();
 		}
 	}
@@ -501,7 +589,14 @@
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
 			<ScrollArea orientation="both" class="h-screen">
 				<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
-				<slot></slot>
+				<div class="flex min-h-screen w-full flex-col items-center">
+					<div class="w-full flex-1">
+						<slot></slot>
+					</div>
+					<div class="p-4">
+						<p>Made with 🧡 by Zarah Floro and Allaine Tan</p>
+					</div>
+				</div>
 			</ScrollArea>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
