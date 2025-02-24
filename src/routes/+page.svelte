@@ -25,7 +25,7 @@
 				>
 				<Button
 					on:click={() => {
-						goto('/engglib1/ground-floor-service/auth/login');
+						goto('/engglib1/ground-floor-services/auth/login');
 					}}>EnggLib I GFS</Button
 				>
 				<Button
