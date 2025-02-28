@@ -144,7 +144,6 @@
 				$ServiceTypeStore = serviceTypes;
 				$ServiceInfoStore = serviceInfo;
 				$ServiceOptionStore = serviceOption;
-                console.log($ServiceTypeStore)
 			}
 		}
 		return;

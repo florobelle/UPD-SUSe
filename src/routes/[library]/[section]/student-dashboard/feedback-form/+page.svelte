@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Input from '$lib/components/ui/input/input.svelte';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Tabs from '$lib/components/ui/tabs/index';
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
@@ -7,17 +6,52 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Card from '$lib/components/ui/card/index';
 	import EmojiButton from '$lib/components/ui/emoji-button/emoji-button.svelte';
+	import LikertButton from '$lib/components/ui/likert-button/likert-button.svelte';
 
-	let rating: number = 5;
+	const surveyAns = {
+        ans1: 0,
+        ans2: 0,
+        ans3: 0,
+        ans4: 0,
+        
+        ans5: 0,
+        ans6: 0,
 
-	$: {
-		if (rating) {
-			console.log(rating, 'from the outside');
-		}
-	}
+        ans7: 0,
+        ans8: 0,
+        ans9: 0,
+        ans10: 0,
+        
+        ans11: 0,
+        ans12: 0,
+        ans13: 0,
+        ans14: 0,
+        ans15: 0,    
+        
+        ans16: 0,
+        ans17: 0,
+        ans18: 0,
+        
+        ans19: 0,
+        ans20: 0,
+        ans21: 0,
+        
+        ans22: 0,
+        ans23: 0,
+        ans24: 0,
+        ans25: 0,
+    }
+
+    function submitFeedbackForm() {
+        console.log(surveyAns)
+    }
+
+    function submitBugReport() {
+        console.log(surveyAns)
+    }
 </script>
 
-<ScrollArea class="h-screen">
+<ScrollArea class="">
 	<div class="flex h-full w-full flex-col gap-10 p-10 md:p-20">
 		<!-- Title -->
 		<div class="flex w-full flex-col gap-4">
@@ -33,6 +67,7 @@
 				<Tabs.Trigger value="feedback">Feedback</Tabs.Trigger>
 				<Tabs.Trigger value="bug-report">Bug Report</Tabs.Trigger>
 			</Tabs.List>
+			<!-- Feedback Form -->
 			<Tabs.Content value="feedback">
 				<Card.Root>
 					<Card.Header>
@@ -42,27 +77,22 @@
 
 					<Card.Content class="flex flex-col gap-4 space-y-2">
 						<div class="grid w-full gap-8">
-							<Label for="bug-description"
-								>How satisfied are you with the overall experience compared to the previous system?</Label
-							>
-							<EmojiButton bind:rating />
+							<Label for="feedback">SUSê has a simple but modern layout and design.</Label>
+							<LikertButton bind:answer={surveyAns.ans1} />
 						</div>
 
-						<div class="grid w-full gap-1.5">
-							<Label for="bug-steps">What improvements would you like to see with SUSê?</Label>
-							<Textarea placeholder="Share your thoughts or suggestions for improvement." />
-						</div>
-
-						<div class="grid w-full gap-1.5">
-							<Label for="bug-steps">Do you have any other comments to the developers?</Label>
-							<Textarea placeholder="Feel free to provide any additional feedback or thoughts." />
+						<div class="grid w-full gap-8">
+							<Label for="feedback">How satisfied are you with SUSê overall?</Label>
+							<!-- <EmojiButton bind:rating /> -->
 						</div>
 					</Card.Content>
+
 					<Card.Footer>
-						<Button class="max-w-[150px]">Send Bug Report</Button>
+						<Button class="max-w-[150px]" on:click={submitFeedbackForm}>Send Bug Report</Button>
 					</Card.Footer>
 				</Card.Root>
 			</Tabs.Content>
+			<!-- Bug Report -->
 			<Tabs.Content value="bug-report">
 				<Card.Root>
 					<Card.Header>
@@ -74,7 +104,7 @@
 
 					<Card.Content class="flex flex-col gap-4 space-y-2">
 						<div class="grid w-full gap-1.5">
-							<Label for="bug-description">What issue did you encounter?</Label>
+							<Label for="bug-report">What issue did you encounter?</Label>
 							<Textarea
 								placeholder="Please be as decriptive as you can when describing the bug you encountered."
 							/>
@@ -88,7 +118,7 @@
 						</div>
 					</Card.Content>
 					<Card.Footer>
-						<Button class="max-w-[150px]">Send Bug Report</Button>
+						<Button class="max-w-[150px]" on:click={submitBugReport}>Send Bug Report</Button>
 					</Card.Footer>
 				</Card.Root>
 			</Tabs.Content>
