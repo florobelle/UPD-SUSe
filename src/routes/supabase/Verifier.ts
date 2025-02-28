@@ -36,10 +36,13 @@ export async function verifyPC(): Promise<{ error: string }> {
             error: error.message
         }
     }
-    else if (data.length && !data[0].is_allowed) {
-        return {
-            error: 'PC not allowed to access SUSê.'
-        }
+    // else if (data.length && !data[0].is_allowed) {
+    //     return {
+    //         error: 'PC not allowed to access SUSê.'
+    //     }
+    // } 
+    else if (data.length == 0) {
+        await addPCCookie();
     }
     return {
         error: ''
