@@ -144,7 +144,6 @@
 				$ServiceTypeStore = serviceTypes;
 				$ServiceInfoStore = serviceInfo;
 				$ServiceOptionStore = serviceOption;
-                console.log($ServiceTypeStore)
 			}
 		}
 		return;
@@ -182,7 +181,8 @@
 			lib_user_id: parseInt($UserStore.formData.lib_user_id),
 			service_type: '',
 			library,
-			section
+			section,
+            admin_id: 0
 		});
 
 		if (error) {

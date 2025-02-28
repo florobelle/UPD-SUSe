@@ -21,10 +21,11 @@
 	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
 	import { readUser } from '../../../supabase/User';
 	import { UserTableStore } from '$lib/stores/UserStore';
-	import { readUsageLog } from '../../../supabase/UsageLog';
+	import { countUsageLog, readUsageLog } from '../../../supabase/UsageLog';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 	import { readService } from '../../../supabase/Service';
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
+	import { StatisticStore } from '$lib/stores/StatisticStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -283,7 +284,6 @@
 
 	async function updateUserRealtime(updatedUser:UserTable, eventType:EventType) {
         // Updates the user record displayed in the User Table store
-        console.log(updatedUser)
         const { users, error } = await readUser({
 			lib_user_id: updatedUser.lib_user_id,
 			username: '',
@@ -300,7 +300,6 @@
 		} else if (users != null) {
             let newUserTableStore: Array<UserView>;
             if (eventType == 'UPDATE') {
-                console.log("UPDATED!")
                 newUserTableStore = $UserTableStore.filter((value) => value.lib_user_id != updatedUser.lib_user_id);
             } else {
                 newUserTableStore = $UserTableStore
@@ -320,7 +319,8 @@
 			lib_user_id: 0,
 			service_type: '',
 			library,
-			section
+			section,
+            admin_id: 0
 		});
 
 		if (error) {
@@ -517,7 +517,8 @@
 			lib_user_id: 0,
 			service_type: '',
 			library,
-			section
+			section,
+            admin_id: 0
 		});
 
 		if (error) {
@@ -529,6 +530,28 @@
 		return;
 	}
 
+    async function getStatistics() {
+        // gets all statistics for the logged in admin
+        const { count, error } = await countUsageLog({
+            usagelog_id: 0,
+            start: null,
+            end: null,
+            is_active: null,
+            lib_user_id: 0,
+            service_type: '',
+            library,
+            section,
+            admin_id: $AdminStore.formData.admin_id
+        });
+
+        if (error) {
+            toast.error(`Error with getting statistics: ${error}`);
+        } else if (count) {
+            $StatisticStore.total_usagelogs = count;
+        }
+        return;
+    }
+
 	// ----------------------------------------------------------------------------
 
 	$: {
@@ -536,7 +559,7 @@
 			startAdminSession();
 		}
 	}
-
+    let values:number|null = null
 	$: {
 		if ($AdminStore.authenticated) {
             if (!$AdminTableStore.length) {
@@ -547,6 +570,10 @@
             }
             if (!$UsageLogTableStore.length) {
                 getUsageTable();
+            }
+            if (values == null) {
+                values = 1
+                getStatistics()
             }
 			subscribeRealtimeUpdates();
 		}
