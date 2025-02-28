@@ -22,3 +22,4 @@ export { default as ChevronsRight } from 'lucide-svelte/icons/chevrons-right';
 export { default as ChevronLeft } from 'lucide-svelte/icons/chevron-left';
 export { default as ChevronsLeft } from 'lucide-svelte/icons/chevrons-left';
 export { default as IDCard } from 'lucide-svelte/icons/id-card';
+export { default as AlignEndHorizontal } from 'lucide-svelte/icons/align-end-horizontal';
