@@ -4,7 +4,15 @@ import type { UsageLogResponse } from "$lib/dataTypes/EntityResponses";
 
 export async function readUsageLog(filter:UsageLogFilter): Promise<UsageLogResponse> {
     // Reads and filters the service_engglib table in the database and returns all corresponding entries
-    let query = supabaseClient.from(`public_usagelog_${filter.library}`).select("*");
+    let midnight3DaysAgo: Date = new Date();
+    midnight3DaysAgo.setHours(0, 0, 0, 0);
+    midnight3DaysAgo.setDate(midnight3DaysAgo.getDate() - 3)
+    
+
+    let query = supabaseClient
+        .from(`public_usagelog_${filter.library}`)
+        .select("*")
+        .gte('start', midnight3DaysAgo.toISOString())
 
     if (filter.usagelog_id) {
         query = query.eq('usagelog_id', filter.usagelog_id);
