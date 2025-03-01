@@ -77,7 +77,6 @@
 		// and puts the returned values in $ServiceStore
 
 		const { serviceTypes, error } = await readServiceType();
-		serviceTypes?.sort((a, b) => a.service_type_id - b.service_type_id);
 
 		if (error) {
 			toast.error(`Error with reading service types: ${error}`);

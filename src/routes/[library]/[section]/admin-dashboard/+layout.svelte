@@ -9,7 +9,7 @@
 	// Backend Imports
 	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { RealtimeChannel, Session, User } from '@supabase/supabase-js';
@@ -21,11 +21,10 @@
 	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
 	import { readUser } from '../../../supabase/User';
 	import { UserTableStore } from '$lib/stores/UserStore';
-	import { countUsageLog, readUsageLog } from '../../../supabase/UsageLog';
+	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 	import { readService } from '../../../supabase/Service';
-	import { ServiceTableStore } from '$lib/stores/ServiceStore';
-	import { StatisticStore } from '$lib/stores/StatisticStore';
+	import { ServiceTableStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -66,6 +65,11 @@
 		attachActivityListeners();
 		startLogOutTimer();
 		getAdmin();
+
+        getAdminTable();
+        getUserTable();
+        getUsageTable();
+        subscribeRealtimeUpdates();
 	}
 
 	function createNewCookies(session: Session | null) {
@@ -530,52 +534,11 @@
 		return;
 	}
 
-    async function getStatistics() {
-        // gets all statistics for the logged in admin
-        const { count, error } = await countUsageLog({
-            usagelog_id: 0,
-            start: null,
-            end: null,
-            is_active: null,
-            lib_user_id: 0,
-            service_type: '',
-            library,
-            section,
-            admin_id: $AdminStore.formData.admin_id
-        });
-
-        if (error) {
-            toast.error(`Error with getting statistics: ${error}`);
-        } else if (count) {
-            $StatisticStore.total_usagelogs = count;
-        }
-        return;
-    }
-
 	// ----------------------------------------------------------------------------
 
 	$: {
 		if (browser && document) {
 			startAdminSession();
-		}
-	}
-    let values:number|null = null
-	$: {
-		if ($AdminStore.authenticated) {
-            if (!$AdminTableStore.length) {
-                getAdminTable();
-            }
-            if (!$UserTableStore.length) {
-                getUserTable();
-            }
-            if (!$UsageLogTableStore.length) {
-                getUsageTable();
-            }
-            if (values == null) {
-                values = 1
-                getStatistics()
-            }
-			subscribeRealtimeUpdates();
 		}
 	}
 </script>

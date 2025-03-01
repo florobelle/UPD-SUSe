@@ -89,7 +89,7 @@ export async function deleteUsageLog(usagelog_id: number): Promise<UsageLogRespo
     };
 }
 
-export async function countUsageLog(filter: UsageLogFilter): Promise<{count:number, error:string|null}> {
+export async function countTotalUsageLog(filter: UsageLogFilter): Promise<{count:number, error:string|null}> {
     // Counts the usage logs according to filter
     const { count, error } = await supabaseClient
         .from(`public_usagelog_${filter.library}`)
