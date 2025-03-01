@@ -18,7 +18,15 @@
 	import { readAdmin, updateAdmin } from '../../../supabase/Admin';
 	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
-	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
+	import type {
+		AdminTable,
+		ServiceTable,
+		ServiceView,
+		UsageLogTable,
+		UsageLogView,
+		UserTable,
+		UserView
+	} from '$lib/dataTypes/EntityTypes';
 	import { readUser } from '../../../supabase/User';
 	import { UserTableStore } from '$lib/stores/UserStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
@@ -64,12 +72,12 @@
 		toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
-		getAdmin();
-
-        getAdminTable();
-        getUserTable();
-        getUsageTable();
-        subscribeRealtimeUpdates();
+		getAdmin().then((_) => {
+			getAdminTable();
+			getUserTable();
+			getUsageTable();
+			subscribeRealtimeUpdates();
+		});
 	}
 
 	function createNewCookies(session: Session | null) {
@@ -213,11 +221,13 @@
 		try {
 			isLoggedOut = true;
 			$AdminStore.toLogin = false;
-            const { error } = await updateAdmin({ is_active: false }, $AdminStore.formData.email);
+			const { error } = await updateAdmin({ is_active: false }, $AdminStore.formData.email);
 
-            if (error) {
-                toast.error(`Error with deactivating admin with email ${$AdminStore.formData.email}: ${error}`);
-            }
+			if (error) {
+				toast.error(
+					`Error with deactivating admin with email ${$AdminStore.formData.email}: ${error}`
+				);
+			}
 			await endAdminSession();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
@@ -247,35 +257,35 @@
 
 	async function getAdmin() {
 		// gets user information from database
-        const { error } = await updateAdmin({ is_active: true }, $AdminStore.formData.email);
+		const { error } = await updateAdmin({ is_active: true }, $AdminStore.formData.email);
 
 		if (error) {
 			toast.error(`Error with activating admin with email ${$AdminStore.formData.email}: ${error}`);
-        } else {
-            const { admins, error } = await readAdmin({
-                admin_id: 0,
-                email: $AdminStore.formData.email,
-                is_active: null,
-                is_approved: null,
-                library: '',
-                section: ''
-            });
+		} else {
+			const { admins, error } = await readAdmin({
+				admin_id: 0,
+				email: $AdminStore.formData.email,
+				is_active: null,
+				is_approved: null,
+				library: '',
+				section: ''
+			});
 
-            if (error) {
-                toast.error(`Error with reading admin information: ${error}`);
-            } else if (admins != null) {
-                $AdminStore.formData.admin_id = admins[0].admin_id;
-                $AdminStore.formData.rfid = admins[0].rfid;
-                $AdminStore.formData.nickname = admins[0].nickname;
-                $AdminStore.formData.email = admins[0].email;
-                $AdminStore.formData.is_approved = admins[0].is_approved;
-                $AdminStore.formData.library = library; // NOTE: the admin's designation
-                $AdminStore.formData.section = section;
+			if (error) {
+				toast.error(`Error with reading admin information: ${error}`);
+			} else if (admins != null) {
+				$AdminStore.formData.admin_id = admins[0].admin_id;
+				$AdminStore.formData.rfid = admins[0].rfid;
+				$AdminStore.formData.nickname = admins[0].nickname;
+				$AdminStore.formData.email = admins[0].email;
+				$AdminStore.formData.is_approved = admins[0].is_approved;
+				$AdminStore.formData.library = library; // NOTE: the admin's designation
+				$AdminStore.formData.section = section;
 
-                $AdminStore = $AdminStore;
-            }
-        }
-		
+				$AdminStore = $AdminStore;
+			}
+		}
+
 		return;
 	}
 
@@ -284,11 +294,11 @@
 	// ----------------------------------------------------------------------------
 
 	let adminChannel: RealtimeChannel;
-    type EventType = 'INSERT'|'UPDATE';
+	type EventType = 'INSERT' | 'UPDATE';
 
-	async function updateUserRealtime(updatedUser:UserTable, eventType:EventType) {
-        // Updates the user record displayed in the User Table store
-        const { users, error } = await readUser({
+	async function updateUserRealtime(updatedUser: UserTable, eventType: EventType) {
+		// Updates the user record displayed in the User Table store
+		const { users, error } = await readUser({
 			lib_user_id: updatedUser.lib_user_id,
 			username: '',
 			is_approved: null,
@@ -302,20 +312,22 @@
 			toast.error(`Error with reading user table: ${error}`);
 			return false;
 		} else if (users != null) {
-            let newUserTableStore: Array<UserView>;
-            if (eventType == 'UPDATE') {
-                newUserTableStore = $UserTableStore.filter((value) => value.lib_user_id != updatedUser.lib_user_id);
-            } else {
-                newUserTableStore = $UserTableStore
-            }
-            newUserTableStore.push(users[0]);
-            $UserTableStore = newUserTableStore;
+			let newUserTableStore: Array<UserView>;
+			if (eventType == 'UPDATE') {
+				newUserTableStore = $UserTableStore.filter(
+					(value) => value.lib_user_id != updatedUser.lib_user_id
+				);
+			} else {
+				newUserTableStore = $UserTableStore;
+			}
+			newUserTableStore.push(users[0]);
+			$UserTableStore = newUserTableStore;
 		}
-    }
+	}
 
-    async function updateUsageLogsRealtime(updatedUsagelog:UsageLogTable, eventType:EventType) {
-        // Updates the usage log record in the Usage Log Table store
-        const { usagelogs, error } = await readUsageLog({
+	async function updateUsageLogsRealtime(updatedUsagelog: UsageLogTable, eventType: EventType) {
+		// Updates the usage log record in the Usage Log Table store
+		const { usagelogs, error } = await readUsageLog({
 			usagelog_id: updatedUsagelog.usagelog_id,
 			start: null,
 			end: null,
@@ -324,7 +336,7 @@
 			service_type: '',
 			library,
 			section,
-            admin_id: 0
+			admin_id: 0
 		});
 
 		if (error) {
@@ -332,21 +344,23 @@
 			return;
 		} else if (usagelogs != null) {
 			let newUsageLogTableStore: Array<UsageLogView>;
-            if (eventType == 'UPDATE') {
-                newUsageLogTableStore = $UsageLogTableStore.filter((value) => value.usagelog_id != updatedUsagelog.usagelog_id);
-            } else {
-                newUsageLogTableStore = $UsageLogTableStore
-            }
-            newUsageLogTableStore.push(usagelogs[0]);
-            $UsageLogTableStore = newUsageLogTableStore;
+			if (eventType == 'UPDATE') {
+				newUsageLogTableStore = $UsageLogTableStore.filter(
+					(value) => value.usagelog_id != updatedUsagelog.usagelog_id
+				);
+			} else {
+				newUsageLogTableStore = $UsageLogTableStore;
+			}
+			newUsageLogTableStore.push(usagelogs[0]);
+			$UsageLogTableStore = newUsageLogTableStore;
 		}
 		return;
-    }
+	}
 
-    async function updateServicesRealtime(updatedService:ServiceTable, eventType:EventType) {
-        // Updates the service record in the Service Table store
-        const { services, error } = await readService({
-            service_id: updatedService.service_id,
+	async function updateServicesRealtime(updatedService: ServiceTable, eventType: EventType) {
+		// Updates the service record in the Service Table store
+		const { services, error } = await readService({
+			service_id: updatedService.service_id,
 			service_type: '',
 			in_use: null,
 			library,
@@ -358,21 +372,23 @@
 			return false;
 		} else if (services != null) {
 			let newServiceTableStore: Array<ServiceView>;
-            if (eventType == 'UPDATE') {
-                newServiceTableStore = $ServiceTableStore.filter((value) => value.service_id != updatedService.service_id);
-            } else {
-                newServiceTableStore = $ServiceTableStore
-            }
-            newServiceTableStore.push(services[0]);
-            $ServiceTableStore = newServiceTableStore;
+			if (eventType == 'UPDATE') {
+				newServiceTableStore = $ServiceTableStore.filter(
+					(value) => value.service_id != updatedService.service_id
+				);
+			} else {
+				newServiceTableStore = $ServiceTableStore;
+			}
+			newServiceTableStore.push(services[0]);
+			$ServiceTableStore = newServiceTableStore;
 		}
 		return;
-    }
+	}
 
-    async function updateAdminsRealtime(updatedAdmin:AdminTable, eventType:EventType) {
-        // Updates the admin record in the Admin Table store
-        const { admins, error } = await readAdmin({
-            admin_id: updatedAdmin.admin_id,
+	async function updateAdminsRealtime(updatedAdmin: AdminTable, eventType: EventType) {
+		// Updates the admin record in the Admin Table store
+		const { admins, error } = await readAdmin({
+			admin_id: updatedAdmin.admin_id,
 			email: '',
 			is_active: null,
 			is_approved: null,
@@ -385,16 +401,18 @@
 			return false;
 		} else if (admins != null) {
 			let newAdminTableStore: Array<AdminTable>;
-            if (eventType == 'UPDATE') {
-                newAdminTableStore = $AdminTableStore.filter((value) => value.admin_id != updatedAdmin.admin_id);
-            } else {
-                newAdminTableStore = $AdminTableStore
-            }
-            newAdminTableStore.push(admins[0]);
-            $AdminTableStore = newAdminTableStore;
+			if (eventType == 'UPDATE') {
+				newAdminTableStore = $AdminTableStore.filter(
+					(value) => value.admin_id != updatedAdmin.admin_id
+				);
+			} else {
+				newAdminTableStore = $AdminTableStore;
+			}
+			newAdminTableStore.push(admins[0]);
+			$AdminTableStore = newAdminTableStore;
 		}
 		return;
-    }
+	}
 
 	function subscribeRealtimeUpdates() {
 		// Subscribes to updates in services, usagelogs and user information
@@ -408,9 +426,9 @@
 					table: 'lib_user'
 				},
 				(payload) => {
-					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
-                        updateUserRealtime(payload.new as UserTable, payload.eventType);
-                    }
+					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
+						updateUserRealtime(payload.new as UserTable, payload.eventType);
+					}
 				}
 			)
 			.on(
@@ -421,9 +439,9 @@
 					table: 'usagelog_engglib'
 				},
 				(payload) => {
-					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
-                        updateUsageLogsRealtime(payload.new as UsageLogTable, payload.eventType);
-                    }
+					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
+						updateUsageLogsRealtime(payload.new as UsageLogTable, payload.eventType);
+					}
 				}
 			)
 			.on(
@@ -434,12 +452,12 @@
 					table: 'service_engglib'
 				},
 				(payload) => {
-					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
-                        updateServicesRealtime(payload.new as ServiceTable, payload.eventType);
-                    }
+					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
+						updateServicesRealtime(payload.new as ServiceTable, payload.eventType);
+					}
 				}
 			)
-            .on(
+			.on(
 				'postgres_changes',
 				{
 					event: '*',
@@ -447,24 +465,24 @@
 					table: 'admin_engglib'
 				},
 				(payload) => {
-					if (payload.eventType == "INSERT" || payload.eventType == "UPDATE") {
-                        updateAdminsRealtime(payload.new as AdminTable, payload.eventType);
-                    }
+					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
+						updateAdminsRealtime(payload.new as AdminTable, payload.eventType);
+					}
 				}
 			)
 			.subscribe();
 	}
 
-    function unsubscribeRealtimeUpdates() {
-        // Unsubscribes to the tables listed above
-        try {
-            adminChannel.unsubscribe()
-        } catch {
-            return;
-        }
-    }
+	function unsubscribeRealtimeUpdates() {
+		// Unsubscribes to the tables listed above
+		try {
+			adminChannel.unsubscribe();
+		} catch {
+			return;
+		}
+	}
 
-    onDestroy(unsubscribeRealtimeUpdates)
+	onDestroy(unsubscribeRealtimeUpdates);
 
 	// ----------------------------------------------------------------------------
 	// READ TABLES ONCE
@@ -490,7 +508,7 @@
 		return;
 	}
 
-    async function getUserTable(): Promise<boolean> {
+	async function getUserTable(): Promise<boolean> {
 		// gets user information from database
 		const { users, error } = await readUser({
 			lib_user_id: 0,
@@ -511,7 +529,7 @@
 		return true;
 	}
 
-    async function getUsageTable() {
+	async function getUsageTable() {
 		// gets user information from database
 		const { usagelogs, error } = await readUsageLog({
 			usagelog_id: 0,
@@ -522,7 +540,7 @@
 			service_type: '',
 			library,
 			section,
-            admin_id: 0
+			admin_id: 0
 		});
 
 		if (error) {

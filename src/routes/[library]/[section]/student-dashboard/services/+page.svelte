@@ -99,15 +99,15 @@
 						service_type: serviceType.service_type,
 						service_type_id: serviceType.service_type_id,
 						available_number: 0,
-                        total_available_number: 0,
+						total_available_number: 0,
 						service_img_src: `../../../services/${serviceType.service_type}.png`
 					};
-                    serviceOption[serviceType.service_type] = {};
+					serviceOption[serviceType.service_type] = {};
 					serviceOption[serviceType.service_type][serviceType.service_type] = {
-                        type: 'select',
-                        label: serviceType.service_type,
-                        options: [],
-                        variant: 'default'
+						type: 'select',
+						label: serviceType.service_type,
+						options: [],
+						variant: 'default'
 					};
 				}
 			}
@@ -126,7 +126,7 @@
 					// service option store
 					if (serviceOption.hasOwnProperty(service.service_type)) {
 						// service is of main service type
-                        serviceInfo[service.service_type].total_available_number++;
+						serviceInfo[service.service_type].total_available_number++;
 						serviceInfo[service.service_type].available_number++;
 						serviceOption[service.service_type][service.service_type].options.push(service);
 					} else {
@@ -134,12 +134,15 @@
 						const mainServiceType: string = serviceTypes.filter(
 							(value) => value.service_type == service.service_type
 						)[0].main_service_type;
-                        if (mainServiceType == "Umbrella") serviceInfo[mainServiceType].available_number++;
-                        serviceInfo[mainServiceType].total_available_number++;
+						if (mainServiceType == 'Umbrella') serviceInfo[mainServiceType].available_number++;
+						serviceInfo[mainServiceType].total_available_number++;
 						serviceOption[mainServiceType][service.service_type].options.push(service);
 					}
 				}
-                serviceInfo['Discussion Room'].available_number = countDiscRoomAvailability(serviceOption['Discussion Room'], library);
+				serviceInfo['Discussion Room'].available_number = countDiscRoomAvailability(
+					serviceOption['Discussion Room'],
+					library
+				);
 				$ServiceTypeStore = serviceTypes;
 				$ServiceInfoStore = serviceInfo;
 				$ServiceOptionStore = serviceOption;
@@ -181,7 +184,7 @@
 			service_type: '',
 			library,
 			section,
-            admin_id: 0
+			admin_id: 0
 		});
 
 		if (error) {
@@ -189,7 +192,9 @@
 		} else if (usagelogs != null) {
 			let activeUsagelogs: { [key: string]: UsageLogView } = {};
 			for (const usagelog of usagelogs) {
-                const serviceType:string = usagelog.main_service_type ? usagelog.main_service_type : usagelog.service_type;
+				const serviceType: string = usagelog.main_service_type
+					? usagelog.main_service_type
+					: usagelog.service_type;
 				activeUsagelogs[serviceType] = usagelog;
 			}
 
