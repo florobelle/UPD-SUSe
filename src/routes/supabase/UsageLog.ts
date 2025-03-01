@@ -89,20 +89,55 @@ export async function deleteUsageLog(usagelog_id: number): Promise<UsageLogRespo
     };
 }
 
-export async function countTotalUsageLog(filter: UsageLogFilter): Promise<{count:number, error:string|null}> {
+export async function countTotalUsageLog(filter: UsageLogFilter): Promise<{ count: number, error: string | null }> {
     // Counts the usage logs according to filter
     const { count, error } = await supabaseClient
         .from(`public_usagelog_${filter.library}`)
         .select("*", { count: 'exact', head: true })
         .eq('section', filter.section)
         .or(`admin_id1.eq.${filter.admin_id},admin_id2.eq.${filter.admin_id}`)
+
+    if (error) {
+        return {
+            count: 0,
+            error: error.message
+        }
+    }
+
+    return { count: count != null ? count : 0, error: null }
+}
+
+export async function countTotalService(filter: UsageLogFilter): Promise<{ count: number, error: string | null }> {
+    // Counts each service for a specific admin and range of date
+    let query = supabaseClient
+        .from(`public_usagelog_${filter.library}`)
+        .select('*', { count: 'exact' })
+        .or(`service_type.eq.${filter.service_type},main_service_type.eq.${filter.service_type}`)
+
+    if (filter.admin_id) {
+        query = query.or(`admin_id1.eq.${filter.admin_id},admin_id2.eq.${filter.admin_id}`)
+    }
+
+    if (filter.section) {
+        query = query.eq('section', filter.section)
+    }
+
+    if (filter.start) {
+        query = query.gte('start', filter.start);
+    }
+
+    if (filter.end) {
+        query = query.lte('end', filter.end);
+    }
+
+    const { count, error } = await query;
     
     if (error) {
         return {
             count: 0,
             error: error.message
         }
-    } 
-    
+    }
+
     return { count: count != null ? count : 0, error: null }
 }

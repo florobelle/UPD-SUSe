@@ -6,10 +6,11 @@
 	// Backend Imports
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { StatisticStore } from '$lib/stores/StatisticStore';
-	import { countTotalUsageLog } from '../../../../supabase/UsageLog';
+	import { countTotalService, countTotalUsageLog } from '../../../../supabase/UsageLog';
 	import { page } from '$app/stores';
 	import { readServiceType } from '../../../../supabase/ServiceType';
 	import { ServiceTypeStore } from '$lib/stores/ServiceStore';
+	import { supabaseClient } from '$lib/client/SupabaseClient';
 
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
@@ -28,15 +29,10 @@
 		if (error) {
 			toast.error(`Error with reading service types: ${error}`);
 		} else if (serviceTypes) {
-            $ServiceTypeStore = serviceTypes;
-            console.log($ServiceTypeStore)
+			$ServiceTypeStore = serviceTypes;
 		}
-        return;
+		return;
 	}
-
-    if ($ServiceTypeStore.length == 0) {
-        getServiceType();
-    }
 
 	async function getStatistics() {
 		// gets all statistics for the logged in admin
@@ -53,24 +49,37 @@
 		});
 
 		if (error) {
-			toast.error(`Error with getting statistics: ${error}`);
+			toast.error(`Error with getting usage log statistics: ${error}`);
 		} else if (count) {
 			$StatisticStore.total_usagelogs = count;
 
-			// const { serviceTypes, error } = await readServiceType();
-			// if (error) {
-			//     return;
-			// } else if (serviceTypes != null) {
+			for (const service of $ServiceTypeStore) {
+				if (!service.main_service_type) {
+					const { count, error } = await countTotalService({
+						usagelog_id: 0,
+						start: null,
+						end: null,
+						is_active: null,
+						lib_user_id: 0,
+						service_type: service.service_type,
+						library,
+						section,
+						admin_id: $AdminStore.formData.admin_id
+					});
 
-			//     $ServiceTypeStore = serviceTypes;
-			//     console.log($ServiceTypeStore)
-
-			//     // for (const service of $ServiceTypeStore) {
-			//     //     console.log(service)
-			//     // }
-			// }
+					if (error) {
+						toast.error(`Error with getting service statistics: ${error}`);
+					} else {
+						$StatisticStore.total_services[service.service_type] = count;
+					}
+				}
+			}
 		}
 		return;
+	}
+
+	if ($ServiceTypeStore.length == 0) {
+		getServiceType();
 	}
 </script>
 
@@ -83,8 +92,13 @@
 			<h2 class="text-lg text-[#636363]">
 				Here are your statistics in {data.libraryName}, {librarySection}
 			</h2>
-			<p>Total Usage Logs Supervised: {$StatisticStore.total_usagelogs}</p>
 			<button on:click={getStatistics}>Get Stat</button>
+			{#if $StatisticStore.total_usagelogs}
+				<p>Total Usage Logs Supervised: {$StatisticStore.total_usagelogs}</p>
+			{/if}
+			{#each Object.keys($StatisticStore.total_services) as service}
+				<p>{service}: {$StatisticStore.total_services[service]}</p>
+			{/each}
 		</div>
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">
