@@ -12,7 +12,7 @@ export async function availService(serviceID:number, libUserID:number, adminID1:
     });
 
     if (error) {
-        return { error: error.toString() };
+        return { error: error.message };
     }
 
     return { error: null }
@@ -24,7 +24,7 @@ export async function endService(usagelog_id:number, service_id:number, lib_user
 
     const { error } = await supabaseClient.rpc('end_service', { usagelog_id, service_id });
     if (error) {
-        return { error: error.toString() };
+        return { error: error.message };
     } else if (!is_user_active) {
         const { error } = await updateUser({ is_active: false }, '', lib_user_id);
 

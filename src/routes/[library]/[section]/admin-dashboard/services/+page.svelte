@@ -1,6 +1,6 @@
 <script lang="ts">
 	// UI Imports
-	import toast, { Toaster } from 'svelte-5-french-toast';
+	import { Toaster } from 'svelte-5-french-toast';
 	import * as Alert from '$lib/components/ui/alert';
 	import CircleAlert from 'lucide-svelte/icons/circle-alert';
 	import DataTable from '$lib/components/ui/data-table/data-table.svelte';
@@ -8,49 +8,12 @@
 
 	// Backend Imports
 	import { AdminStore } from '$lib/stores/AdminStore';
-	import { page } from '$app/stores';
-	import { readService } from '../../../../supabase/Service';
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
 
 	export const initialSort = [
 		{ id: 'in_use', desc: true },
 		{ id: 'service_id', desc: false }
-	];
-
-	// ----------------------------------------------------------------------------
-	// READ ADMIN TABLES
-	// ----------------------------------------------------------------------------
-
-	const routes: Array<string> = $page.url.pathname.split('/');
-	const library: string = routes[1]; // session
-	const section: string = routes[2]; // session
-
-	async function getServiceTable() {
-		// gets user information from database
-		const { services, error } = await readService({
-			service_id: 0,
-			service_type: '',
-			in_use: null,
-			library,
-			section
-		});
-
-		if (error) {
-			toast.error(`Error with reading service table: ${error}`);
-			return;
-		} else if (services != null) {
-			$ServiceTableStore = services;
-		}
-		return;
-	}
-
-	// ----------------------------------------------------------------------------
-
-	$: {
-		if ($AdminStore.authenticated) {
-			getServiceTable();
-		}
-	}
+	];	
 </script>
 
 <Toaster />

@@ -3,12 +3,12 @@ import type { UserFilter } from "$lib/dataTypes/EntityFilters";
 import type { UserResponse } from "$lib/dataTypes/EntityResponses";
 import type { UserFormData } from "$lib/stores/UserStore";
 
-type Username = { 
-    username: string, 
-    error: string | null 
+type Username = {
+    username: string,
+    error: string | null
 }
 
-export async function readUsername(rfid:string='', username:string=''): Promise<Username> {
+export async function readUsername(rfid: string = '', username: string = ''): Promise<Username> {
     // Reads the public_user_info view in the database and returns the username of the user
     let query = supabaseClient.from('public_user_info').select("username");
 
@@ -23,7 +23,7 @@ export async function readUsername(rfid:string='', username:string=''): Promise<
     if (error) {
         return {
             username: '',
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -33,7 +33,7 @@ export async function readUsername(rfid:string='', username:string=''): Promise<
     }
 }
 
-export async function readUser(filter:UserFilter): Promise<UserResponse> {
+export async function readUser(filter: UserFilter): Promise<UserResponse> {
     // Reads and filters the user_info view in the database and returns all corresponding entries
     let query = supabaseClient.from('user_info').select("*");
 
@@ -64,7 +64,7 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -74,7 +74,7 @@ export async function readUser(filter:UserFilter): Promise<UserResponse> {
     }
 }
 
-export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
+export async function createUser(userInfo: UserFormData): Promise<UserResponse> {
     // Creates user information in the lib_user table.
 
     const { error } = await supabaseClient.from('lib_user').insert({
@@ -95,7 +95,7 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     if (error) {
         return {
             users: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -105,7 +105,7 @@ export async function createUser(userInfo:UserFormData): Promise<UserResponse> {
     };
 }
 
-export async function updateUser(userInfo: object, username: string, lib_user_id:number=0): Promise<UserResponse> {
+export async function updateUser(userInfo: object, username: string, lib_user_id: number = 0): Promise<UserResponse> {
     // Updates user information in the lib_user table
     let query = supabaseClient.from('lib_user').update(userInfo)
 
@@ -119,7 +119,7 @@ export async function updateUser(userInfo: object, username: string, lib_user_id
     if (error) {
         return {
             users: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -129,14 +129,14 @@ export async function updateUser(userInfo: object, username: string, lib_user_id
     };
 }
 
-export async function deleteUser(lib_user_id:number): Promise<UserResponse> {
+export async function deleteUser(lib_user_id: number): Promise<UserResponse> {
     // Deletes user record from user_engglib table
     const { error } = await supabaseClient.from('lib_user').delete().eq('lib_user_id', lib_user_id)
 
     if (error) {
         return {
             users: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
