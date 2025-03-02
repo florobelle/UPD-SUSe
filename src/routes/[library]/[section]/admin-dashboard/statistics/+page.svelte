@@ -86,8 +86,8 @@
 				Here are your statistics in {data.libraryName}, {librarySection}
 			</h2>
             <div class="grid grid-cols-4">
-                <LibraryCombobox bind:selectedLibrary={selectedLibrary} onChange={(e) => {selectedLibrary = e; console.log(selectedLibrary)}} />
-                <SectionCombobox bind:selectedSection={selectedSection} onChange={(e) => {selectedSection = e; console.log(selectedSection)}} />
+                <LibraryCombobox bind:selectedLibrary={selectedLibrary} onChange={(e) => selectedLibrary = e} />
+                <SectionCombobox bind:selectedSection={selectedSection} onChange={(e) => selectedSection = e} />
                 <Input placeholder="Enter admin nickname" class="max-w-sm" bind:value={selectedAdmin}/>
                 <Button on:click={getStatistics}>Get Statistics</Button>
             </div>

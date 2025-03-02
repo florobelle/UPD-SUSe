@@ -115,7 +115,6 @@ export async function countTotalService(filter: UsageLogFilter): Promise<{ count
     }
 
     const { data, count, error } = await query;
-    console.log(data)
     
     if (error) {
         return {

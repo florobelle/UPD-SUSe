@@ -68,7 +68,7 @@
 		$AdminStore.authenticated = true;
 		$AdminStore.formData.email = admin?.email ? admin.email : '';
 		$AdminStore = $AdminStore;
-
+        
 		toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
@@ -76,6 +76,7 @@
 			getAdminTable();
 			getUserTable();
 			getUsageTable();
+            getServiceTable()
 			subscribeRealtimeUpdates();
 		});
 	}
@@ -111,7 +112,7 @@
 		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
 		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session) {
+		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is currently a session with no cookies, save tokens in cookies
 			createNewCookies(session);
 			getSessionData(admin);
@@ -120,7 +121,7 @@
 			toast.error('Please login first.');
 			isLoggedOut = true;
 			goto(`/${library}/${section}/auth/login`);
-		} else if (accessTokenAdmin && refreshTokenAdmin) {
+		} else if (!session && accessTokenAdmin && refreshTokenAdmin) {
 			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
@@ -330,7 +331,6 @@
 
 	async function updateUsageLogsRealtime(updatedUsagelog: UsageLogTable, eventType: EventType) {
 		// Updates the usage log record in the Usage Log Table store
-        console.log(updatedUsagelog)
         if (eventType == 'DELETE') {
             $UsageLogTableStore = $UsageLogTableStore.filter((value) => value.usagelog_id != updatedUsagelog.usagelog_id);
         } else {
