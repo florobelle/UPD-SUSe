@@ -27,7 +27,7 @@ export async function readService(filter:ServiceFilter): Promise<ServiceResponse
     if (error) {
         return {
             services: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -44,7 +44,7 @@ export async function updateService(service:object, serviceID: number): Promise<
     if (error) {
         return {
             services: null,
-            error: error.toString()
+            error: error.message
         }
     }
 
@@ -61,7 +61,7 @@ export async function deleteService(service_id:number): Promise<ServiceResponse>
     if (error) {
         return {
             services: null,
-            error: error.toString()
+            error: error.message
         }
     }
 

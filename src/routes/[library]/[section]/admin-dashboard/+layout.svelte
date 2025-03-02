@@ -287,124 +287,134 @@
 	// ----------------------------------------------------------------------------
 
 	let adminChannel: RealtimeChannel;
-	type EventType = 'INSERT' | 'UPDATE';
+    type EventType = 'INSERT'|'UPDATE'|'DELETE';
 
 	async function updateUserRealtime(updatedUser:UserTable, eventType:EventType) {
         // Updates the user record displayed in the User Table store
-        const { users, error } = await readUser({
-			lib_user_id: updatedUser.lib_user_id,
-			username: '',
-			is_approved: null,
-			is_active: null,
-			college: '',
-			program: '',
-			user_type: ''
-		});
+        if (eventType == 'DELETE') {
+            $UserTableStore = $UserTableStore.filter((value) => value.lib_user_id != updatedUser.lib_user_id);
+        } else {
+            const { users, error } = await readUser({
+                lib_user_id: updatedUser.lib_user_id,
+                username: '',
+                is_approved: null,
+                is_active: null,
+                college: '',
+                program: '',
+                user_type: ''
+            });
 
-		if (error) {
-			toast.error(`Error with reading user table: ${error}`);
-			return false;
-		} else if (users != null) {
-			let newUserTableStore: Array<UserView>;
-			if (eventType == 'UPDATE') {
-				newUserTableStore = $UserTableStore.filter(
-					(value) => value.lib_user_id != updatedUser.lib_user_id
-				);
-			} else {
-				newUserTableStore = $UserTableStore;
-			}
-			newUserTableStore.push(users[0]);
-			$UserTableStore = newUserTableStore;
-		}
-	}
+            if (error) {
+                toast.error(`Error with reading user table: ${error}`);
+                return false;
+            } else if (users != null) {
+                let newUserTableStore: Array<UserView>;
+                if (eventType == 'UPDATE') {
+                    newUserTableStore = $UserTableStore.filter((value) => value.lib_user_id != updatedUser.lib_user_id);
+                } else {
+                    newUserTableStore = $UserTableStore
+                }
+                newUserTableStore.push(users[0]);
+                $UserTableStore = newUserTableStore;
+            }
+        }
+        return;
+    }
 
-	async function updateUsageLogsRealtime(updatedUsagelog: UsageLogTable, eventType: EventType) {
-		// Updates the usage log record in the Usage Log Table store
-		const { usagelogs, error } = await readUsageLog({
-			usagelog_id: updatedUsagelog.usagelog_id,
-			start: null,
-			end: null,
-			is_active: null,
-			lib_user_id: 0,
-			service_type: '',
-			library,
-			section
-		});
+    async function updateUsageLogsRealtime(updatedUsagelog:UsageLogTable, eventType:EventType) {
+        // Updates the usage log record in the Usage Log Table store
+        console.log(updatedUsagelog)
+        if (eventType == 'DELETE') {
+            $UsageLogTableStore = $UsageLogTableStore.filter((value) => value.usagelog_id != updatedUsagelog.usagelog_id);
+        } else {
+            const { usagelogs, error } = await readUsageLog({
+                usagelog_id: updatedUsagelog.usagelog_id,
+                start: null,
+                end: null,
+                is_active: null,
+                lib_user_id: 0,
+                service_type: '',
+                library,
+                section
+            });
 
-		if (error) {
-			toast.error(`Error with reading usagelog table: ${error}`);
-			return;
-		} else if (usagelogs != null) {
-			let newUsageLogTableStore: Array<UsageLogView>;
-			if (eventType == 'UPDATE') {
-				newUsageLogTableStore = $UsageLogTableStore.filter(
-					(value) => value.usagelog_id != updatedUsagelog.usagelog_id
-				);
-			} else {
-				newUsageLogTableStore = $UsageLogTableStore;
-			}
-			newUsageLogTableStore.push(usagelogs[0]);
-			$UsageLogTableStore = newUsageLogTableStore;
-		}
+            if (error) {
+                toast.error(`Error with reading usagelog table: ${error}`);
+                return;
+            } else if (usagelogs != null) {
+                let newUsageLogTableStore: Array<UsageLogView>;
+                if (eventType == 'UPDATE') {
+                    newUsageLogTableStore = $UsageLogTableStore.filter((value) => value.usagelog_id != updatedUsagelog.usagelog_id);
+                } else {
+                    newUsageLogTableStore = $UsageLogTableStore
+                }
+                newUsageLogTableStore.push(usagelogs[0]);
+                $UsageLogTableStore = newUsageLogTableStore;
+            }
+        }
 		return;
 	}
 
-	async function updateServicesRealtime(updatedService: ServiceTable, eventType: EventType) {
-		// Updates the service record in the Service Table store
-		const { services, error } = await readService({
-			service_id: updatedService.service_id,
-			service_type: '',
-			in_use: null,
-			library,
-			section
-		});
+    async function updateServicesRealtime(updatedService:ServiceTable, eventType:EventType) {
+        // Updates the service record in the Service Table store
+        if (eventType == 'DELETE') {
+            $ServiceTableStore = $ServiceTableStore.filter((value) => value.service_id != updatedService.service_id);
+        } else {
+            const { services, error } = await readService({
+                service_id: updatedService.service_id,
+                service_type: '',
+                in_use: null,
+                library,
+                section
+            });
 
-		if (error) {
-			toast.error(`Error with reading service table: ${error}`);
-			return false;
-		} else if (services != null) {
-			let newServiceTableStore: Array<ServiceView>;
-			if (eventType == 'UPDATE') {
-				newServiceTableStore = $ServiceTableStore.filter(
-					(value) => value.service_id != updatedService.service_id
-				);
-			} else {
-				newServiceTableStore = $ServiceTableStore;
-			}
-			newServiceTableStore.push(services[0]);
-			$ServiceTableStore = newServiceTableStore;
-		}
+            if (error) {
+                toast.error(`Error with reading service table: ${error}`);
+                return false;
+            } else if (services != null) {
+                let newServiceTableStore: Array<ServiceView>;
+                if (eventType == 'UPDATE') {
+                    newServiceTableStore = $ServiceTableStore.filter((value) => value.service_id != updatedService.service_id);
+                } else {
+                    newServiceTableStore = $ServiceTableStore
+                }
+                newServiceTableStore.push(services[0]);
+                $ServiceTableStore = newServiceTableStore;
+            }
+        }
 		return;
 	}
 
-	async function updateAdminsRealtime(updatedAdmin: AdminTable, eventType: EventType) {
-		// Updates the admin record in the Admin Table store
-		const { admins, error } = await readAdmin({
-			admin_id: updatedAdmin.admin_id,
-			email: '',
-			is_active: null,
-			is_approved: null,
-			library,
-			section
-		});
+    async function updateAdminsRealtime(updatedAdmin:AdminTable, eventType:EventType) {
+        // Updates the admin record in the Admin Table store
+        if (eventType == 'DELETE') {
+            $AdminTableStore = $AdminTableStore.filter((value) => value.admin_id != updatedAdmin.admin_id);
+        } else {
+            const { admins, error } = await readAdmin({
+                admin_id: updatedAdmin.admin_id,
+                email: '',
+                is_active: null,
+                is_approved: null,
+                library,
+                section
+            });
 
-		if (error) {
-			toast.error(`Error with reading admin table: ${error}`);
-			return false;
-		} else if (admins != null) {
-			let newAdminTableStore: Array<AdminTable>;
-			if (eventType == 'UPDATE') {
-				newAdminTableStore = $AdminTableStore.filter(
-					(value) => value.admin_id != updatedAdmin.admin_id
-				);
-			} else {
-				newAdminTableStore = $AdminTableStore;
-			}
-			newAdminTableStore.push(admins[0]);
-			$AdminTableStore = newAdminTableStore;
-		}
-		return;
-	}
+            if (error) {
+                toast.error(`Error with reading admin table: ${error}`);
+                return false;
+            } else if (admins != null) {
+                let newAdminTableStore: Array<AdminTable>;
+                if (eventType == 'UPDATE') {
+                    newAdminTableStore = $AdminTableStore.filter((value) => value.admin_id != updatedAdmin.admin_id);
+                } else {
+                    newAdminTableStore = $AdminTableStore
+                }
+                newAdminTableStore.push(admins[0]);
+                $AdminTableStore = newAdminTableStore;
+            }
+        }
+        return;
+    }
 
 	function subscribeRealtimeUpdates() {
 		// Subscribes to updates in services, usagelogs and user information
@@ -417,11 +427,7 @@
 					schema: 'public',
 					table: 'lib_user'
 				},
-				(payload) => {
-					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
-						updateUserRealtime(payload.new as UserTable, payload.eventType);
-					}
-				}
+				(payload) => updateUserRealtime((payload.eventType == 'DELETE' ? payload.old : payload.new) as UserTable, payload.eventType)
 			)
 			.on(
 				'postgres_changes',
@@ -430,11 +436,7 @@
 					schema: 'public',
 					table: 'usagelog_engglib'
 				},
-				(payload) => {
-					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
-						updateUsageLogsRealtime(payload.new as UsageLogTable, payload.eventType);
-					}
-				}
+				(payload) => {updateUsageLogsRealtime((payload.eventType == 'DELETE' ? payload.old : payload.new) as UsageLogTable, payload.eventType);}
 			)
 			.on(
 				'postgres_changes',
@@ -443,11 +445,7 @@
 					schema: 'public',
 					table: 'service_engglib'
 				},
-				(payload) => {
-					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
-						updateServicesRealtime(payload.new as ServiceTable, payload.eventType);
-					}
-				}
+				(payload) => updateServicesRealtime((payload.eventType == 'DELETE' ? payload.old : payload.new) as ServiceTable, payload.eventType)
 			)
             .on(
 				'postgres_changes',
@@ -456,11 +454,7 @@
 					schema: 'public',
 					table: 'admin_engglib'
 				},
-				(payload) => {
-					if (payload.eventType == 'INSERT' || payload.eventType == 'UPDATE') {
-						updateAdminsRealtime(payload.new as AdminTable, payload.eventType);
-					}
-				}
+				(payload) => updateAdminsRealtime((payload.eventType == 'DELETE' ? payload.old : payload.new) as AdminTable, payload.eventType)
 			)
 			.subscribe();
 	}
@@ -500,7 +494,7 @@
 		return;
 	}
 
-    async function getUserTable(): Promise<boolean> {
+    async function getUserTable() {
 		// gets user information from database
 		const { users, error } = await readUser({
 			lib_user_id: 0,
@@ -514,11 +508,11 @@
 
 		if (error) {
 			toast.error(`Error with reading user table: ${error}`);
-			return false;
+			return;
 		} else if (users != null) {
 			$UserTableStore = users;
 		}
-		return true;
+		return;
 	}
 
     async function getUsageTable() {
@@ -543,6 +537,25 @@
 		return;
 	}
 
+    async function getServiceTable() {
+		// gets user information from database
+		const { services, error } = await readService({
+			service_id: 0,
+			service_type: '',
+			in_use: null,
+			library,
+			section
+		});
+
+		if (error) {
+			toast.error(`Error with reading service table: ${error}`);
+			return;
+		} else if (services != null) {
+			$ServiceTableStore = services;
+		}
+		return;
+	}
+
 	// ----------------------------------------------------------------------------
 
 	$: {
@@ -561,6 +574,9 @@
             }
             if (!$UsageLogTableStore.length) {
                 getUsageTable();
+            }
+            if (!$ServiceTableStore.length) {
+                getServiceTable();
             }
 			subscribeRealtimeUpdates();
 		}
