@@ -34,4 +34,5 @@ export type UsageLogFilter = {
     service_type: string,
     library: string,
     section: string, 
+    admin_nickname:string
 }
