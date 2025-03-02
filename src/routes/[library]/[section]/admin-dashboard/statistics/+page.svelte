@@ -28,11 +28,11 @@
 	let selectedStart: Date | null = null;
 	let selectedEnd: Date | null = null;
 
-	export let data: { libraryName: string };
-	const librarySection: string = section
-		.split('-')
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ');
+	// export let data: { libraryName: string };
+	// const librarySection: string = section
+	// 	.split('-')
+	// 	.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+	// 	.join(' ');
 
 	async function getServiceType() {
 		// gets the service types from the db as it's needed in both admin and user dashboard
@@ -86,9 +86,9 @@
 		<div class="flex w-[95%] flex-col gap-4">
 			<h1 class="pt-10 text-3xl font-medium">Hello, {$AdminStore.formData.nickname}</h1>
 			<h2 class="text-lg text-[#636363]">
-				Here are your statistics in {data.libraryName}, {librarySection}
+				Here is your report
 			</h2>
-			<div class="grid grid-cols-6">
+			<div class="grid grid-cols-6 gap-2">
 				<LibraryCombobox bind:selectedLibrary onChange={(e) => (selectedLibrary = e)} />
 				<SectionCombobox bind:selectedSection onChange={(e) => (selectedSection = e)} />
 				<Input placeholder="Enter admin nickname" class="max-w-sm" bind:value={selectedAdmin} />
