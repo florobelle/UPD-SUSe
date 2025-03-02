@@ -339,7 +339,7 @@
 			service_type: '',
 			library,
 			section,
-            admin_id: 0
+            admin_nickname: ''
 		});
 
 		if (error) {
