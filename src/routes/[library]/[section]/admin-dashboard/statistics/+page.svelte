@@ -7,14 +7,13 @@
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { StatisticStore } from '$lib/stores/StatisticStore';
 	import { countTotalService } from '../../../../supabase/UsageLog';
-	import { page } from '$app/stores';
 	import { readServiceType } from '../../../../supabase/ServiceType';
 	import { ServiceTypeStore } from '$lib/stores/ServiceStore';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
+	import DatePicker from '$lib/components/ui/date-picker/date-picker.svelte';
 	import LibraryCombobox from '$lib/components/ui/combobox/library-combobox.svelte';
 	import SectionCombobox from '$lib/components/ui/combobox/section-combobox.svelte';
-	import DatePicker from '$lib/components/ui/date-picker/date-picker.svelte';
 
 	let selectedLibrary: string = 'engglib1';
 	let selectedSection: string = '';
@@ -81,8 +80,8 @@
 			<h1 class="pt-10 text-3xl font-medium">Hello, {$AdminStore.formData.nickname}</h1>
 			<h2 class="text-lg text-[#636363]">Here is your report</h2>
 			<div class="grid grid-cols-6 gap-2">
-				<LibraryCombobox bind:selectedLibrary onChange={(e) => (selectedLibrary = e)} />
-				<SectionCombobox bind:selectedSection onChange={(e) => (selectedSection = e)} />
+				<LibraryCombobox bind:selectedLibrary onChange={(e:string) => (selectedLibrary = e)} />
+				<SectionCombobox bind:selectedSection onChange={(e:string) => (selectedSection = e)} />
 				<Input placeholder="Enter admin nickname" class="max-w-sm" bind:value={selectedAdmin} />
 				<DatePicker bind:selectedDate={selectedStart} placeholder={'Enter start date'} />
 				<DatePicker bind:selectedDate={selectedEnd} placeholder={'Enter end date'} />
