@@ -18,7 +18,15 @@
 	import { readAdmin, updateAdmin } from '../../../supabase/Admin';
 	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
 	import { browser } from '$app/environment';
-	import type { AdminTable, ServiceTable, ServiceView, UsageLogTable, UsageLogView, UserTable, UserView } from '$lib/dataTypes/EntityTypes';
+	import type {
+		AdminTable,
+		ServiceTable,
+		ServiceView,
+		UsageLogTable,
+		UsageLogView,
+		UserTable,
+		UserView
+	} from '$lib/dataTypes/EntityTypes';
 	import { readUser } from '../../../supabase/User';
 	import { UserTableStore } from '$lib/stores/UserStore';
 	import { readUsageLog } from '../../../supabase/UsageLog';
@@ -151,7 +159,7 @@
 	// AUTO LOG OUT DIALOG
 	// ----------------------------------------------------------------------------
 
-	let maxSessionDuration = 900 * 1000; // 10 seconds for testing
+	let maxSessionDuration = 90000 * 1000; // 10 seconds for testing
 	let remainingTime = Math.floor(maxSessionDuration / 1000);
 	let logOutTimer: NodeJS.Timeout;
 	let checkInterval: NodeJS.Timeout;
@@ -345,7 +353,7 @@
             }
         }
 		return;
-    }
+	}
 
     async function updateServicesRealtime(updatedService:ServiceTable, eventType:EventType) {
         // Updates the service record in the Service Table store
@@ -375,7 +383,7 @@
             }
         }
 		return;
-    }
+	}
 
     async function updateAdminsRealtime(updatedAdmin:AdminTable, eventType:EventType) {
         // Updates the admin record in the Admin Table store
@@ -451,14 +459,14 @@
 			.subscribe();
 	}
 
-    function unsubscribeRealtimeUpdates() {
-        // Unsubscribes to the tables listed above
-        try {
-            adminChannel.unsubscribe()
-        } catch {
-            return;
-        }
-    }
+	function unsubscribeRealtimeUpdates() {
+		// Unsubscribes to the tables listed above
+		try {
+			adminChannel.unsubscribe();
+		} catch {
+			return;
+		}
+	}
 
     onDestroy(unsubscribeRealtimeUpdates)
 

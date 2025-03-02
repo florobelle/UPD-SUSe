@@ -38,3 +38,5 @@ export const AdminStore: Writable<AdminInformation> = writable({
 })
 
 export const AdminTableStore: Writable<Array<AdminTable>> = writable([]);
+
+export const isPCVerified: Writable<{isCalled: boolean, isVerified:boolean}> = writable({ isCalled: false, isVerified: false});
