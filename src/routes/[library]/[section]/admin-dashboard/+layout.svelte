@@ -9,7 +9,7 @@
 	// Backend Imports
 	import { navigating, page } from '$app/stores';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { createCookie, deleteCookie, readCookie } from '$lib/client/Cookie';
 	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import type { RealtimeChannel, Session, User } from '@supabase/supabase-js';
@@ -32,7 +32,7 @@
 	import { readUsageLog } from '../../../supabase/UsageLog';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 	import { readService } from '../../../supabase/Service';
-	import { ServiceTableStore } from '$lib/stores/ServiceStore';
+	import { ServiceTableStore, ServiceTypeStore } from '$lib/stores/ServiceStore';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -68,11 +68,17 @@
 		$AdminStore.authenticated = true;
 		$AdminStore.formData.email = admin?.email ? admin.email : '';
 		$AdminStore = $AdminStore;
-
+        
 		toast(`You will be logged out after 15 minutes of inactivity.`, { icon: '⏳' });
 		attachActivityListeners();
 		startLogOutTimer();
-		getAdmin();
+		getAdmin().then((_) => {
+			getAdminTable();
+			getUserTable();
+			getUsageTable();
+            getServiceTable()
+			subscribeRealtimeUpdates();
+		});
 	}
 
 	function createNewCookies(session: Session | null) {
@@ -106,7 +112,7 @@
 		const accessTokenAdmin: string = readCookie('accessTokenAdmin');
 		const refreshTokenAdmin: string = readCookie('refreshTokenAdmin');
 
-		if (session) {
+		if (session && !accessTokenAdmin && !refreshTokenAdmin) {
 			// if there is currently a session with no cookies, save tokens in cookies
 			createNewCookies(session);
 			getSessionData(admin);
@@ -115,7 +121,7 @@
 			toast.error('Please login first.');
 			isLoggedOut = true;
 			goto(`/${library}/${section}/auth/login`);
-		} else if (accessTokenAdmin && refreshTokenAdmin) {
+		} else if (!session && accessTokenAdmin && refreshTokenAdmin) {
 			// if there is no current session, start one with the saved tokens
 			const {
 				data: { session },
@@ -216,11 +222,13 @@
 		try {
 			isLoggedOut = true;
 			$AdminStore.toLogin = false;
-            const { error } = await updateAdmin({ is_active: false }, $AdminStore.formData.email);
+			const { error } = await updateAdmin({ is_active: false }, $AdminStore.formData.email);
 
-            if (error) {
-                toast.error(`Error with deactivating admin with email ${$AdminStore.formData.email}: ${error}`);
-            }
+			if (error) {
+				toast.error(
+					`Error with deactivating admin with email ${$AdminStore.formData.email}: ${error}`
+				);
+			}
 			await endAdminSession();
 			goto(`/${library}/${section}/auth/login`);
 		} catch {
@@ -250,35 +258,35 @@
 
 	async function getAdmin() {
 		// gets user information from database
-        const { error } = await updateAdmin({ is_active: true }, $AdminStore.formData.email);
+		const { error } = await updateAdmin({ is_active: true }, $AdminStore.formData.email);
 
 		if (error) {
 			toast.error(`Error with activating admin with email ${$AdminStore.formData.email}: ${error}`);
-        } else {
-            const { admins, error } = await readAdmin({
-                admin_id: 0,
-                email: $AdminStore.formData.email,
-                is_active: null,
-                is_approved: null,
-                library: '',
-                section: ''
-            });
+		} else {
+			const { admins, error } = await readAdmin({
+				admin_id: 0,
+				email: $AdminStore.formData.email,
+				is_active: null,
+				is_approved: null,
+				library,
+				section
+			});
 
-            if (error) {
-                toast.error(`Error with reading admin information: ${error}`);
-            } else if (admins != null) {
-                $AdminStore.formData.admin_id = admins[0].admin_id;
-                $AdminStore.formData.rfid = admins[0].rfid;
-                $AdminStore.formData.nickname = admins[0].nickname;
-                $AdminStore.formData.email = admins[0].email;
-                $AdminStore.formData.is_approved = admins[0].is_approved;
-                $AdminStore.formData.library = library; // NOTE: the admin's designation
-                $AdminStore.formData.section = section;
+			if (error) {
+				toast.error(`Error with reading admin information: ${error}`);
+			} else if (admins != null) {
+				$AdminStore.formData.admin_id = admins[0].admin_id;
+				$AdminStore.formData.rfid = admins[0].rfid;
+				$AdminStore.formData.nickname = admins[0].nickname;
+				$AdminStore.formData.email = admins[0].email;
+				$AdminStore.formData.is_approved = admins[0].is_approved;
+				$AdminStore.formData.library = library; // NOTE: the admin's designation
+				$AdminStore.formData.section = section;
 
-                $AdminStore = $AdminStore;
-            }
-        }
-		
+				$AdminStore = $AdminStore;
+			}
+		}
+
 		return;
 	}
 
@@ -321,13 +329,12 @@
         return;
     }
 
-    async function updateUsageLogsRealtime(updatedUsagelog:UsageLogTable, eventType:EventType) {
-        // Updates the usage log record in the Usage Log Table store
-        console.log(updatedUsagelog)
+	async function updateUsageLogsRealtime(updatedUsagelog: UsageLogTable, eventType: EventType) {
+		// Updates the usage log record in the Usage Log Table store
         if (eventType == 'DELETE') {
             $UsageLogTableStore = $UsageLogTableStore.filter((value) => value.usagelog_id != updatedUsagelog.usagelog_id);
         } else {
-            const { usagelogs, error } = await readUsageLog({
+    		const { usagelogs, error } = await readUsageLog({
                 usagelog_id: updatedUsagelog.usagelog_id,
                 start: null,
                 end: null,
@@ -335,7 +342,8 @@
                 lib_user_id: 0,
                 service_type: '',
                 library,
-                section
+                section,
+			admin_nickname: ''
             });
 
             if (error) {
@@ -447,7 +455,7 @@
 				},
 				(payload) => updateServicesRealtime((payload.eventType == 'DELETE' ? payload.old : payload.new) as ServiceTable, payload.eventType)
 			)
-            .on(
+			.on(
 				'postgres_changes',
 				{
 					event: '*',
@@ -468,7 +476,7 @@
 		}
 	}
 
-    onDestroy(unsubscribeRealtimeUpdates)
+	onDestroy(unsubscribeRealtimeUpdates);
 
 	// ----------------------------------------------------------------------------
 	// READ TABLES ONCE
@@ -515,7 +523,7 @@
 		return;
 	}
 
-    async function getUsageTable() {
+	async function getUsageTable() {
 		// gets user information from database
 		const { usagelogs, error } = await readUsageLog({
 			usagelog_id: 0,
@@ -525,7 +533,8 @@
 			lib_user_id: 0,
 			service_type: '',
 			library,
-			section
+			section,
+			admin_nickname: ''
 		});
 
 		if (error) {
@@ -561,24 +570,6 @@
 	$: {
 		if (browser && document) {
 			startAdminSession();
-		}
-	}
-
-	$: {
-		if ($AdminStore.authenticated) {
-            if (!$AdminTableStore.length) {
-                getAdminTable();
-            }
-            if (!$UserTableStore.length) {
-                getUserTable();
-            }
-            if (!$UsageLogTableStore.length) {
-                getUsageTable();
-            }
-            if (!$ServiceTableStore.length) {
-                getServiceTable();
-            }
-			subscribeRealtimeUpdates();
 		}
 	}
 </script>

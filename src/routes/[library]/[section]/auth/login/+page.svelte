@@ -19,6 +19,7 @@
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 	import { verifyPC } from '../../../../supabase/Verifier';
+	import { StatisticStore } from '$lib/stores/StatisticStore';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
@@ -80,6 +81,11 @@
     $ServiceTableStore = [];
     $UsageLogTableStore = [];
     $AdminTableStore = [];
+
+    $StatisticStore = {
+        total_usagelogs: 0,
+        total_services: {}
+    }
 
 	// ----------------------------------------------------------------------------
 

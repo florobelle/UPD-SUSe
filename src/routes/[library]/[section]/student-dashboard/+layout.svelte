@@ -339,7 +339,8 @@
 			lib_user_id: 0,
 			service_type: '',
 			library,
-			section
+			section,
+            admin_nickname: ''
 		});
 
 		if (error) {

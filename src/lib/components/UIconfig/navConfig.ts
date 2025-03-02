@@ -60,5 +60,11 @@ export const adminRoutes: Route[] = [
 		id: 'administrators',
 		icon: Icons.ShoppingCart,
 		url: './administrators'
+	},
+	{
+		title: 'Statistics',
+		id: 'statistics',
+		icon: Icons.AlignEndHorizontal,
+		url: './statistics'
 	}
 ];
