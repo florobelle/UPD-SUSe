@@ -10,17 +10,11 @@
 	import { page } from '$app/stores';
 	import { readServiceType } from '../../../../supabase/ServiceType';
 	import { ServiceTypeStore } from '$lib/stores/ServiceStore';
-	import { supabaseClient } from '$lib/client/SupabaseClient';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import LibraryCombobox from '$lib/components/ui/combobox/library-combobox.svelte';
 	import SectionCombobox from '$lib/components/ui/combobox/section-combobox.svelte';
-	import DatetimePicker from '$lib/components/ui/datetime-picker/datetime-picker.svelte';
 	import DatePicker from '$lib/components/ui/date-picker/date-picker.svelte';
-
-	const routes: Array<string> = $page.url.pathname.split('/');
-	const library: string = routes[1]; // session
-	const section: string = routes[2]; // session
 
 	let selectedLibrary: string = 'engglib1';
 	let selectedSection: string = '';
@@ -85,15 +79,13 @@
 	{#if $AdminStore.formData.is_approved}
 		<div class="flex w-[95%] flex-col gap-4">
 			<h1 class="pt-10 text-3xl font-medium">Hello, {$AdminStore.formData.nickname}</h1>
-			<h2 class="text-lg text-[#636363]">
-				Here is your report
-			</h2>
+			<h2 class="text-lg text-[#636363]">Here is your report</h2>
 			<div class="grid grid-cols-6 gap-2">
 				<LibraryCombobox bind:selectedLibrary onChange={(e) => (selectedLibrary = e)} />
 				<SectionCombobox bind:selectedSection onChange={(e) => (selectedSection = e)} />
 				<Input placeholder="Enter admin nickname" class="max-w-sm" bind:value={selectedAdmin} />
-                <DatePicker bind:selectedDate={selectedStart} placeholder={'Enter start date'}/>
-                <DatePicker bind:selectedDate={selectedEnd}  placeholder={'Enter end date'}/>
+				<DatePicker bind:selectedDate={selectedStart} placeholder={'Enter start date'} />
+				<DatePicker bind:selectedDate={selectedEnd} placeholder={'Enter end date'} />
 				<Button on:click={getStatistics}>Get Statistics</Button>
 			</div>
 			{#each Object.keys($StatisticStore.total_services) as service}
