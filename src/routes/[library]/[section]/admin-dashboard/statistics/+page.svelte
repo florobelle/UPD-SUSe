@@ -15,14 +15,18 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import LibraryCombobox from '$lib/components/ui/combobox/library-combobox.svelte';
 	import SectionCombobox from '$lib/components/ui/combobox/section-combobox.svelte';
+	import DatetimePicker from '$lib/components/ui/datetime-picker/datetime-picker.svelte';
+	import DatePicker from '$lib/components/ui/date-picker/date-picker.svelte';
 
 	const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
 
-    let selectedLibrary:string = 'engglib1';
-    let selectedSection:string = '';
-    let selectedAdmin:string = '';
+	let selectedLibrary: string = 'engglib1';
+	let selectedSection: string = '';
+	let selectedAdmin: string = '';
+	let selectedStart: Date | null = null;
+	let selectedEnd: Date | null = null;
 
 	export let data: { libraryName: string };
 	const librarySection: string = section
@@ -44,30 +48,29 @@
 
 	async function getStatistics() {
 		// gets all statistics for the logged in admin
-        // console.log(`lib: ${selectedLibrary}, section: ${selectedSection}, admin: ${selectedAdmin}`)
-        $StatisticStore.total_usagelogs = 0;
-        for (const service of $ServiceTypeStore) {
-            if (!service.main_service_type) {
-                const { count, error } = await countTotalService({
-                    usagelog_id: 0,
-                    start: null,
-                    end: null,
-                    is_active: null,
-                    lib_user_id: 0,
-                    service_type: service.service_type,
-                    library: selectedLibrary,
-                    section: selectedSection,
-                    admin_nickname: selectedAdmin,
-                });
+		$StatisticStore.total_usagelogs = 0;
+		for (const service of $ServiceTypeStore) {
+			if (!service.main_service_type) {
+				const { count, error } = await countTotalService({
+					usagelog_id: 0,
+					start: selectedStart,
+					end: selectedEnd,
+					is_active: null,
+					lib_user_id: 0,
+					service_type: service.service_type,
+					library: selectedLibrary,
+					section: selectedSection,
+					admin_nickname: selectedAdmin
+				});
 
-                if (error) {
-                    toast.error(`Error with getting service statistics: ${error}`);
-                } else {
-                    $StatisticStore.total_services[service.service_type] = count;
-                    $StatisticStore.total_usagelogs += count;
-                }
-            }
-        }
+				if (error) {
+					toast.error(`Error with getting service statistics: ${error}`);
+				} else {
+					$StatisticStore.total_services[service.service_type] = count;
+					$StatisticStore.total_usagelogs += count;
+				}
+			}
+		}
 		return;
 	}
 
@@ -85,16 +88,18 @@
 			<h2 class="text-lg text-[#636363]">
 				Here are your statistics in {data.libraryName}, {librarySection}
 			</h2>
-            <div class="grid grid-cols-4">
-                <LibraryCombobox bind:selectedLibrary={selectedLibrary} onChange={(e) => selectedLibrary = e} />
-                <SectionCombobox bind:selectedSection={selectedSection} onChange={(e) => selectedSection = e} />
-                <Input placeholder="Enter admin nickname" class="max-w-sm" bind:value={selectedAdmin}/>
-                <Button on:click={getStatistics}>Get Statistics</Button>
-            </div>
+			<div class="grid grid-cols-6">
+				<LibraryCombobox bind:selectedLibrary onChange={(e) => (selectedLibrary = e)} />
+				<SectionCombobox bind:selectedSection onChange={(e) => (selectedSection = e)} />
+				<Input placeholder="Enter admin nickname" class="max-w-sm" bind:value={selectedAdmin} />
+                <DatePicker bind:selectedDate={selectedStart} placeholder={'Enter start date'}/>
+                <DatePicker bind:selectedDate={selectedEnd}  placeholder={'Enter end date'}/>
+				<Button on:click={getStatistics}>Get Statistics</Button>
+			</div>
 			{#each Object.keys($StatisticStore.total_services) as service}
 				{#if $StatisticStore.total_services[service]}
-                    <p>{service}: {$StatisticStore.total_services[service]}</p>
-                {/if}
+					<p>{service}: {$StatisticStore.total_services[service]}</p>
+				{/if}
 			{/each}
 			{#if $StatisticStore.total_usagelogs}
 				<p>Total Usage Logs Supervised: {$StatisticStore.total_usagelogs}</p>

@@ -7,12 +7,11 @@ export async function readUsageLog(filter: UsageLogFilter): Promise<UsageLogResp
     let midnight3DaysAgo: Date = new Date();
     midnight3DaysAgo.setHours(0, 0, 0, 0);
     midnight3DaysAgo.setDate(midnight3DaysAgo.getDate() - 3)
-    
+
 
     let query = supabaseClient
         .from(`public_usagelog_${filter.library}`)
         .select("*")
-        .gte('start', midnight3DaysAgo.toISOString())
 
     if (filter.usagelog_id) {
         query = query.eq('usagelog_id', filter.usagelog_id);
@@ -24,6 +23,10 @@ export async function readUsageLog(filter: UsageLogFilter): Promise<UsageLogResp
 
     if (filter.end) {
         query = query.lte('end', filter.end);
+    }
+
+    if (!filter.start && !filter.end) {
+        query = query.gte('start', midnight3DaysAgo.toISOString())
     }
 
     if (filter.is_active != null) {
@@ -95,7 +98,7 @@ export async function countTotalService(filter: UsageLogFilter): Promise<{ count
     // Counts each service for a specific admin and range of date
     let query = supabaseClient
         .from(`public_usagelog_${filter.library}`)
-        .select('*', { count: 'exact', })
+        .select('*', { count: 'exact', head: true })
         .or(`service_type.eq.${filter.service_type},main_service_type.eq.${filter.service_type}`)
 
     if (filter.admin_nickname) {
@@ -107,15 +110,14 @@ export async function countTotalService(filter: UsageLogFilter): Promise<{ count
     }
 
     if (filter.start) {
-        query = query.gte('start', filter.start);
+        query = query.gte('start', `${filter.start.getUTCFullYear()}-${filter.start.getUTCMonth()}-${filter.start.getUTCDate()} ${filter.start.getUTCHours()}:${filter.start.getUTCMinutes()}`);
     }
 
     if (filter.end) {
-        query = query.lte('end', filter.end);
+        query = query.lte('end', `${filter.end.getUTCFullYear()}-${filter.end.getUTCMonth()}-${filter.end.getUTCDate()}`);
     }
+    const { count, error } = await query;
 
-    const { data, count, error } = await query;
-    
     if (error) {
         return {
             count: 0,
