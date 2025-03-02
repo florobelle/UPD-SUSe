@@ -26,7 +26,6 @@
 	function handleClick() {
 		activeHeader.set(header);
 		up.update((value) => !value);
-		console.log($activeHeader, $up);
 		onclick();
 	}
 </script>
