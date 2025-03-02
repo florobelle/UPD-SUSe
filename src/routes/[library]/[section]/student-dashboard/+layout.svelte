@@ -31,6 +31,7 @@
 	import { ActiveUsageLogStore } from '$lib/stores/UsageLogStore';
 	import { countDiscRoomAvailability } from '$lib/utilsBack';
 	import { AdminStore } from '$lib/stores/AdminStore';
+	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 	// ----------------------------------------------------------------------------
 	// NAVBAR
 	// ----------------------------------------------------------------------------
@@ -469,15 +470,17 @@
 		</Resizable.Pane>
 		<Resizable.Handle withHandle />
 		<Resizable.Pane defaultSize={defaultLayout[2]}>
-			<Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
-			<div class="relative">
-				<slot></slot>
-				<p
-					class="absolute bottom-0 flex h-20 w-full items-end justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-2 text-center"
-				>
-					Made with 🧡 by Zarah Floro and Allaine Tan
-				</p>
-			</div>
+            <ScrollArea orientation="both" class="h-screen">
+                <Loading loadingText={'Retrieving your dashboard'} loading={Boolean($navigating)} />
+                <div class="relative">
+                    <slot></slot>
+                    <p
+                        class="absolute bottom-0 flex h-20 w-full items-end justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-2 text-center"
+                    >
+                        Made with 🧡 by Zarah Floro and Allaine Tan
+                    </p>
+                </div>
+            </ScrollArea>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>
