@@ -268,8 +268,8 @@
 				email: $AdminStore.formData.email,
 				is_active: null,
 				is_approved: null,
-				library: '',
-				section: ''
+				library,
+				section
 			});
 
 			if (error) {
