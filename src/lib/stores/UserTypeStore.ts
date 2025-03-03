@@ -1,4 +1,4 @@
-export const userTypes = [
+export const UserTypeStore = [
 	{ value: '1', label: 'Undergraduate Student' },
 	{ value: '2', label: 'Graduate Student' },
 	{ value: '3', label: 'Faculty' },

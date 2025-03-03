@@ -70,7 +70,7 @@ export const adminRoutes: Route[] = [
 	{
 		title: 'Settings',
 		id: 'settings',
-		icon: Icons.AlignEndHorizontal,
+		icon: Icons.Settings,
 		url: './settings'
 	}
 ];

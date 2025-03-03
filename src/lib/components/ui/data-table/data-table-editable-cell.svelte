@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { rowChanges } from '$lib/stores/tableStore';
+	import { RowChangeStore } from '$lib/stores/tableStore';
 	import { type TableEditT } from '$lib/dataTypes/tableTypes';
 	import UserTypeCombobox from '../combobox/user-type-combobox.svelte';
 	import CollegeCombobox from '../combobox/college-combobox.svelte';
@@ -13,10 +13,10 @@
 	export let initVal: any;
 
 	// Subscribe to row changes
-	$: rInEdit = !!($rowChanges as RowChanges)[id];
+	$: rInEdit = !!($RowChangeStore as RowChanges)[id];
 
 	// Track the current value with proper typing
-	$: currentValue = ($rowChanges as RowChanges)[id]?.[colId] ?? initVal;
+	$: currentValue = ($RowChangeStore as RowChanges)[id]?.[colId] ?? initVal;
 
 	function handleInput(e: Event | string | Date, isNumber = false) {
 		let value: string | number;
@@ -31,7 +31,7 @@
 			value = '';
 		}
 
-		rowChanges.update((rows) => {
+		RowChangeStore.update((rows) => {
 			const newRows = {
 				...rows,
 				[id]: {

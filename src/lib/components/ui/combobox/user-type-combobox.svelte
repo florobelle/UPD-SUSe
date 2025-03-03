@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
-	import { userTypes } from '$lib/stores/UserTypeStore';
+	import { UserTypeStore } from '$lib/stores/UserTypeStore';
 	import { ChevronsUpDown, Check } from 'lucide-svelte';
 	import { cn } from '$lib/utilsFront';
 
@@ -16,7 +16,7 @@
 		role="combobox"
 	>
 		<p class="truncate">
-			{userTypes.find((f) => f.label === selectedUserType)?.label ?? 'Select user type'}
+			{UserTypeStore.find((f) => f.label === selectedUserType)?.label ?? 'Select user type'}
 		</p>
 		<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 	</Popover.Trigger>
@@ -26,7 +26,7 @@
 			<Command.Empty>No user type found.</Command.Empty>
 			<Command.List>
 				<Command.Group>
-					{#each userTypes as userType}
+					{#each UserTypeStore as userType}
 						<Command.Item
 							value={userType.label}
 							onSelect={() => {
