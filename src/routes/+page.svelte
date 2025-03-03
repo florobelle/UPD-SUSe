@@ -1,6 +1,12 @@
 <script>
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import { PCInfoStore } from '$lib/stores/AdminStore';
+
+    $PCInfoStore = {
+        icVerifierCalled: false,
+        isVerified: false, 
+    }
 </script>
 
 <div

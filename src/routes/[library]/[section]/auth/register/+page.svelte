@@ -16,7 +16,7 @@
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import PopoverContent from '$lib/components/ui/popover/popover-content.svelte';
 	import Check from 'lucide-svelte/icons/check';
-	import { userTypes } from '$lib/stores/UserTypeStore';
+	import { UserTypeStore } from '$lib/stores/UserTypeStore';
 
 	// Login Imports
 	import { UserStore } from '$lib/stores/UserStore';
@@ -26,7 +26,7 @@
 	import {
 		allColleges,
 		allPrograms,
-		collegeProgramsList,
+		CollegeProgramStoreList,
 		type College
 	} from '$lib/stores/CollegeProgramStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
@@ -45,7 +45,7 @@
 	// Combobox filter functions
 
 	function filterCollegePrograms(
-		collegeProgramsList: College[],
+		CollegeProgramStoreList: College[],
 		searchTerm: string,
 		selectedCollege: string
 	): College[] {
@@ -55,7 +55,7 @@
 
 		const normalizedSearchTerm = searchTerm.toLowerCase();
 
-		return collegeProgramsList
+		return CollegeProgramStoreList
 			.map((college) => {
 				// only include results in the same college selected
 				if (selectedCollege !== college.value && selectedCollege != undefined) {
@@ -95,7 +95,7 @@
 
 	// Combobox filtered stores
 	$: filteredPrograms = filterCollegePrograms(
-		collegeProgramsList,
+		CollegeProgramStoreList,
 		searchProgram,
 		$formData.college
 	);
@@ -244,7 +244,7 @@
 											{...attrs}
 										>
 											<p class="truncate">
-												{userTypes.find((f) => f.value === $formData.user_type)?.label ??
+												{UserTypeStore.find((f) => f.value === $formData.user_type)?.label ??
 													'Select user type'}
 											</p>
 											<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -257,7 +257,7 @@
 											<Command.Empty>No user found.</Command.Empty>
 											<Command.List>
 												<Command.Group>
-													{#each userTypes as userType}
+													{#each UserTypeStore as userType}
 														<Command.Item
 															value={userType.label}
 															onSelect={() => {
