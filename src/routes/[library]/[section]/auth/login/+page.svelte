@@ -77,15 +77,15 @@
 		}
 	};
 
-    $UserTableStore = [];
-    $ServiceTableStore = [];
-    $UsageLogTableStore = [];
-    $AdminTableStore = [];
+	$UserTableStore = [];
+	$ServiceTableStore = [];
+	$UsageLogTableStore = [];
+	$AdminTableStore = [];
 
-    $StatisticStore = {
-        total_usagelogs: 0,
-        total_services: {}
-    }
+	$StatisticStore = {
+		total_usagelogs: 0,
+		total_services: {}
+	};
 
 	// ----------------------------------------------------------------------------
 
@@ -192,10 +192,6 @@
 	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key === 'Enter' || rfidGlobal.length == 10) {
-            if (!$isPCVerified.isVerified) {
-                toast.error('PC not allowed to access SUSê.')
-                return;
-            }
 			if (rfidGlobal.match(/[a-fA-F]+/i)) {
 				rfidConverted = convertRfidInt(rfidGlobal);
 			} else {
@@ -206,6 +202,10 @@
 				checkAdminCount++;
 				checkAdminRfid();
 			} else {
+				if (!$isPCVerified.isVerified) {
+					toast.error('PC not allowed to access SUSê.');
+					return;
+				}
 				checkRfidCount++;
 				checkUserRfid();
 			}
@@ -215,10 +215,10 @@
 	function handleKeydownUsername(event: KeyboardEvent) {
 		// Listens to input in the UP mail field
 		if (event.key === 'Enter') {
-            if (!$isPCVerified.isVerified) {
-                toast.error('PC not allowed to access SUSê.')
-                return;
-            }
+			if (!$isPCVerified.isVerified) {
+				toast.error('PC not allowed to access SUSê.');
+				return;
+			}
 			checkUsernameCount++;
 			checkUsername();
 		}
@@ -275,6 +275,7 @@
                         toast.error(res.error)
                     } else {
                         $isPCVerified.isVerified = true;
+                        toast.success('PC approved to access SUSê.')
                     }
                 })
             }
