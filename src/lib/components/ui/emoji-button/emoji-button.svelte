@@ -1,6 +1,6 @@
 <script lang="ts">
 	// Credits for the html and css to https://codepen.io/aaroniker/pen/mdyYBPP
-	export let rating: number;
+	export let rating: string;
 </script>
 
 <div class="feedback w-full items-center justify-center">
