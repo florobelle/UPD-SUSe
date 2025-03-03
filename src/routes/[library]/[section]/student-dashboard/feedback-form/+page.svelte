@@ -8,47 +8,74 @@
 	import EmojiButton from '$lib/components/ui/emoji-button/emoji-button.svelte';
 	import LikertButton from '$lib/components/ui/likert-button/likert-button.svelte';
 
-	const surveyAns = {
-        ans1: 0,
-        ans2: 0,
-        ans3: 0,
-        ans4: 0,
+	const answers: {[key:string]: string} = {
+        q1_1_1: '',
+        q1_1_2: '',
+        q1_1_3: '',
+        q1_1_4: '',
         
-        ans5: 0,
-        ans6: 0,
+        q1_2_1: '',
+        q1_2_2: '',
 
-        ans7: 0,
-        ans8: 0,
-        ans9: 0,
-        ans10: 0,
+        q2_1: '',
+        q2_2: '',
+        q2_3: '',
+        q2_4: '',
         
-        ans11: 0,
-        ans12: 0,
-        ans13: 0,
-        ans14: 0,
-        ans15: 0,    
+        q3_1_1: '',
+        q3_1_2: '',
+        q3_1_3: '',
+        q3_1_4: '',
+        q3_1_5: '',    
         
-        ans16: 0,
-        ans17: 0,
-        ans18: 0,
+        q3_2_1: '',
+        q3_2_2: '',
+        q3_2_3: '',
         
-        ans19: 0,
-        ans20: 0,
-        ans21: 0,
+        q4_1: '',
+        q4_2: '',
+        q4_3: '',
+
+        q5_1: '',
+        q5_2: '',
+    }
+
+    const questions: {[key:string]: string} = {
+        q1_1_1: 'SUSê has a simple but modern layout and design.',
+        q1_1_2: 'SUSê has a pleasant color palette.',
+        q1_1_3: 'SUSê has the necessary content displayed to explain its functions.',
+        q1_1_4: 'Overall, SUSê has an consistent and easy-to-read content.',
         
-        ans22: 0,
-        ans23: 0,
-        ans24: 0,
-        ans25: 0,
+        q1_2_1: 'SUSê is easy to navigate.',
+        q1_2_2: 'SUSê has clear labels on buttons and links.',
+
+        q2_1: 'SUSê is a needed upgrade in Engineering Libraries services.',
+        q2_2: 'SUSê should be available in other sections of the Engineering Libraries/other libraries in UP.',
+        q2_3: 'SUSê is a unique software that gives more use to my UP ID.',
+        q2_4: 'SUSê is unlike other applications used in UP libraries, making it a novel feature in Engineering Libraries.',
+        
+        q3_1_1: 'Logging in using my RFID is faster and easier than manually answering previous Google Registration Forms.',
+        q3_1_2: 'SUSê v2 has better design and functionality than SUSê v1.',
+        q3_1_3: 'SUSê v2 is faster and easier to use than SUSê v1.',
+        q3_1_4: 'SUSê v1 captured the basic features for registration and availing a miscellaneous service but SUSê v2 improved these features.',
+        q3_1_5: 'SUSê still has room for improvement.',    
+        
+        q3_2_1: 'SUSê improved my experience with availing miscellaneous in the Engineering Libraries.',
+        q3_2_2: 'SUSê adds more utility to my UP ID.',
+        q3_2_3: 'I would prefer to use SUSê from now on when availing services in the Engineering Libraries.',
+        
+        q4_1: 'SUSê has clear contrast between text and background, making it easier to read the content.',
+        q4_2: 'SUSê can be used easily with a keyboard only.',
+        q4_3: 'SUSê can be used with a screen reader and has alternative text to images.',
     }
 
     function submitFeedbackForm() {
-        console.log(surveyAns)
+        console.log(answers)
     }
 
-    function submitBugReport() {
-        console.log(surveyAns)
-    }
+    // function submitBugReport() {
+    //     console.log(surveyAns)
+    // }
 </script>
 
 <ScrollArea class="">
@@ -64,31 +91,49 @@
 		<!-- Tabs -->
 		<Tabs.Root value="feedback" class="">
 			<Tabs.List class="grid max-w-[300px] grid-cols-2">
-				<Tabs.Trigger value="feedback">Feedback</Tabs.Trigger>
+				<Tabs.Trigger value="feedback">Survey</Tabs.Trigger>
 				<Tabs.Trigger value="bug-report">Bug Report</Tabs.Trigger>
 			</Tabs.List>
 			<!-- Feedback Form -->
 			<Tabs.Content value="feedback">
 				<Card.Root>
 					<Card.Header>
-						<Card.Title>Feedback</Card.Title>
-						<Card.Description>We’d love to hear your thoughts about SUSe!</Card.Description>
+						<Card.Title>Survey</Card.Title>
+						<Card.Description>Zarah Floro and Nina Sapitula are conducting a survey on the factors affecting the success of a website. 
+                            Please indicate your agreement with the following statements to complete the survey. 
+                            Your answers would greatly contribute to their research!</Card.Description>
 					</Card.Header>
 
 					<Card.Content class="flex flex-col gap-4 space-y-2">
-						<div class="grid w-full gap-8">
-							<Label for="feedback">SUSê has a simple but modern layout and design.</Label>
-							<LikertButton bind:answer={surveyAns.ans1} />
-						</div>
+                        {#each Object.keys(questions) as key}
+                            <div class="grid w-full gap-8 pb-8">
+                                <Label for="feedback" class="text-base">{questions[key]}</Label>
+                                <LikertButton bind:answer={answers[key]} questionName={key}/>
+                            </div>
+                        {/each}
 
 						<div class="grid w-full gap-8">
-							<Label for="feedback">How satisfied are you with SUSê overall?</Label>
-							<!-- <EmojiButton bind:rating /> -->
+							<Label for="feedback" class="text-base">How satisfied are you with SUSê overall?</Label>
+							<EmojiButton bind:rating={answers.q5_1} />
 						</div>
+
+                        <div class="grid w-full gap-1.5">
+							<Label for="feedback" class="text-base">Is there anything you would like to tell the developers about SUSê?</Label>
+							<Textarea
+								placeholder="Your response may be a feature request or words of encouragement."
+                                bind:value={answers.q5_2}
+							/>
+						</div>
+
+                        <div>
+                            <p class="text-muted-foreground">What you think of SUSê encourages us developers, researchers, and students to do our best 
+                            and provide quality service to you 🫵, the students, librarians, faculty, and other library users of the Engineering Libraries.
+                            We are very happy of SUSê's journey and we are glad you are part of it. Thank you 🧡!</p>
+                        </div>
 					</Card.Content>
 
 					<Card.Footer>
-						<Button class="max-w-[150px]" on:click={submitFeedbackForm}>Send Bug Report</Button>
+						<Button class="max-w-[150px]" on:click={submitFeedbackForm}>Submit Survey</Button>
 					</Card.Footer>
 				</Card.Root>
 			</Tabs.Content>
@@ -118,7 +163,7 @@
 						</div>
 					</Card.Content>
 					<Card.Footer>
-						<Button class="max-w-[150px]" on:click={submitBugReport}>Send Bug Report</Button>
+						<!-- <Button class="max-w-[150px]" on:click={submitBugReport}>Send Bug Report</Button> -->
 					</Card.Footer>
 				</Card.Root>
 			</Tabs.Content>

@@ -66,5 +66,11 @@ export const adminRoutes: Route[] = [
 		id: 'statistics',
 		icon: Icons.AlignEndHorizontal,
 		url: './statistics'
+	},
+	{
+		title: 'Settings',
+		id: 'settings',
+		icon: Icons.Settings,
+		url: './settings'
 	}
 ];

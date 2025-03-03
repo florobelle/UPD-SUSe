@@ -1,5 +1,5 @@
 import { allColleges, allPrograms } from '$lib/stores/CollegeProgramStore';
-import { userTypes } from '$lib/stores/UserTypeStore';
+import { UserTypeStore } from '$lib/stores/UserTypeStore';
 import { z } from 'zod';
 
 export const formSchema = z.object({
@@ -33,7 +33,7 @@ export const formSchema = z.object({
 	phone_number: z.string().regex(/^\d{10}$/, {
 		message: 'Exactly 10 digits'
 	}),
-	user_type: z.enum(userTypes.map((f) => f.value) as [string, ...string[]], {
+	user_type: z.enum(UserTypeStore.map((f) => f.value) as [string, ...string[]], {
 		message: 'Please select a user type'
 	}),
 	college: z.enum(allColleges.map((g) => g.value) as [string, ...string[]], {

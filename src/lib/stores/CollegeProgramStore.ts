@@ -12,7 +12,7 @@ export type College = {
 	programs: Program[];
 };
 
-export const collegePrograms: Readable<College[]> = readable([
+export const CollegeProgramStore: Readable<College[]> = readable([
 	// {
 	// 	label: 'College of Architecture',
 	// 	value: '1',
@@ -198,13 +198,13 @@ export const collegePrograms: Readable<College[]> = readable([
 
 function getAllPrograms(): Program[] {
 	// returns a list of all the programs only
-	const colleges = get(collegePrograms);
+	const colleges = get(CollegeProgramStore);
 	return colleges.flatMap((college) => college.programs);
 }
 
 function getAllColleges() {
 	// returns a list of all the colleges only
-	const colleges = get(collegePrograms);
+	const colleges = get(CollegeProgramStore);
 	return colleges.map((college) => ({
 		label: college.label,
 		value: college.value
@@ -213,4 +213,4 @@ function getAllColleges() {
 
 export const allPrograms = getAllPrograms();
 export const allColleges = getAllColleges();
-export const collegeProgramsList = get(collegePrograms);
+export const CollegeProgramStoreList = get(CollegeProgramStore);

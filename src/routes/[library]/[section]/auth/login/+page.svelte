@@ -13,7 +13,7 @@
 	import { readUsername } from '../../../../supabase/User';
 	import { page } from '$app/stores';
 	import { deleteCookie } from '$lib/client/Cookie';
-	import { AdminStore, AdminTableStore, isPCVerified } from '$lib/stores/AdminStore';
+	import { AdminStore, AdminTableStore, PCInfoStore } from '$lib/stores/AdminStore';
 	import { readEmail } from '../../../../supabase/Admin';
 	import { convertRfidInt } from '$lib/utilsBack';
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
@@ -77,15 +77,15 @@
 		}
 	};
 
-    $UserTableStore = [];
-    $ServiceTableStore = [];
-    $UsageLogTableStore = [];
-    $AdminTableStore = [];
+	$UserTableStore = [];
+	$ServiceTableStore = [];
+	$UsageLogTableStore = [];
+	$AdminTableStore = [];
 
-    $StatisticStore = {
-        total_usagelogs: 0,
-        total_services: {}
-    }
+	$StatisticStore = {
+		total_usagelogs: 0,
+		total_services: {}
+	};
 
 	// ----------------------------------------------------------------------------
 
@@ -192,10 +192,6 @@
 	function handleKeydownRfid(event: KeyboardEvent) {
 		// Listens to input in the RFID field
 		if (event.key === 'Enter' || rfidGlobal.length == 10) {
-            if (!$isPCVerified.isVerified) {
-                toast.error('PC not allowed to access SUSê.')
-                return;
-            }
 			if (rfidGlobal.match(/[a-fA-F]+/i)) {
 				rfidConverted = convertRfidInt(rfidGlobal);
 			} else {
@@ -206,6 +202,10 @@
 				checkAdminCount++;
 				checkAdminRfid();
 			} else {
+				if (!$PCInfoStore.isVerified) {
+					toast.error('PC not allowed to access SUSê.');
+					return;
+				}
 				checkRfidCount++;
 				checkUserRfid();
 			}
@@ -215,10 +215,10 @@
 	function handleKeydownUsername(event: KeyboardEvent) {
 		// Listens to input in the UP mail field
 		if (event.key === 'Enter') {
-            if (!$isPCVerified.isVerified) {
-                toast.error('PC not allowed to access SUSê.')
-                return;
-            }
+			if (!$PCInfoStore.isVerified) {
+				toast.error('PC not allowed to access SUSê.');
+				return;
+			}
 			checkUsernameCount++;
 			checkUsername();
 		}
@@ -268,13 +268,14 @@
 		if (browser) {
 			selectText('userRfid');
 			document.addEventListener('mousedown', handleClickOutside);
-            if (!$isPCVerified.isCalled) {
+            if (!$PCInfoStore.icVerifierCalled) {
                 verifyPC().then((res) => {
-                    $isPCVerified.isCalled = true;
+                    $PCInfoStore.icVerifierCalled = true;
                     if (res.error) {
                         toast.error(res.error)
                     } else {
-                        $isPCVerified.isVerified = true;
+                        $PCInfoStore.isVerified = true;
+                        toast.success('PC approved to access SUSê.')
                     }
                 })
             }

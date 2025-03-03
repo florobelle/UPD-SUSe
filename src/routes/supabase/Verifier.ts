@@ -29,21 +29,36 @@ export async function verifyPC(): Promise<{ error: string }> {
     }
     const { data, error } = await supabaseClient
         .from('cookie')
-        .select('is_allowed')
+        .select('is_approved')
         .eq('cookie_id', pcCookie)
     if (error) {
         return {
             error: error.message
         }
     }
-    // else if (data.length && !data[0].is_allowed) {
-    //     return {
-    //         error: 'PC not allowed to access SUSê.'
-    //     }
-    // } 
+    else if (data.length && !data[0].is_approved) {
+        return {
+            error: 'PC not approved to access SUSê.'
+        }
+    }
     else if (data.length == 0) {
         await addPCCookie();
     }
+    return {
+        error: ''
+    }
+}
+
+export async function approvePC(cookieID: number): Promise<{ error: string }> {
+    // Approves this PC
+    const { error } = await supabaseClient.from('cookie').update({ is_approved: true }).eq('cookie_id', cookieID);
+
+    if (error) {
+        return {
+            error: error.message
+        }
+    }
+
     return {
         error: ''
     }
