@@ -1,45 +1,45 @@
 <script lang="ts">
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
-	import { UserTypeStore } from '$lib/stores/UserTypeStore';
 	import { ChevronsUpDown, Check } from 'lucide-svelte';
 	import { cn } from '$lib/utilsFront';
+	import { sectionTypes } from '$lib/stores/LibrarySectionStore';
 
 	let comboboxOpen = false;
-	export let selectedUserType = '';
+	export let selectedSection = '';
 	export let onChange: (value: string) => void = () => {};
 </script>
 
 <Popover.Root bind:open={comboboxOpen}>
 	<Popover.Trigger
-		class=" border-1 flex w-[175px] justify-between rounded-sm border border-slate-200 p-2"
+		class=" border-1 flex justify-between rounded-sm border border-slate-200 p-2"
 		role="combobox"
 	>
-		<p class="truncate">
-			{UserTypeStore.find((f) => f.label === selectedUserType)?.label ?? 'Select user type'}
+		<p class="truncate text-sm my-auto">
+			{sectionTypes.find((f) => f.value === selectedSection)?.label ?? 'Select a section'}
 		</p>
 		<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 	</Popover.Trigger>
 
 	<Popover.Content>
 		<Command.Root shouldFilter={false}>
-			<Command.Empty>No user type found.</Command.Empty>
+			<Command.Empty>No library found.</Command.Empty>
 			<Command.List>
 				<Command.Group>
-					{#each UserTypeStore as userType}
+					{#each sectionTypes as sectionType}
 						<Command.Item
-							value={userType.label}
+							value={sectionType.label}
 							onSelect={() => {
-								selectedUserType = userType.label;
-								onChange(userType.value);
+								selectedSection = sectionType.label;
+								onChange(sectionType.value);
 								comboboxOpen = false;
 							}}
 						>
-							{userType.label}
+							{sectionType.label}
 							<Check
 								class={cn(
 									'ml-auto h-4 w-4',
-									userType.value !== selectedUserType && 'text-transparent'
+									sectionType.value !== selectedSection && 'text-transparent'
 								)}
 							/>
 						</Command.Item>

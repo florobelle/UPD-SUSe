@@ -7,5 +7,5 @@ export interface RowChanges {
 	};
 }
 
-export const activeHeader = writable<string | null>(null);
-export const rowChanges = writable<{ [key: number]: any }>({});
+export const ActiveHeaderStore = writable<string | null>(null);
+export const RowChangeStore = writable<{ [key: number]: any }>({});

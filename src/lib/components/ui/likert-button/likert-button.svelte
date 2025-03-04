@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Credits for the html and css to https://codepen.io/aaroniker/pen/mdyYBPP
 	export let answer: string;
-    export let questionName: string
+	export let questionName: string;
 </script>
 
 <div class="feedback w-full flex grow items-top text-center justify-left gap-4">

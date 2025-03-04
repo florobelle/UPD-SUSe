@@ -4,7 +4,7 @@
 	import X from 'lucide-svelte/icons/x';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { rowChanges } from '$lib/stores/tableStore';
+	import { RowChangeStore } from '$lib/stores/tableStore';
 	import toast from 'svelte-5-french-toast';
 	import { deleteUser, updateUser } from '../../../../routes/supabase/User';
 	import { deleteAdmin, updateAdmin } from '../../../../routes/supabase/Admin';
@@ -25,7 +25,7 @@
 	function setEditRow(val: boolean) {
 		isEdit = val;
 
-		rowChanges.update((rows) => {
+		RowChangeStore.update((rows) => {
 			if (!val) {
 				// Remove the row from edit state
 				const newRows = { ...rows };
@@ -43,7 +43,7 @@
 
 	async function saveChanges() {
 		// Get the current changes for this row
-		const changes = $rowChanges[id];
+		const changes = $RowChangeStore[id];
 		if (!changes) return;
 
 		const updatedProperties: { [key: string]: string | number } = {};
@@ -303,8 +303,8 @@
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
-				<!-- <DropdownMenu.Item on:click={deleteRow}>Delete</DropdownMenu.Item> -->
 				<DropdownMenu.Item on:click={() => setEditRow(true)}>Edit</DropdownMenu.Item>
+				<DropdownMenu.Item on:click={deleteRow}>Delete</DropdownMenu.Item>
 			</DropdownMenu.Group>
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>

@@ -4,7 +4,7 @@
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { writable, type Writable } from 'svelte/store';
-	import { activeHeader } from '$lib/stores/tableStore';
+	import { ActiveHeaderStore } from '$lib/stores/tableStore';
 
 	const props = $props<{
 		header: string;
@@ -16,7 +16,7 @@
 	const { header, onclick, variant = 'ghost', ...restProps } = props;
 
 	let isActive: Writable<boolean> = writable(false);
-	activeHeader.subscribe((current) => {
+	ActiveHeaderStore.subscribe((current) => {
 		isActive.set(current === header);
 		if (!isActive) {
 			up.set(false);
@@ -24,9 +24,8 @@
 	});
 
 	function handleClick() {
-		activeHeader.set(header);
+		ActiveHeaderStore.set(header);
 		up.update((value) => !value);
-		console.log($activeHeader, $up);
 		onclick();
 	}
 </script>

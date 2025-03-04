@@ -4,7 +4,7 @@
 	import { ChevronsUpDown, Check } from 'lucide-svelte';
 	import { cn } from '$lib/utilsFront';
 	import type { College } from '$lib/stores/CollegeProgramStore';
-	import { collegeProgramsList } from '$lib/stores/CollegeProgramStore';
+	import { CollegeProgramStoreList } from '$lib/stores/CollegeProgramStore';
 	import { allPrograms } from '$lib/stores/CollegeProgramStore';
 
 	// Combobox variables
@@ -14,14 +14,14 @@
 	export let onChange: (value: string) => void = () => {};
 
 	// Combobox filter functions
-	function filterCollegePrograms(collegeProgramsList: College[], searchTerm: string): College[] {
+	function filterCollegePrograms(CollegeProgramStoreList: College[], searchTerm: string): College[] {
 		// Function that filters the programs in the programs combobox based on:
 		// 1. The search term in the input
 		// 2. The selected college (if there is)
 
 		const normalizedSearchTerm = searchTerm.toLowerCase();
 
-		return collegeProgramsList
+		return CollegeProgramStoreList
 			.map((college) => {
 				// only include programs that match the search term
 				const filteredPrograms = college.programs.filter((program) =>
@@ -41,7 +41,7 @@
 	}
 
 	// Combobox filtered stores
-	$: filteredPrograms = filterCollegePrograms(collegeProgramsList, searchProgram);
+	$: filteredPrograms = filterCollegePrograms(CollegeProgramStoreList, searchProgram);
 </script>
 
 <Popover.Root bind:open={comboboxOpen}>

@@ -199,7 +199,7 @@
 		<!-- Tabs -->
 		<Tabs.Root value="feedback" class="">
 			<Tabs.List class="grid max-w-[300px] grid-cols-2">
-				<Tabs.Trigger value="feedback">Feedback</Tabs.Trigger>
+				<Tabs.Trigger value="feedback">Survey</Tabs.Trigger>
 				<Tabs.Trigger value="bug-report">Bug Report</Tabs.Trigger>
 			</Tabs.List>
 			<!-- Feedback Form -->
@@ -328,7 +328,7 @@
 						</div>
 					</Card.Content>
 					<Card.Footer>
-						<Button class="max-w-[150px]" on:click={submitBugReport}>Send Bug Report</Button>
+						<!-- <Button class="max-w-[150px]" on:click={submitBugReport}>Send Bug Report</Button> -->
 					</Card.Footer>
 				</Card.Root>
 			</Tabs.Content>

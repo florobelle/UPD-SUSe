@@ -13,11 +13,13 @@
 	import { readUsername } from '../../../../supabase/User';
 	import { page } from '$app/stores';
 	import { deleteCookie } from '$lib/client/Cookie';
-	import { AdminStore, AdminTableStore } from '$lib/stores/AdminStore';
+	import { AdminStore, AdminTableStore, PCInfoStore } from '$lib/stores/AdminStore';
 	import { readEmail } from '../../../../supabase/Admin';
 	import { convertRfidInt } from '$lib/utilsBack';
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
+	import { verifyPC } from '../../../../supabase/Verifier';
+	import { StatisticStore } from '$lib/stores/StatisticStore';
 
 	let loginWithRfid: boolean = true;
 	let rfidGlobal: string = '';
@@ -75,10 +77,15 @@
 		}
 	};
 
-    $UserTableStore = [];
-    $ServiceTableStore = [];
-    $UsageLogTableStore = [];
-    $AdminTableStore = [];
+	$UserTableStore = [];
+	$ServiceTableStore = [];
+	$UsageLogTableStore = [];
+	$AdminTableStore = [];
+
+	$StatisticStore = {
+		total_usagelogs: 0,
+		total_services: {}
+	};
 
 	// ----------------------------------------------------------------------------
 
@@ -195,6 +202,10 @@
 				checkAdminCount++;
 				checkAdminRfid();
 			} else {
+				if (!$PCInfoStore.isVerified) {
+					toast.error('PC not allowed to access SUSê.');
+					return;
+				}
 				checkRfidCount++;
 				checkUserRfid();
 			}
@@ -204,6 +215,10 @@
 	function handleKeydownUsername(event: KeyboardEvent) {
 		// Listens to input in the UP mail field
 		if (event.key === 'Enter') {
+			if (!$PCInfoStore.isVerified) {
+				toast.error('PC not allowed to access SUSê.');
+				return;
+			}
 			checkUsernameCount++;
 			checkUsername();
 		}
@@ -253,6 +268,17 @@
 		if (browser) {
 			selectText('userRfid');
 			document.addEventListener('mousedown', handleClickOutside);
+            if (!$PCInfoStore.icVerifierCalled) {
+                verifyPC().then((res) => {
+                    $PCInfoStore.icVerifierCalled = true;
+                    if (res.error) {
+                        toast.error(res.error)
+                    } else {
+                        $PCInfoStore.isVerified = true;
+                        toast.success('PC approved to access SUSê.')
+                    }
+                })
+            }
 		}
 	});
 

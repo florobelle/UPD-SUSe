@@ -12,7 +12,7 @@ export type College = {
 	programs: Program[];
 };
 
-export const collegePrograms: Readable<College[]> = readable([
+export const CollegeProgramStore: Readable<College[]> = readable([
 	// {
 	// 	label: 'College of Architecture',
 	// 	value: '1',
@@ -71,6 +71,7 @@ export const collegePrograms: Readable<College[]> = readable([
 		value: '7',
 		programs: [
 			{ label: 'Artificial Intelligence (MEng, PhD)', value: '20' },
+			{ label: 'Bioinformatics (MS)', value: '83' },
 			{ label: 'Chemical Engineering (BS)', value: '21' },
 			{ label: 'Chemical Engineering (MS, PhD)', value: '22' },
 			{ label: 'Civil Engineering (BS)', value: '23' },
@@ -78,7 +79,6 @@ export const collegePrograms: Readable<College[]> = readable([
 			{ label: 'Computer Engineering (BS)', value: '25' },
 			{ label: 'Computer Science (BS)', value: '26' },
 			{ label: 'Computer Science (MS, PhD)', value: '82' },
-			{ label: 'Bioinformatics (MS)', value: '83' },
 			{ label: 'Electrical Engineering (BS)', value: '27' },
 			{ label: 'Electrical Engineering (ME, MS, PhD)', value: '28' },
 			{ label: 'Environmental Engineering (Dip, MS, PhD)', value: '29' },
@@ -198,13 +198,13 @@ export const collegePrograms: Readable<College[]> = readable([
 
 function getAllPrograms(): Program[] {
 	// returns a list of all the programs only
-	const colleges = get(collegePrograms);
+	const colleges = get(CollegeProgramStore);
 	return colleges.flatMap((college) => college.programs);
 }
 
 function getAllColleges() {
 	// returns a list of all the colleges only
-	const colleges = get(collegePrograms);
+	const colleges = get(CollegeProgramStore);
 	return colleges.map((college) => ({
 		label: college.label,
 		value: college.value
@@ -213,4 +213,4 @@ function getAllColleges() {
 
 export const allPrograms = getAllPrograms();
 export const allColleges = getAllColleges();
-export const collegeProgramsList = get(collegePrograms);
+export const CollegeProgramStoreList = get(CollegeProgramStore);

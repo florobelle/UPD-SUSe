@@ -32,7 +32,7 @@ export const studentRoutes: Route[] = [
 		title: 'Send Feedback',
 		id: 'feedback-form',
 		icon: Icons.MessageCircleHeart,
-		url: './feedback-form'
+		url: ''
 	}
 ];
 
@@ -60,5 +60,17 @@ export const adminRoutes: Route[] = [
 		id: 'administrators',
 		icon: Icons.ShoppingCart,
 		url: './administrators'
+	},
+	{
+		title: 'Statistics',
+		id: 'statistics',
+		icon: Icons.AlignEndHorizontal,
+		url: './statistics'
+	},
+	{
+		title: 'Settings',
+		id: 'settings',
+		icon: Icons.Settings,
+		url: './settings'
 	}
 ];
