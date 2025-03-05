@@ -6,12 +6,13 @@ export async function readUsageLog(filter: UsageLogFilter): Promise<UsageLogResp
     // Reads and filters the service_engglib table in the database and returns all corresponding entries
     let midnight3DaysAgo: Date = new Date();
     midnight3DaysAgo.setHours(0, 0, 0, 0);
-    midnight3DaysAgo.setDate(midnight3DaysAgo.getDate() - 3)
+    midnight3DaysAgo.setDate(midnight3DaysAgo.getDate() - 4)
 
 
     let query = supabaseClient
         .from(`public_usagelog_${filter.library}`)
         .select("*")
+        .order('usagelog_id', { ascending: true })
 
     if (filter.usagelog_id) {
         query = query.eq('usagelog_id', filter.usagelog_id);
@@ -26,7 +27,7 @@ export async function readUsageLog(filter: UsageLogFilter): Promise<UsageLogResp
     }
 
     if (!filter.start && !filter.end) {
-        query = query.gte('start', midnight3DaysAgo.toISOString())
+        query = query.or(`start.gte.${midnight3DaysAgo.toISOString()},is_active.is.true`);
     }
 
     if (filter.is_active != null) {
