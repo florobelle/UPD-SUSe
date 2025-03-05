@@ -47,82 +47,56 @@
 
 	const surveyQuestions: Array<{
 		category: string;
-		contents: Array<{ subcategory: string; questions: { [key: string]: string } }>;
+		questions: { [key: string]: string };
 	}> = [
 		{
 			category: 'User Interface & User Experience',
-			contents: [
-				{
-					subcategory: 'Simplicity',
-					questions: {
-						q1_1_1: 'SUSê has a simple but modern layout and design.',
-						q1_1_2: 'SUSê has a pleasant color palette.',
-						q1_1_3: 'SUSê has the necessary content displayed to explain its functions.',
-						q1_1_4: 'Overall, SUSê has an consistent and easy-to-read content.'
-					}
-				},
-				{
-					subcategory: 'Navigation',
-					questions: {
-						q1_2_1: 'SUSê is easy to navigate.',
-						q1_2_2: 'SUSê has clear labels on buttons and links.'
-					}
-				}
-			]
+			questions: {
+				q1_1_1: 'SUSê has a simple but modern layout and design.',
+				q1_1_2: 'SUSê has a pleasant color palette.',
+				q1_1_3: 'SUSê has enough content displayed to explain its functions.',
+				q1_1_4: 'Overall, SUSê has consistent organization and easy-to-read content.',
+
+				q1_2_1: 'SUSê is easy to navigate.',
+				q1_2_2: 'SUSê has clear labels on buttons and links.'
+			}
 		},
 		{
 			category: 'Novelty & Need',
-			contents: [
-				{
-					subcategory: '',
-					questions: {
-						q2_1: 'SUSê is a needed upgrade in Engineering Libraries services.',
-						q2_2: 'SUSê should be available in other sections of the Engineering Libraries/other libraries in UP.',
-						q2_3: 'SUSê is a unique software that gives more use to my UP ID.',
-						q2_4: 'SUSê is unlike other applications used in UP libraries, making it a novel feature in Engineering Libraries.'
-					}
-				}
-			]
+			questions: {
+				q2_1: 'SUSê is a needed upgrade in Engineering Libraries services.',
+				q2_2: 'SUSê should be available in other sections of the Engineering Libraries. (SUSê is only available in EnggLib 1 Circulation and GFS, and EnggLib 2 Circulation)',
+				q2_3: 'SUSê gives more utility to my UP ID.',
+				q2_4: 'SUSê is a novelty in Engineering Libraries. (novelty: different, new, unusual)'
+			}
 		},
 		{
 			category: 'End-User Satisfaction',
-			contents: [
-				{
-					subcategory: 'Satisfaction with Version 2 Compared to Version 1',
-					questions: {
-						q3_1_1:
-							'Logging in using my RFID is faster and easier than manually answering previous Google Registration Forms.',
-						q3_1_2: 'SUSê v2 has better design and functionality than SUSê v1.',
-						q3_1_3: 'SUSê v2 is faster and easier to use than SUSê v1.',
-						q3_1_4:
-							'SUSê v1 captured the basic features for registration and availing a miscellaneous service but SUSê v2 improved these features.',
-						q3_1_5: 'SUSê still has room for improvement.'
-					}
-				},
-				{
-					subcategory: 'Satisfaction with Version 2',
-					questions: {
-						q3_2_1:
-							'SUSê improved my experience with availing miscellaneous in the Engineering Libraries.',
-						q3_2_2: 'SUSê adds more utility to my UP ID.',
-						q3_2_3:
-							'I would prefer to use SUSê from now on when availing services in the Engineering Libraries.'
-					}
-				}
-			]
+			questions: {
+				q3_1_1:
+					'Logging in using my UP ID is faster and easier than manually answering Google Registration Forms.',
+				q3_1_2: 'SUSê v2 has better design and functionality than SUSê v1.',
+				q3_1_3:
+					'SUSê v2 is faster and easier to use than SUSê v1. (N/A if you did not use SUSê in 1st Sem 24-25)',
+				q3_1_4:
+					'SUSê v1 captured the basic features for registration and availing a miscellaneous service but SUSê v2 improved these features.  (N/A if you did not use SUSê in 1st Sem 24-25)',
+				q3_1_5:
+					'SUSê still has room for improvement. (N/A if you did not use SUSê in 1st Sem 24-25)',
+
+				q3_2_1:
+					'SUSê improved my experience when availing miscellaneous in the Engineering Libraries.',
+				q3_2_2: 'I still prefer using Google Forms when availing Engineering Library services.',
+				q3_2_3:
+					'I would prefer to use SUSê from now on when availing services in the Engineering Libraries.'
+			}
 		},
 		{
 			category: 'Accessibility',
-			contents: [
-				{
-					subcategory: '',
-					questions: {
-						q4_1: 'SUSê has clear contrast between text and background, making it easier to read the content.',
-						q4_2: 'SUSê can be used easily with a keyboard only.',
-						q4_3: 'SUSê can be used with a screen reader and has alternative text to images.'
-					}
-				}
-			]
+			questions: {
+				q4_1: 'SUSê has clear contrast between text and background, making it easier to read the content.',
+				q4_2: 'SUSê can be used easily with a keyboard only. (N/A if you use mouse and keyboard to interact with SUSê)',
+				q4_3: 'SUSê can be used with a screen reader and has alternative text to images. (N/A if you do not use screen readers for SUSê)'
+			}
 		}
 	];
 
@@ -218,30 +192,24 @@
 					<Card.Content class="flex flex-col">
 						{#key pageNum}
 							<h3 class="text-lg font-semibold">{surveyQuestions[pageNum].category}</h3>
-							{#each surveyQuestions[pageNum].contents as content}
-								<!-- {#if content.subcategory}
-									<h2 class="text-md pt-4 font-semibold text-foreground/70 uppercase">
-										{content.subcategory}
-									</h2>
-								{/if} -->
-								<div class="grid grid-cols-2 py-4">
-									<div class="flex flex-col gap-6">
-										{#each Object.keys(content.questions) as key, i}
-											<div class="flex flex-col gap-1.5">
-												<Label for="feedback" class="text-base"
-													>{content.questions[key]}</Label
-												>
-												{#if !completeSurvey && !surveyAnswers[key] && key != 'q5_2'}
-													<p class="text-sm text-destructive">
-														Please respond to the statement/question above.
-													</p>
-												{/if}
-												<LikertButton bind:answer={surveyAnswers[key]} questionName={key} />
-											</div>
-										{/each}
-									</div>
+							<div class="grid grid-cols-2 py-4">
+								<!-- Questions -->
+								<div class="flex flex-col gap-6">
+									{#each Object.keys(surveyQuestions[pageNum].questions) as key, i}
+										<div class="flex flex-col gap-1.5">
+											<Label for="feedback" class="text-base"
+												>{i + 1}. {surveyQuestions[pageNum].questions[key]}</Label
+											>
+											{#if !completeSurvey && !surveyAnswers[key] && key != 'q5_2'}
+												<p class="text-sm text-destructive">
+													Please respond to the statement/question above.
+												</p>
+											{/if}
+											<LikertButton bind:answer={surveyAnswers[key]} questionName={key} />
+										</div>
+									{/each}
 								</div>
-							{/each}
+							</div>
 						{/key}
 					</Card.Content>
 
