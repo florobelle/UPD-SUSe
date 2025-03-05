@@ -10,9 +10,9 @@
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
 
-	export const initialSort = [
-		{ id: 'is_active', desc: false },
-		{ id: 'usagelog_id', desc: false }
+	export const initialSort: any[] = [
+		{ id: 'is_active', desc: true },
+		{ id: 'usagelog_id', desc: true },
 	];
 </script>
 
