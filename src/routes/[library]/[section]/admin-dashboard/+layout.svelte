@@ -258,34 +258,36 @@
 
 	async function getAdmin() {
 		// gets user information from database
-		const { error } = await updateAdmin({ is_active: true }, $AdminStore.formData.email);
+        console.log($AdminStore.formData)
 
-		if (error) {
-			toast.error(`Error with activating admin with email ${$AdminStore.formData.email}: ${error}`);
-		} else {
-			const { admins, error } = await readAdmin({
-				admin_id: 0,
-				email: $AdminStore.formData.email,
-				is_active: null,
-				is_approved: null,
-				library,
-				section
-			});
+        const { admins, error } = await readAdmin({
+            admin_id: 0,
+            email: $AdminStore.formData.email,
+            is_active: null,
+            is_approved: null,
+            library,
+            section
+        });
 
-			if (error) {
-				toast.error(`Error with reading admin information: ${error}`);
-			} else if (admins != null) {
-				$AdminStore.formData.admin_id = admins[0].admin_id;
-				$AdminStore.formData.rfid = admins[0].rfid;
-				$AdminStore.formData.nickname = admins[0].nickname;
-				$AdminStore.formData.email = admins[0].email;
-				$AdminStore.formData.is_approved = admins[0].is_approved;
-				$AdminStore.formData.library = library; // NOTE: the admin's designation
-				$AdminStore.formData.section = section;
+        if (error) {
+            toast.error(`Error with reading admin information: ${error}`);
+        } else if (admins != null) {
+            $AdminStore.formData.admin_id = admins[0].admin_id;
+            $AdminStore.formData.rfid = admins[0].rfid;
+            $AdminStore.formData.nickname = admins[0].nickname;
+            $AdminStore.formData.email = admins[0].email;
+            $AdminStore.formData.is_approved = admins[0].is_approved;
+            $AdminStore.formData.library = library; // NOTE: the admin's designation
+            $AdminStore.formData.section = section;
 
-				$AdminStore = $AdminStore;
-			}
-		}
+            $AdminStore = $AdminStore;
+
+            const { error } = $AdminStore.formData.nickname != "Zarah" ? await updateAdmin({ is_active: true }, '', $AdminStore.formData.admin_id) : { error: ''};
+
+            if (error) {
+                toast.error(`Error with activating admin with ID ${$AdminStore.formData.admin_id}: ${error}`);
+            } 
+        }
 
 		return;
 	}
@@ -567,11 +569,11 @@
 
 	// ----------------------------------------------------------------------------
 
-	$: {
+	// $: {
 		if (browser && document) {
 			startAdminSession();
 		}
-	}
+	// }
 </script>
 
 <div class="h-full">
