@@ -48,6 +48,7 @@
 	const surveyQuestions: Array<{
 		category: string;
 		questions: { [key: string]: string };
+        completeQuestions: number;
 	}> = [
 		{
 			category: 'User Interface & User Experience',
@@ -59,7 +60,8 @@
 
 				q1_2_1: 'SUSê is easy to navigate.',
 				q1_2_2: 'SUSê has clear labels on buttons and links.'
-			}
+			},
+            completeQuestions: 0
 		},
 		{
 			category: 'Novelty & Need',
@@ -68,7 +70,8 @@
 				q2_2: 'SUSê should be available in other sections of the Engineering Libraries. (SUSê is only available in EnggLib 1 Circulation and GFS, and EnggLib 2 Circulation)',
 				q2_3: 'SUSê gives more utility to my UP ID.',
 				q2_4: 'SUSê is a novelty in Engineering Libraries. (novelty: different, new, unusual)'
-			}
+			},
+            completeQuestions: 0
 		},
 		{
 			category: 'End-User Satisfaction',
@@ -88,7 +91,8 @@
 				q3_2_2: 'I still prefer using Google Forms when availing Engineering Library services.',
 				q3_2_3:
 					'I would prefer to use SUSê from now on when availing services in the Engineering Libraries.'
-			}
+			},
+            completeQuestions: 0
 		},
 		{
 			category: 'Accessibility',
@@ -96,7 +100,8 @@
 				q4_1: 'SUSê has clear contrast between text and background, making it easier to read the content.',
 				q4_2: 'SUSê can be used easily with a keyboard only. (N/A if you use mouse and keyboard to interact with SUSê)',
 				q4_3: 'SUSê can be used with a screen reader and has alternative text to images. (N/A if you do not use screen readers for SUSê)'
-			}
+			},
+            completeQuestions: 0
 		}
 	];
 
@@ -109,6 +114,8 @@
 
 	let completeSurvey: boolean = true;
 	let completeBugReport: boolean = true;
+
+    let answerUpdate: boolean = false;
 
 	async function submitFeedbackForm() {
 		// stores library user answers to database
@@ -160,60 +167,73 @@
 	}
 </script>
 
-<ScrollArea class="">
-	<div class="flex h-full w-full flex-col gap-10 p-10 md:p-20">
-		<!-- Title -->
-		<div class="flex w-full flex-col gap-4">
-			<h1 class="text-3xl font-medium">We would love to hear your thoughts!</h1>
-			<p class="text-slate-500">
-				SUSê is built by students, for the students. Any feedback makes SUSê better.
-			</p>
-		</div>
+<div class="flex h-full w-full flex-col gap-10 p-10 md:p-20">
+	<!-- Title -->
+	<div class="flex w-full flex-col gap-4">
+		<h1 class="text-3xl font-medium">We would love to hear your thoughts!</h1>
+		<p class="text-slate-500">
+			SUSê is built by students, for the students. Any feedback makes SUSê better.
+		</p>
+	</div>
 
-		<!-- Tabs -->
-		<Tabs.Root value="feedback" class="">
-			<Tabs.List class="grid max-w-[300px] grid-cols-2">
-				<Tabs.Trigger value="feedback">Survey</Tabs.Trigger>
-				<Tabs.Trigger value="bug-report">Bug Report</Tabs.Trigger>
-			</Tabs.List>
-			<!-- Feedback Form -->
-			<Tabs.Content value="feedback">
-				<Card.Root>
-					<Card.Header>
-						<Card.Title id="survey-title">Survey</Card.Title>
-						<Card.Description
-							>Zarah Floro and Nina Sapitula WSL seniors conducting a survey on the factors
-							affecting the success of a website. Please indicate your disagreement/agreement with
-							the following statements to complete the survey. Your answers would greatly contribute
-							to their research!</Card.Description
-						>
-					</Card.Header>
+	<!-- Tabs -->
+	<Tabs.Root value="feedback" class="">
+		<Tabs.List class="grid max-w-[300px] grid-cols-2">
+			<Tabs.Trigger value="feedback">Survey</Tabs.Trigger>
+			<Tabs.Trigger value="bug-report">Bug Report</Tabs.Trigger>
+		</Tabs.List>
+		<!-- Feedback Form -->
+		<Tabs.Content value="feedback">
+			<Card.Root>
+				<Card.Header>
+					<Card.Title id="survey-title">Survey</Card.Title>
+					<Card.Description
+						>Zarah Floro and Nina Sapitula WSL seniors conducting a survey on the factors affecting
+						the success of a website. Please indicate your disagreement/agreement with the following
+						statements to complete the survey. Your answers would greatly contribute to their
+						research!</Card.Description
+					>
+				</Card.Header>
 
-					<Card.Content class="flex flex-col">
-						{#key pageNum}
-							<h3 class="text-lg font-semibold">{surveyQuestions[pageNum].category}</h3>
-							<div class="grid grid-cols-2 py-4">
-								<!-- Questions -->
-								<div class="flex flex-col gap-6">
-									{#each Object.keys(surveyQuestions[pageNum].questions) as key, i}
-										<div class="flex flex-col gap-1.5">
-											<Label for="feedback" class="text-base"
-												>{i + 1}. {surveyQuestions[pageNum].questions[key]}</Label
-											>
-											{#if !completeSurvey && !surveyAnswers[key] && key != 'q5_2'}
-												<p class="text-sm text-destructive">
-													Please respond to the statement/question above.
-												</p>
-											{/if}
-											<LikertButton bind:answer={surveyAnswers[key]} questionName={key} />
-										</div>
-									{/each}
-								</div>
+				<Card.Content class="flex flex-col">
+					{#key pageNum}
+						<h3 class="text-lg font-semibold">{surveyQuestions[pageNum].category}</h3>
+						<div class="grid grid-cols-2 py-4">
+							<!-- Questions -->
+							<div class="flex flex-col gap-6">
+								{#each Object.keys(surveyQuestions[pageNum].questions) as key, i}
+									<div class="flex flex-col gap-1.5">
+										<Label for="feedback" class="text-base"
+											>{i + 1}. {surveyQuestions[pageNum].questions[key]}</Label
+										>
+										{#if !completeSurvey && !surveyAnswers[key] && key != 'q5_2'}
+											<p class="text-sm text-destructive">
+												Please respond to the statement/question above.
+											</p>
+										{/if}
+										<LikertButton bind:answer={surveyAnswers[key]} on:change={_ => surveyQuestions[pageNum].completeQuestions++} questionName={key} />
+									</div>
+								{/each}
 							</div>
-						{/key}
-					</Card.Content>
 
-					<!-- <div class="grid w-full gap-1.5">
+							<!-- Sticky -->
+							{#key surveyQuestions[pageNum].completeQuestions}
+								<div class="sticky top-[30%] max-h-min text-center place-items-center">
+									<p class="text-[50px] font-semibold">
+										{surveyQuestions[pageNum].completeQuestions}/{Object.keys(surveyQuestions[pageNum].questions).length}
+									</p>
+                                    <p class="">Questions left in this section</p>
+                                    {#if surveyQuestions[pageNum].completeQuestions == Object.keys(surveyQuestions[pageNum].questions).length}
+                                        <p>You have completed this section! Here's an uiiau cat.</p>
+                                        <img alt="Spinning cat GIF" src={"../../../misc/cat-spinning.gif"} class="size-32"/>
+                                    {/if}
+								</div>
+							{/key}
+						</div>
+					{/key}
+				</Card.Content>
+
+				<!-- <div class="grid w-full gap-1.5">
 								<Label for="feedback" class="text-base"
 									>How satisfied are you with SUSê overall?</Label
 								>
@@ -244,62 +264,61 @@
 								</p>
 							</div> -->
 
-					<Card.Footer>
-						<div class="flex items-center gap-2">
-							<Button variant="outline" on:click={prevPage}><ChevronLeft /></Button>
-							<p class="text-sm text-muted-foreground">
-								Page {pageNum + 1} of {surveyQuestions.length}
+				<Card.Footer>
+					<div class="flex items-center gap-2">
+						<Button variant="outline" on:click={prevPage}><ChevronLeft /></Button>
+						<p class="text-sm text-muted-foreground">
+							Page {pageNum + 1} of {surveyQuestions.length}
+						</p>
+						<Button variant="outline" on:click={nextPage}><ChevronRight /></Button>
+						{#if pageNum == surveyQuestions.length - 1}
+							<Button class="max-w-[150px]" on:click={submitFeedbackForm}>Submit Survey</Button>
+						{/if}
+					</div>
+				</Card.Footer>
+			</Card.Root>
+		</Tabs.Content>
+		<!-- Bug Report -->
+		<Tabs.Content value="bug-report">
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Bug Report</Card.Title>
+					<Card.Description>
+						We are working hard to make SUSê better! We appreciate any bugs 🐛 that you can find.
+					</Card.Description>
+				</Card.Header>
+
+				<Card.Content class="flex flex-col gap-4 space-y-2">
+					<div class="grid w-full gap-1.5">
+						<Label for="bug-report">What issue did you encounter?</Label>
+						{#if !completeBugReport && !bugReportAnswers.q1}
+							<p class="text-sm text-destructive">
+								Please respond to the statement/question above.
 							</p>
-							<Button variant="outline" on:click={nextPage}><ChevronRight /></Button>
-							{#if pageNum == surveyQuestions.length - 1}
-								<Button class="max-w-[150px]" on:click={submitFeedbackForm}>Submit Survey</Button>
-							{/if}
-						</div>
-					</Card.Footer>
-				</Card.Root>
-			</Tabs.Content>
-			<!-- Bug Report -->
-			<Tabs.Content value="bug-report">
-				<Card.Root>
-					<Card.Header>
-						<Card.Title>Bug Report</Card.Title>
-						<Card.Description>
-							We are working hard to make SUSê better! We appreciate any bugs 🐛 that you can find.
-						</Card.Description>
-					</Card.Header>
+						{/if}
+						<Textarea
+							placeholder="Please be as decriptive as you can when describing the bug you encountered."
+							bind:value={bugReportAnswers.q1}
+						/>
+					</div>
 
-					<Card.Content class="flex flex-col gap-4 space-y-2">
-						<div class="grid w-full gap-1.5">
-							<Label for="bug-report">What issue did you encounter?</Label>
-							{#if !completeBugReport && !bugReportAnswers.q1}
-								<p class="text-sm text-destructive">
-									Please respond to the statement/question above.
-								</p>
-							{/if}
-							<Textarea
-								placeholder="Please be as decriptive as you can when describing the bug you encountered."
-								bind:value={bugReportAnswers.q1}
-							/>
-						</div>
-
-						<div class="grid w-full gap-1.5">
-							<Label for="bug-steps">Can you describe the steps you took to cause the bug?</Label>
-							{#if !completeBugReport && !bugReportAnswers.q2}
-								<p class="text-sm text-destructive">
-									Please respond to the statement/question above.
-								</p>
-							{/if}
-							<Textarea
-								placeholder="This will help the developers recreate the bug and find what's causing the issue faster!"
-								bind:value={bugReportAnswers.q2}
-							/>
-						</div>
-					</Card.Content>
-					<Card.Footer>
-						<!-- <Button class="max-w-[150px]" on:click={submitBugReport}>Send Bug Report</Button> -->
-					</Card.Footer>
-				</Card.Root>
-			</Tabs.Content>
-		</Tabs.Root>
-	</div>
-</ScrollArea>
+					<div class="grid w-full gap-1.5">
+						<Label for="bug-steps">Can you describe the steps you took to cause the bug?</Label>
+						{#if !completeBugReport && !bugReportAnswers.q2}
+							<p class="text-sm text-destructive">
+								Please respond to the statement/question above.
+							</p>
+						{/if}
+						<Textarea
+							placeholder="This will np the developers recreate the bug and find what's causing the issue faster!"
+							bind:value={bugReportAnswers.q2}
+						/>
+					</div>
+				</Card.Content>
+				<Card.Footer>
+					<!-- <Button class="max-w-[150px]" on:click={submitBugReport}>Send Bug Report</Button> -->
+				</Card.Footer>
+			</Card.Root>
+		</Tabs.Content>
+	</Tabs.Root>
+</div>
