@@ -70,7 +70,7 @@
 				q2_1: 'SUSê is a needed upgrade in Engineering Libraries services.',
 				q2_2: 'SUSê should be available in other sections of the Engineering Libraries. (SUSê is only available in EnggLib 1 Circulation and GFS, and EnggLib 2 Circulation)',
 				q2_3: 'SUSê gives more utility to my UP ID.',
-				q2_4: 'SUSê is a novelty in Engineering Libraries. (novelty: different, new, unusual)'
+				q2_4: 'SUSê is a novelty in Engineering Libraries. (Novelty: different, new, unusual)'
 			},
 			completeQuestions: 0
 		},
@@ -78,20 +78,20 @@
 			category: 'End-User Satisfaction',
 			questions: {
 				q3_1_1:
-					'Logging in using my UP ID is faster and easier than manually answering Google Registration Forms.',
+					'Logging in using my UP ID is faster and easier than answering Google Registration Forms manually.',
 				q3_1_2: 'SUSê v2 has better design and functionality than SUSê v1.',
 				q3_1_3:
 					'SUSê v2 is faster and easier to use than SUSê v1. (N/A if you did not use SUSê in 1st Sem 24-25)',
 				q3_1_4:
-					'SUSê v1 captured the basic features for registration and availing a miscellaneous service but SUSê v2 improved these features.  (N/A if you did not use SUSê in 1st Sem 24-25)',
+					'SUSê v1 captured the basic features for registration and availing a miscellaneous service, but SUSê v2 improved these features.  (N/A if you did not use SUSê in 1st Sem 24-25).',
 				q3_1_5:
 					'SUSê still has room for improvement. (N/A if you did not use SUSê in 1st Sem 24-25)',
 
 				q3_2_1:
 					'SUSê improved my experience when availing miscellaneous in the Engineering Libraries.',
-				q3_2_2: 'I still prefer using Google Forms when availing Engineering Library services.',
+				q3_2_2: 'I still prefer answering Google Forms when availing Engineering Library miscellaneous services.',
 				q3_2_3:
-					'I would prefer to use SUSê from now on when availing services in the Engineering Libraries.'
+					'I would prefer to use SUSê from now on when availing miscellaneous services in the Engineering Libraries.'
 			},
 			completeQuestions: 0
 		},
