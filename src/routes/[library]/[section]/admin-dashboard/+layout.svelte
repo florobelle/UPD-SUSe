@@ -258,8 +258,6 @@
 
 	async function getAdmin() {
 		// gets user information from database
-        console.log($AdminStore.formData)
-
         const { admins, error } = await readAdmin({
             admin_id: 0,
             email: $AdminStore.formData.email,

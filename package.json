@@ -50,8 +50,11 @@
 		"@supabase/supabase-js": "^2.47.6",
 		"@sveltejs/adapter-vercel": "^5.5.2",
 		"@tanstack/table-core": "^8.20.5",
+		"d3-array": "^3.2.4",
+		"d3-scale": "^4.0.2",
 		"date-fns": "^4.1.0",
 		"dotenv": "^16.4.7",
+		"layerchart": "^1.0.7",
 		"svelte-5-french-toast": "^2.0.1"
 	}
 }
