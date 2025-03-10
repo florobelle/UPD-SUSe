@@ -14,8 +14,8 @@
 	import DatePicker from '$lib/components/ui/date-picker/date-picker.svelte';
 	import LibraryCombobox from '$lib/components/ui/combobox/library-combobox.svelte';
 	import SectionCombobox from '$lib/components/ui/combobox/section-combobox.svelte';
-    import { Chart, Svg, Axis, Bars, Labels } from 'layerchart'
-    import { scaleBand } from 'd3-scale';
+	import { Chart, Svg, Axis, Bars, Labels } from 'layerchart';
+	import { scaleBand } from 'd3-scale';
 
 	let selectedLibrary: string = 'engglib1';
 	let selectedSection: string = '';
@@ -44,7 +44,7 @@
 	async function getStatistics() {
 		// gets all statistics for the logged in admin
 		$StatisticStore.total_usagelogs = 0;
-        $StatisticStore.total_services = [];
+		$StatisticStore.total_services = [];
 		for (const service of $ServiceTypeStore) {
 			if (!service.main_service_type) {
 				const { count, error } = await countTotalService({
@@ -62,12 +62,16 @@
 				if (error) {
 					toast.error(`Error with getting service statistics: ${error}`);
 				} else if (count) {
-                    const stat: {[key:string]: number | string} = {service: service.service_type, value: count};
+					const stat: { [key: string]: number | string } = {
+						service: service.service_type,
+						value: count
+					};
 					$StatisticStore.total_services.push(stat);
 					$StatisticStore.total_usagelogs += count;
 				}
 			}
 		}
+        
 		return;
 	}
 
@@ -92,31 +96,28 @@
 				<Button on:click={getStatistics}>Get Statistics</Button>
 			</div>
 
-            <!-- Per Admin Statistic -->
-            <div class="h-[300px] rounded border p-4">
-                <Chart
-                    data={$StatisticStore.total_services}
-                    x="service"
-                    xScale={scaleBand().padding(0.4)}
-                    y="value"
-                    yDomain={[0, null]}
-                    yNice={4}
-                    padding={{ left: 16, bottom: 24 }}
-                >
-                    <Svg>
-                        <Axis placement="left" grid rule />
-                        <Axis
-                            placement="bottom" rule
-                        />
-                        <Bars radius={4} rounded="top" strokeWidth={1} class="fill-primary " />
-                        <Labels placement="inside" format="integer" class="fill-secondary"/>
-                    </Svg>
-                </Chart>
-            </div>
+			<!-- Per Admin Statistic -->
 			{#if $StatisticStore.total_usagelogs}
+				<div class="h-[300px] rounded border p-4">
+					<Chart
+						data={$StatisticStore.total_services}
+						x="service"
+						xScale={scaleBand().padding(0.4)}
+						y="value"
+						yDomain={[0, null]}
+						yNice={4}
+						padding={{ left: 16, bottom: 24 }}
+					>
+						<Svg>
+							<Axis placement="left" grid rule />
+							<Axis placement="bottom" rule />
+							<Bars radius={4} rounded="top" strokeWidth={1} class="fill-primary " />
+							<Labels placement="outside" format="integer" class="fill-primary" />
+						</Svg>
+					</Chart>
+				</div>
 				<p>Total Usage Logs Supervised: {$StatisticStore.total_usagelogs}</p>
 			{/if}
-
 		</div>
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">
