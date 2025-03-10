@@ -18,7 +18,7 @@
 		<p class="truncate text-sm my-auto">
 			{libraryTypes.find((f) => f.value === selectedLibrary)?.label ?? 'Select a library'}
 		</p>
-		<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+		<ChevronsUpDown class="my-auto ml-2 h-4 w-4 shrink-0 opacity-50" />
 	</Popover.Trigger>
 
 	<Popover.Content>
