@@ -14,6 +14,8 @@
 	import DatePicker from '$lib/components/ui/date-picker/date-picker.svelte';
 	import LibraryCombobox from '$lib/components/ui/combobox/library-combobox.svelte';
 	import SectionCombobox from '$lib/components/ui/combobox/section-combobox.svelte';
+    import { Chart, Svg, Axis, Bars, Labels } from 'layerchart'
+    import { scaleBand } from 'd3-scale';
 
 	let selectedLibrary: string = 'engglib1';
 	let selectedSection: string = '';
@@ -42,6 +44,7 @@
 	async function getStatistics() {
 		// gets all statistics for the logged in admin
 		$StatisticStore.total_usagelogs = 0;
+        $StatisticStore.total_services = [];
 		for (const service of $ServiceTypeStore) {
 			if (!service.main_service_type) {
 				const { count, error } = await countTotalService({
@@ -58,8 +61,9 @@
 
 				if (error) {
 					toast.error(`Error with getting service statistics: ${error}`);
-				} else {
-					$StatisticStore.total_services[service.service_type] = count;
+				} else if (count) {
+                    const stat: {[key:string]: number | string} = {service: service.service_type, value: count};
+					$StatisticStore.total_services.push(stat);
 					$StatisticStore.total_usagelogs += count;
 				}
 			}
@@ -79,22 +83,40 @@
 		<div class="flex w-[95%] flex-col gap-4">
 			<h1 class="pt-10 text-3xl font-medium">Hello, {$AdminStore.formData.nickname}</h1>
 			<h2 class="text-lg text-[#636363]">Here is your report</h2>
-			<div class="grid grid-cols-6 gap-2">
-				<LibraryCombobox bind:selectedLibrary onChange={(e:string) => (selectedLibrary = e)} />
-				<SectionCombobox bind:selectedSection onChange={(e:string) => (selectedSection = e)} />
+			<div class="grid grid-cols-6 gap-1">
+				<LibraryCombobox bind:selectedLibrary onChange={(e: string) => (selectedLibrary = e)} />
+				<SectionCombobox bind:selectedSection onChange={(e: string) => (selectedSection = e)} />
 				<Input placeholder="Enter admin nickname" class="max-w-sm" bind:value={selectedAdmin} />
 				<DatePicker bind:selectedDate={selectedStart} placeholder={'Enter start date'} />
 				<DatePicker bind:selectedDate={selectedEnd} placeholder={'Enter end date'} />
 				<Button on:click={getStatistics}>Get Statistics</Button>
 			</div>
-			{#each Object.keys($StatisticStore.total_services) as service}
-				{#if $StatisticStore.total_services[service]}
-					<p>{service}: {$StatisticStore.total_services[service]}</p>
-				{/if}
-			{/each}
+
+            <!-- Per Admin Statistic -->
+            <div class="h-[300px] rounded border p-4">
+                <Chart
+                    data={$StatisticStore.total_services}
+                    x="service"
+                    xScale={scaleBand().padding(0.4)}
+                    y="value"
+                    yDomain={[0, null]}
+                    yNice={4}
+                    padding={{ left: 16, bottom: 24 }}
+                >
+                    <Svg>
+                        <Axis placement="left" grid rule />
+                        <Axis
+                            placement="bottom" rule
+                        />
+                        <Bars radius={4} rounded="top" strokeWidth={1} class="fill-primary " />
+                        <Labels placement="inside" format="integer" class="fill-secondary"/>
+                    </Svg>
+                </Chart>
+            </div>
 			{#if $StatisticStore.total_usagelogs}
 				<p>Total Usage Logs Supervised: {$StatisticStore.total_usagelogs}</p>
 			{/if}
+
 		</div>
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">
