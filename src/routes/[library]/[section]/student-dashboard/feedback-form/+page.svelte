@@ -211,10 +211,13 @@
 				<Card.Header>
 					<Card.Title id="survey-title">Survey</Card.Title>
 					<Card.Description
-						>Zarah Floro and Nina Sapitula WSL seniors conducting a survey on the factors affecting
+						>Zarah Floro and Nina Sapitula Computer Science Web Science Laboratory (WSL) seniors conducting a survey on the factors affecting
 						the success of a website. Please indicate your disagreement/agreement with the following
 						statements to complete the survey. Your answers would greatly contribute to their
-						research!</Card.Description
+						research!
+                        <br> <br>
+                        No information from you will be collected for this survey other than your answers. 
+                        You consent to your answers being recorded and analyzed once you submit this form.</Card.Description
 					>
 				</Card.Header>
 
