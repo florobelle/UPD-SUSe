@@ -3,7 +3,7 @@
 	export let rating: string;
 </script>
 
-<div class="feedback w-full items-center justify-center">
+<div class="feedback w-full items-center justify-center" on:change>
 	<p class="mr-4 hidden text-sm text-slate-500 md:block">Very Unsatisfied</p>
 	<label class="angry relative flex flex-col items-center">
 		<input

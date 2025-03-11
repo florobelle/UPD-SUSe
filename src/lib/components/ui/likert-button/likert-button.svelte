@@ -4,25 +4,25 @@
 	export let questionName: string;
 </script>
 
-<div class="feedback w-full flex grow items-center justify-center">
-	<div class="mr-4 flex flex-col items-center">
+<div class="feedback w-full flex grow items-top text-center justify-left gap-4" on:change>
+	<div class="mr-4 flex flex-col items-center gap-1.5">
 		<input type="radio" value="1" bind:group={answer} name={questionName} class="size-6" />
-		<p class="text-sm text-slate-500">Strongly Disagree</p>
+		<p class="text-sm text-slate-500 max-w-[60px]">Strongly Disagree</p>
 	</div>
-	<div class="mr-4 flex flex-col items-center">
+	<div class="mr-4 flex flex-col items-center gap-1.5">
 		<input type="radio" value="2" bind:group={answer} name={questionName} class="size-6" />
-		<p class="text-sm text-slate-500">Disagree</p>
+		<p class="text-sm text-slate-500 max-w-[60px]">Disagree</p>
 	</div>
-	<div class="mr-4 flex flex-col items-center">
+	<div class="mr-4 flex flex-col items-center gap-1.5">
 		<input type="radio" value="3" bind:group={answer} name={questionName} class="size-6" />
-		<p class="text-sm text-slate-500">Agree</p>
+		<p class="text-sm text-slate-500 max-w-[60px]">Agree</p>
 	</div>
-	<div class="mr-4 flex flex-col items-center">
+	<div class="mr-4 flex flex-col items-center gap-1.5">
 		<input type="radio" value="4" bind:group={answer} name={questionName} class="size-6" />
-		<p class="text-sm text-slate-500">Strongly Agree</p>
+		<p class="text-sm text-slate-500 max-w-[60px]">Strongly Agree</p>
 	</div>
-	<div class="mr-4 flex flex-col items-center">
+	<div class="mr-4 flex flex-col items-center gap-1.5">
 		<input type="radio" value="0" bind:group={answer} name={questionName} class="size-6" />
-		<p class="text-sm text-slate-500">N/A</p>
+		<p class="text-sm text-slate-500 max-w-[60px]">N/A</p>
 	</div>
 </div>
