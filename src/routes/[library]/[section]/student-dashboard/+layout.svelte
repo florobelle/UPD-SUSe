@@ -249,7 +249,7 @@
 			college: '',
 			program: '',
 			user_type: ''
-		});
+		}, false);
 
 		if (error) {
 			toast.error(`Error with reading user information: ${error}`);
