@@ -4,28 +4,35 @@ import type { AdminResponse } from "$lib/dataTypes/EntityResponses";
 import type { AdminFormData } from "$lib/stores/AdminStore";
 
 type Email = { 
+    rfid: string,
     email: string, 
     error: string | null 
 }
 
-export async function readEmail(rfid:string, library:string, section:string): Promise<Email> {
+export async function readCredentials(rfid:string, email:string, library:string, section:string): Promise<Email> {
     // Reads the public_admin_info view in the database and returns the email of the admin
-    let query = supabaseClient.from(`public_admin_${library}`).select("email").eq('section', section);
+    let query = supabaseClient.from(`public_admin_${library}`).select("email, rfid").eq('section', section);
 
     if (rfid) {
         query = query.eq('rfid', rfid);
+    }
+
+    if (email) {
+        query = query.eq('email', email);
     }
 
     const { data, error } = await query;
 
     if (error) {
         return {
+            rfid: '',
             email: '',
             error: error.message
         }
     }
 
     return {
+        rfid: data.length ? data[0].rfid : '',
         email: data.length ? data[0].email : '',
         error: null
     }
