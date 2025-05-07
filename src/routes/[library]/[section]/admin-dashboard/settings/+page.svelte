@@ -78,6 +78,22 @@
 				>
 			</div>
 		</div>
+
+		<div class="flex w-full justify-center">
+			<div class="flex w-[95%] flex-col gap-10 md:py-20">
+				<h1 class="text-3xl font-medium">Please tap your UP ID to link it to your account!</h1>
+
+				<Input
+					type="password"
+					bind:value={rfidGlobal}
+					on:keyup={handleKeydownRfid}
+					maxlength={10}
+					pattern="[0-9a-fA-F]+"
+					placeholder="••••••••••"
+					class="max-w-full text-center text-base"
+				/>
+			</div>
+		</div>
 	{:else}
 		<div class="flex h-full w-full flex-col gap-10 p-20">
 			<div class="flex w-full grow flex-col gap-4">
@@ -92,20 +108,4 @@
 			</div>
 		</div>
 	{/if}
-</div>
-
-<div class="flex w-full justify-center">
-	<div class="flex w-[95%] flex-col gap-10 md:py-20">
-		<h1 class="text-3xl font-medium">Please tap your UP ID to link it to your account!</h1>
-
-		<Input
-			type="password"
-			bind:value={rfidGlobal}
-			on:keyup={handleKeydownRfid}
-			maxlength={10}
-			pattern="[0-9a-fA-F]+"
-			placeholder="••••••••••"
-			class="max-w-full text-center text-base"
-		/>
-	</div>
 </div>
