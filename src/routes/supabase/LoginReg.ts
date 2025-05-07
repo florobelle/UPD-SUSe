@@ -1,7 +1,7 @@
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import { createUser, updateUser } from "./User";
 import type { UserFormData } from "$lib/stores/UserStore";
-import { createAdmin } from "./Admin";
+import { createAdmin, updateAdmin } from "./Admin";
 import type { AdminFormData } from "$lib/stores/AdminStore";
 import type { Error } from "$lib/dataTypes/EntityResponses";
 
@@ -52,12 +52,12 @@ export async function loginOtp(otp:string, username:string, toRegister:boolean, 
         const { error } = await createUser(formData);
 
         if (error) {
-            return { error: error.message };
+            return { error };
         }
         if (formData.rfid) {
             const { error } = await linkRfid(formData.rfid, username);
             if (error) {
-                return { error: error.message };
+                return { error };
             }
         }
     }
@@ -73,7 +73,7 @@ export async function linkRfid(rfid:string, username:string): Promise<Error> {
     } else {
         const { error } = await updateUser({ rfid }, username);
         if (error) {
-            return { error: error.message};
+            return { error};
         }
     }
     return { error: null };
@@ -112,7 +112,7 @@ export async function verifyAdmin(otp:string, email:string, toRegister:boolean, 
         const { error } = await createAdmin(formData);
 
         if (error) {
-            return { error: error.message};
+            return { error};
         } else {
             const { error } = await supabaseClient.auth.updateUser({ password: formData.rfid})
 
@@ -136,5 +136,32 @@ export async function loginAdmin(rfid:string, email:string): Promise<Error> {
         return { error: error.message};
     }
 
+    return { error: null };
+}
+
+export async function sendAdminOTP(email:string): Promise<Error> {
+    // Sends OTP to user admin email
+    const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+    });
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    return { error: null };
+}
+
+export async function linkAdminRfid(rfid:string, email:string): Promise<Error> {
+    // Links the UP RFID of a student to their UP Mail account
+    const { error } = await supabaseClient.auth.updateUser({ password: rfid})
+    if (error) {
+        return { error: error.message};
+    } else {
+        const { error } = await updateAdmin({ rfid }, email);
+        if (error) {
+            return { error};
+        }
+    }
     return { error: null };
 }
