@@ -310,7 +310,7 @@
                 college: '',
                 program: '',
                 user_type: ''
-            });
+            }, false);
 
             if (error) {
                 toast.error(`Error with reading user table: ${error}`);
@@ -512,7 +512,7 @@
 			college: '',
 			program: '',
 			user_type: ''
-		});
+		}, true);
 
 		if (error) {
 			toast.error(`Error with reading user table: ${error}`);

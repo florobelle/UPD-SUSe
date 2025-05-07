@@ -33,9 +33,13 @@ export async function readUsername(rfid: string = '', username: string = ''): Pr
     }
 }
 
-export async function readUser(filter: UserFilter): Promise<UserResponse> {
+export async function readUser(filter: UserFilter, getTableRecords:boolean): Promise<UserResponse> {
     // Reads and filters the user_info view in the database and returns all corresponding entries
     let query = supabaseClient.from('user_info').select("*");
+
+    if (getTableRecords) {
+        query = query.or(`is_approved.is.false,is_active.is.true`)
+    }
 
     if (filter.lib_user_id) {
         query = query.eq('lib_user_id', filter.lib_user_id)
