@@ -9,12 +9,12 @@
 	import { UserStore, UserTableStore } from '$lib/stores/UserStore';
 	import toast, { Toaster } from 'svelte-5-french-toast';
 	import { goto } from '$app/navigation';
-	import { loginAdmin, loginRfid, sendOtp } from '../../../../supabase/LoginReg';
+	import { loginAdmin, loginRfid, sendOtp, sendAdminOTP } from '../../../../supabase/LoginReg';
 	import { readUsername } from '../../../../supabase/User';
 	import { page } from '$app/stores';
 	import { deleteCookie } from '$lib/client/Cookie';
 	import { AdminStore, AdminTableStore, PCInfoStore } from '$lib/stores/AdminStore';
-	import { readEmail } from '../../../../supabase/Admin';
+	import { readCredentials } from '../../../../supabase/Admin';
 	import { convertRfidInt } from '$lib/utilsBack';
 	import { ServiceTableStore } from '$lib/stores/ServiceStore';
 	import { UsageLogTableStore } from '$lib/stores/UsageLogStore';
@@ -94,7 +94,7 @@
 		if (checkAdminCount == 1) {
 			if (checkInputValidity('adminRfid')) {
 				const loadID: string = toast.loading('Logging you in...');
-				const { email, error } = await readEmail(rfidConverted, library, section);
+				const { email, error } = await readCredentials(rfidConverted, '', library, section);
 
 				if (error) {
 					toast.error(`Error with looking for a username: ${error}`);
@@ -120,6 +120,40 @@
 			}
 		}
 		checkAdminCount = 0;
+		return;
+	}
+
+	async function checkAdminEmail() {
+		// Check if admin is already registered
+		if (checkAdminCount == 1) {
+			if (checkInputValidity('adminEmail')) {
+				const loadID: string = toast.loading('Logging you in...');
+				const { rfid, error } = await readCredentials('', usernameGlobal, library, section);
+
+				if (error) {
+					toast.error(`Error with looking for an rfid: ${error}`);
+				} else {
+					$AdminStore.formData.rfid = rfid;
+					$AdminStore.formData.email = usernameGlobal;
+					if (rfid) {
+						const { error } = await sendAdminOTP(usernameGlobal);
+                        console.log(error)
+						if (error) {
+							toast.error(`Error with sending OTP: ${error}`);
+							goto(`/${library}/${section}/auth/login`);
+						} else {
+							goto(`/${library}/${section}/auth/verify-otp-admin`);
+						}
+					} else {
+						goto(`/${library}/${section}/auth/register`);
+					}
+				}
+				toast.dismiss(loadID);
+			} else {
+				UPMailError = true;
+			}
+		}
+		checkUsernameCount = 0;
 		return;
 	}
 
@@ -169,7 +203,7 @@
 				} else {
 					$UserStore.formData.username = usernameGlobal;
 					if (username) {
-						const { error } = await sendOtp(username);
+						const { error } = await sendOtp(username, '');
 						if (error) {
 							toast.error(`Error with sending OTP: ${error}`);
 							goto(`/${library}/${section}/auth/login`);
@@ -212,9 +246,12 @@
 		}
 	}
 
-	function handleKeydownUsername(event: KeyboardEvent) {
+	function handleKeydownUsername() {
 		// Listens to input in the UP mail field
-		if (event.key === 'Enter') {
+		if ($AdminStore.toLogin) {
+			checkAdminCount++;
+			checkAdminEmail();
+		} else {
 			if (!$PCInfoStore.isVerified) {
 				toast.error('PC not allowed to access SUSê.');
 				return;
@@ -268,17 +305,17 @@
 		if (browser) {
 			selectText('userRfid');
 			document.addEventListener('mousedown', handleClickOutside);
-            if (!$PCInfoStore.icVerifierCalled) {
-                verifyPC().then((res) => {
-                    $PCInfoStore.icVerifierCalled = true;
-                    if (res.error) {
-                        toast.error(res.error)
-                    } else {
-                        $PCInfoStore.isVerified = true;
-                        toast.success('PC approved to access SUSê.')
-                    }
-                })
-            }
+			if (!$PCInfoStore.icVerifierCalled) {
+				verifyPC().then((res) => {
+					$PCInfoStore.icVerifierCalled = true;
+					if (res.error) {
+						toast.error(res.error);
+					} else {
+						$PCInfoStore.isVerified = true;
+						toast.success('PC approved to access SUSê.');
+					}
+				});
+			}
 		}
 	});
 
@@ -296,6 +333,13 @@
 		selectText('UPmail');
 	}
 
+	async function selectLoginWithAdminEmail() {
+		loginWithRfid = false;
+		await tick();
+		deselectText('adminRfid');
+		selectText('adminEmail');
+	}
+
 	async function selectLoginWithUserRfid() {
 		loginWithRfid = true;
 		$AdminStore.toLogin = false;
@@ -307,6 +351,7 @@
 	}
 
 	async function selectLoginWithAdminRfid() {
+		loginWithRfid = true;
 		await tick(); // Ensure DOM updates before interacting
 		deselectText('UPmail');
 		deselectText('userRfid');
@@ -366,7 +411,7 @@
 				<p class="text-base">Login with UP Mail</p>
 			</Button>
 		</div>
-	{:else if $AdminStore.toLogin}
+	{:else if loginWithRfid && $AdminStore.toLogin}
 		<div class="flex w-full flex-col gap-4">
 			<!-- Login with RFID Admin -->
 			<div class="flex w-full flex-col gap-8">
@@ -400,10 +445,68 @@
 				<!-- Right line -->
 			</div>
 
-			<!-- Login with UP Mail -->
-			<Button on:click={selectLoginWithUserRfid} class="flex w-full gap-2">
-				<p class="text-base">Go Back to User Login</p>
-			</Button>
+			<div class="grid gap-4 xl:grid-cols-2">
+				<!-- Back To User Login -->
+				<Button on:click={selectLoginWithUserRfid} variant="outline" class="flex w-full gap-2">
+					<p class="text-base">Go Back to User Login</p>
+				</Button>
+
+				<!-- Login with Email -->
+				<Button on:click={selectLoginWithAdminEmail} class="flex w-full gap-2">
+					<img src="../../../logos/google.png" class="h-[70%]" alt="Google logo" />
+					<p class="text-base">Login with Email</p>
+				</Button>
+			</div>
+		</div>
+	{:else if !loginWithRfid && $AdminStore.toLogin}
+		<div class="flex w-full flex-col gap-4">
+			<!-- Login with RFID Admin -->
+			<div class="flex w-full flex-col gap-8">
+				<div class="flex w-full flex-col gap-4 text-center">
+					<h1 class="text-5xl font-medium">Enter your Email</h1>
+					<h2 class="text-lg font-normal">Login as an admin in SUSê by entering your email!</h2>
+				</div>
+				<div class="flex flex-col gap-2">
+					<Input
+						id="adminEmail"
+						type="text"
+						placeholder="jddelacruz@gmail.com"
+						bind:value={usernameGlobal}
+						pattern="[a-zA-Z]+.*@.*"
+						class="max-w-full text-center text-base"
+					/>
+					{#if UPMailError}
+						<p class="text-sm font-semibold text-muted-foreground text-red-500">
+							Enter a valid email 😡
+						</p>
+					{/if}
+				</div>
+			</div>
+
+			<!-- Divider -->
+			<div class="my-4 flex w-full items-center justify-center">
+				<div class="h-[0.5px] flex-grow bg-black/20"></div>
+				<!-- Left line -->
+				<span class="mx-4"><p>or</p></span>
+				<div class="h-[0.5px] flex-grow bg-black/20"></div>
+				<!-- Right line -->
+			</div>
+
+			<div class="grid gap-4 xl:grid-cols-2">
+				<!-- Login with Email -->
+				<Button on:click={selectLoginWithAdminRfid} variant="outline" class="flex w-full gap-2">
+					<p class="text-base">Login with UP RFID</p>
+				</Button>
+
+				<!-- Back To Admin RFID Login -->
+				<Button
+					on:click={handleKeydownUsername}
+					disabled={usernameGlobal.length == 0}
+					class="w-full"
+				>
+					<p class="text-base">Send OTP</p>
+				</Button>
+			</div>
 		</div>
 	{:else}
 		<div class="flex w-full flex-col gap-4">
@@ -423,7 +526,6 @@
 							type="text"
 							placeholder="jddelacruz"
 							bind:value={usernameGlobal}
-							on:keyup={handleKeydownUsername}
 							pattern="^[a-z]+[0-9]*"
 							class="max-w-full rounded-r-none text-center text-base"
 						/>
@@ -454,10 +556,7 @@
 					<p class="text-base">Login with UP RFID</p>
 				</Button>
 				<Button
-					on:click={() => {
-						checkUsernameCount++;
-						checkUsername();
-					}}
+					on:click={handleKeydownUsername}
 					disabled={usernameGlobal.length == 0}
 					class="w-full"
 				>

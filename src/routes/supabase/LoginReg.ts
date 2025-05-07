@@ -52,12 +52,12 @@ export async function loginOtp(otp:string, username:string, toRegister:boolean, 
         const { error } = await createUser(formData);
 
         if (error) {
-            return { error: error.message };
+            return { error };
         }
         if (formData.rfid) {
             const { error } = await linkRfid(formData.rfid, username);
             if (error) {
-                return { error: error.message };
+                return { error };
             }
         }
     }
@@ -73,7 +73,7 @@ export async function linkRfid(rfid:string, username:string): Promise<Error> {
     } else {
         const { error } = await updateUser({ rfid }, username);
         if (error) {
-            return { error: error.message};
+            return { error};
         }
     }
     return { error: null };
@@ -112,7 +112,7 @@ export async function verifyAdmin(otp:string, email:string, toRegister:boolean, 
         const { error } = await createAdmin(formData);
 
         if (error) {
-            return { error: error.message};
+            return { error};
         } else {
             const { error } = await supabaseClient.auth.updateUser({ password: formData.rfid})
 
@@ -134,6 +134,19 @@ export async function loginAdmin(rfid:string, email:string): Promise<Error> {
 
     if (error) {
         return { error: error.message};
+    }
+
+    return { error: null };
+}
+
+export async function sendAdminOTP(email:string): Promise<Error> {
+    // Sends OTP to user admin email
+    const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+    });
+
+    if (error) {
+        return { error: error.message };
     }
 
     return { error: null };
