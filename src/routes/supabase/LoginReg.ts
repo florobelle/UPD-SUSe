@@ -1,7 +1,7 @@
 import { supabaseClient } from "$lib/client/SupabaseClient";
 import { createUser, updateUser } from "./User";
 import type { UserFormData } from "$lib/stores/UserStore";
-import { createAdmin } from "./Admin";
+import { createAdmin, updateAdmin } from "./Admin";
 import type { AdminFormData } from "$lib/stores/AdminStore";
 import type { Error } from "$lib/dataTypes/EntityResponses";
 
@@ -149,5 +149,19 @@ export async function sendAdminOTP(email:string): Promise<Error> {
         return { error: error.message };
     }
 
+    return { error: null };
+}
+
+export async function linkAdminRfid(rfid:string, email:string): Promise<Error> {
+    // Links the UP RFID of a student to their UP Mail account
+    const { error } = await supabaseClient.auth.updateUser({ password: rfid})
+    if (error) {
+        return { error: error.message};
+    } else {
+        const { error } = await updateAdmin({ rfid }, email);
+        if (error) {
+            return { error};
+        }
+    }
     return { error: null };
 }
