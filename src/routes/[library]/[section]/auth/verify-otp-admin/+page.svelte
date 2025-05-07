@@ -36,7 +36,7 @@
 				toast.error(`Error with verifying OTP: ${error}`);
 				goto(`/${library}/${section}/auth/login`);
 			} else {
-				goto(`/${library}/${section}/admin-dashboard`);
+				goto(`/${library}/${section}/admin-dashboard/users`);
 			}
             toast.dismiss(loadID);
 		}
