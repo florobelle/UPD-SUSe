@@ -137,7 +137,6 @@
 					$AdminStore.formData.email = usernameGlobal;
 					if (rfid) {
 						const { error } = await sendAdminOTP(usernameGlobal);
-                        console.log(error)
 						if (error) {
 							toast.error(`Error with sending OTP: ${error}`);
 							goto(`/${library}/${section}/auth/login`);
@@ -145,7 +144,7 @@
 							goto(`/${library}/${section}/auth/verify-otp-admin`);
 						}
 					} else {
-						goto(`/${library}/${section}/auth/register`);
+						toast.error(`No registered admin with email: ${usernameGlobal}`)
 					}
 				}
 				toast.dismiss(loadID);
@@ -203,7 +202,7 @@
 				} else {
 					$UserStore.formData.username = usernameGlobal;
 					if (username) {
-						const { error } = await sendOtp(username, '');
+						const { error } = await sendOtp(username);
 						if (error) {
 							toast.error(`Error with sending OTP: ${error}`);
 							goto(`/${library}/${section}/auth/login`);
