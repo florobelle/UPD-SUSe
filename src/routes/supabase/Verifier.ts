@@ -4,7 +4,7 @@ import { supabaseClient } from "$lib/client/SupabaseClient";
 async function addPCCookie(): Promise<{ newID: string, error: string }> {
     // Adds a unique ID for a PC
     const newID: string = Math.ceil(Math.random() * (10 ** 15)).toString();
-    createCookie('pcCookie', newID, 24 * 30, '/')
+    createCookie('pcCookie', newID, 24 * 30 * 4, '/')
 
     const { error } = await supabaseClient.from('cookie').insert({ cookie_id: newID })
 
