@@ -22,7 +22,6 @@
 
 	async function getUserTable(getTableRecords:boolean) {
 		// gets user information from database
-        console.log(getTableRecords)
         const { users, error } = await readUser(
             {
                 lib_user_id: 0,
@@ -35,8 +34,6 @@
             },
             unapprovedIsActiveUsers
         );
-
-        console.log(users)
 
         if (error) {
             toast.error(`Error with reading user table: ${error}`);
