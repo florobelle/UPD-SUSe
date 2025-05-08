@@ -68,8 +68,10 @@
 
 <Toaster />
 
-<div class="flex w-full justify-center">
+<div class="flex flex-col w-full justify-center">
 	{#if $AdminStore.formData.is_approved}
+    
+		<div class="flex w-full justify-center">
 		<div class="flex w-[95%] flex-col gap-4">
 			<h1 class="pt-10 text-3xl font-medium">Hello, {$AdminStore.formData.nickname}</h1>
 			<h2 class="text-lg text-[#636363]">Is this PC an EnggLib verified PC?</h2>
@@ -78,6 +80,7 @@
 				>
 			</div>
 		</div>
+    </div>
 
 		<div class="flex w-full justify-center">
 			<div class="flex w-[95%] flex-col gap-10 md:py-20">
