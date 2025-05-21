@@ -43,12 +43,14 @@
 
     for (const [key, value] of Object.entries($SectionStore)) {
         if (section == value) {
+            console.log(section)
             sectionID = key.toString();
         }
     }
 
     for (const [key, value] of Object.entries($LibraryStore)) {
         if (library == value) {
+            console.log(library)
             libraryID = key.toString();
         }
     }
