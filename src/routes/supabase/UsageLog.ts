@@ -111,12 +111,13 @@ export async function countTotalService(filter: UsageLogFilter): Promise<{ count
     }
 
     if (filter.start) {
-        query = query.gte('start', `${filter.start.getUTCFullYear()}-${filter.start.getUTCMonth()}-${filter.start.getUTCDate()} ${filter.start.getUTCHours()}:${filter.start.getUTCMinutes()}`);
+        query = query.gte('start', filter.start.toISOString())
     }
 
     if (filter.end) {
-        query = query.lte('end', `${filter.end.getUTCFullYear()}-${filter.end.getUTCMonth()}-${filter.end.getUTCDate()}`);
+        query = query.lte('start', filter.end.toISOString())        
     }
+
     const { count, error } = await query;
 
     if (error) {
