@@ -22,5 +22,5 @@ export const sectionTypes = [
 	{ value: 'circulation', label: 'Circulation' },
 	{ value: 'serials', label: 'Serials' },
 	{ value: 'the-learning-commons', label: 'The Learning Commons' },
-	{ value: 'ground-floor-service', label: 'Ground Floor Services' },
+	{ value: 'ground-floor-services', label: 'Ground Floor Services' },
 ];
