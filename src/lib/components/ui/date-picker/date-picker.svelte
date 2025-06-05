@@ -17,7 +17,7 @@
 
 	$: {
 		if (value) {
-            selectedDate = new Date(value.year, value.month, value.day)
+            selectedDate = new Date(value.year, value.month - 1, value.day)
 		}
 	}
 </script>
