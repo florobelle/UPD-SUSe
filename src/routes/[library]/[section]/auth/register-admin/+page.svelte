@@ -15,6 +15,8 @@
 	import { AdminStore } from '$lib/stores/AdminStore';
 	import { page } from '$app/stores';
 	import { signUpAdmin } from '../../../../supabase/LoginReg';
+	import { Key } from 'lucide-svelte';
+	import { LibraryStore, SectionStore } from '$lib/stores/LibrarySectionStore';
 
 
 	// ----------------------------------------------------------------------------
@@ -36,6 +38,22 @@
     const routes: Array<string> = $page.url.pathname.split('/');
 	const library: string = routes[1]; // session
 	const section: string = routes[2]; // session
+    let libraryID: string;
+    let sectionID: string;
+
+    for (const [key, value] of Object.entries($SectionStore)) {
+        if (section == value) {
+            console.log(section)
+            sectionID = key.toString();
+        }
+    }
+
+    for (const [key, value] of Object.entries($LibraryStore)) {
+        if (library == value) {
+            console.log(library)
+            libraryID = key.toString();
+        }
+    }
 
 	// Returns to Login if rfid is lost after page refresh
 	if (browser && !$AdminStore.formData.rfid) {
@@ -52,8 +70,8 @@
             nickname: $formData.nickname,
             is_approved: false,
             email: $formData.email,
-            library: library == 'engglib1' ? '1' : '2',
-            section: '1'
+            library: libraryID,
+            section: sectionID
 		};
 
 		const { error } = await signUpAdmin($formData.email);
