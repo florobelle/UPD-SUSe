@@ -101,7 +101,6 @@ export async function countTotalService(filter: UsageLogFilter): Promise<{ count
         .from(`public_usagelog_${filter.library}`)
         .select('*', { count: 'exact', head: true })
         .or(`service_type.eq.${filter.service_type},main_service_type.eq.${filter.service_type}`)
-        console.log(filter)
 
     if (filter.admin_nickname) {
         query = query.or(`admin_nickname1.eq.${filter.admin_nickname},admin_nickname2.eq.${filter.admin_nickname}`)
@@ -112,12 +111,13 @@ export async function countTotalService(filter: UsageLogFilter): Promise<{ count
     }
 
     if (filter.start) {
-        query = query.gte('start', `${filter.start.getUTCFullYear()}-${filter.start.getUTCMonth()+1}-${filter.start.getUTCDate()} ${filter.start.getUTCHours()}:${filter.start.getUTCMinutes()}`);
+        query = query.gte('start', filter.start.toISOString())
     }
 
     if (filter.end) {
-        query = query.lte('end', `${filter.end.getUTCFullYear()}-${filter.end.getUTCMonth()+1}-${filter.end.getUTCDate()} ${filter.end.getUTCHours()}:${filter.end.getUTCMinutes()}`);
+        query = query.lte('start', filter.end.toISOString())        
     }
+
     const { count, error } = await query;
 
     if (error) {
